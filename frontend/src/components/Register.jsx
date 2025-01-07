@@ -94,7 +94,7 @@ const Register = () => {
               Already have an account?{" "}
             </span>
             <RouterLink
-              to="/login"
+              to="/"
               className="text-sm text-blue-500 hover:underline"
             >
               Login as {selectedToggle}
