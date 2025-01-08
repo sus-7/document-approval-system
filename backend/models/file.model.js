@@ -1,21 +1,62 @@
 const mongoose = require("mongoose");
 
 const FileSchema = new mongoose.Schema({
-  _id: Number,
-  fileUniqueName: { type: String, required: true },
-  filePath: { type: String, required: true },
-  createdBy: { type: Number, ref: "User", required: true },
-  assignedTo: { type: Number, ref: "User" }, // New field referencing User model
-  hidden: { type: Boolean, default: false },
-  status: { type: String, enum: ["A", "R", "C", "P"], required: true }, // A = Approved, R = Rejected, C = Correction, P = Pending
-  department: { type: Number, ref: "Department", required: true },
-  remark: { type: String },
-  description: { type: String },
-  title: { type: String, required: true },
-  createdDate: { type: Date, default: Date.now },
-  approvedDate: { type: Date },
-  rejectedDate: { type: Date },
-  correctionDate: { type: Date },
+    fileUniqueName: {
+        type: String,
+        required: true,
+    },
+    filePath: {
+        type: String,
+        required: true,
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true,
+    },
+    assignedTo: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    },
+    hidden: {
+        type: Boolean,
+        default: false,
+    },
+    status: {
+        type: String,
+        enum: ["Approved", "Rejected", "Correction", "Pending"],
+        default: "Pending",
+        required: true,
+    },
+    department: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Department",
+        required: true,
+    },
+    remark: {
+        type: String,
+    },
+    description: {
+        type: String,
+    },
+    title: {
+        type: String,
+        required: true,
+    },
+    createdDate: {
+        type: Date,
+        default: Date.now,
+    },
+    approvedDate: {
+        type: Date,
+    },
+    rejectedDate: {
+        type: Date,
+    },
+    correctionDate: {
+        type: Date,
+    },
 });
 
-module.exports = mongoose.model("File", FileSchema);
+const File = mongoose.model("File", FileSchema);
+module.exports = File;
