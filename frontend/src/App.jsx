@@ -17,7 +17,7 @@ const App = () => {
         <Route path="/remark-pdf" element={<RemarkUI />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/users/manage" element={<ManageUsers />} />
-        <Route path="cm-new" element={<CM_New/>} />
+        <Route path="/cm-new" element={<CM_New/>} />
         
       </Routes>
     
