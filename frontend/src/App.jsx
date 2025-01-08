@@ -7,6 +7,7 @@ import RemarkUI from "./components/RemarkUI";
 import Notifications from "./components/Notifications";
 import ManageUsers from "./components/ManageUsers";
 import History from "./components/History";
+import EditProfile from "./components/EditProfile";
 
 const App = () => {
   return (
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/manage/users" element={<ManageUsers />} />
         <Route path="/history" element={<History />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
         
         
       </Routes>
