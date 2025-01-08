@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [selectedToggle, setSelectedToggle] = useState("CM");
+  const [selectedToggle, setSelectedToggle] = useState("Approver");
   const navigate = useNavigate();
 
   return (
@@ -12,22 +12,22 @@ const Login = () => {
           {/* Toggle Buttons for CM/PA */}
           <div className="flex justify-center gap-4 mb-6">
             <button
-              className={`px-4 py-2 text-sm font-medium rounded-md ${selectedToggle === "CM"
+              className={`px-4 py-2 text-sm font-medium rounded-md ${selectedToggle === "Approver"
                   ? "bg-blue-500 text-white"
                   : "bg-gray-100 text-gray-700"
                 }`}
-              onClick={() => setSelectedToggle("CM")}
+              onClick={() => setSelectedToggle("Approver")}
             >
-              CM
+              Approver
             </button>
             <button
-              className={`px-4 py-2 text-sm font-medium rounded-md ${selectedToggle === "PA"
+              className={`px-4 py-2 text-sm font-medium rounded-md ${selectedToggle === "Assistant"
                   ? "bg-blue-500 text-white"
                   : "bg-gray-100 text-gray-700"
                 }`}
-              onClick={() => setSelectedToggle("PA")}
+              onClick={() => setSelectedToggle("Assistant")}
             >
-              PA
+              Assistant
             </button>
           </div>
 
@@ -82,7 +82,7 @@ const Login = () => {
           </form>
 
           {/* Footer */}
-          <div className="text-center mt-6">
+          {selectedToggle === "Assistant" && <div className="text-center mt-6">
             <span className="text-sm text-gray-600">
               Don't have an account?{" "}
             </span>
@@ -92,7 +92,7 @@ const Login = () => {
             >
               Register
             </RouterLink>
-          </div>
+          </div>}
         </div>
       </div>
     </div>
