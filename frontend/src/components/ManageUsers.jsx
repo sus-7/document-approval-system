@@ -1,27 +1,39 @@
 import React, { useState } from "react";
-import { FaUserPlus, FaEdit, FaTrashAlt, FaPlusCircle } from "react-icons/fa";
-import { toast } from "react-hot-toast";
+import { FaUserPlus, FaEdit, FaTrashAlt } from "react-icons/fa";
 
 const ManageUsers = () => {
   const [users, setUsers] = useState({
-    CM: [
-      { id: 1, name: "John Doe", role: "CM", email: "john@example.com" },
-    ],
-    PA: [
-      { id: 2, name: "Jane Smith", role: "PA", email: "jane@example.com" },
-    ],
+    CM: [{ id: 1, name: "John Doe", role: "CM", email: "john@example.com" }],
+    PA: [{ id: 2, name: "Jane Smith", role: "PA", email: "jane@example.com" }],
   });
 
-  const [showModal, setShowModal] = useState(false); // Modal for adding a user
-  const [showEditModal, setShowEditModal] = useState(false); // Modal for editing a user
+  const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [newUser, setNewUser] = useState({ name: "", role: "CM", email: "" });
-  const [userToEdit, setUserToEdit] = useState(null); // User being edited
+  const [userToEdit, setUserToEdit] = useState(null);
+  const [errors, setErrors] = useState({ name: "", email: "" });
+
+  const validateInputs = (user) => {
+    let valid = true;
+    const newErrors = { name: "", email: "" };
+
+    if (!user.name.trim()) {
+      newErrors.name = "Name is required.";
+      valid = false;
+    }
+    if (!user.email.trim()) {
+      newErrors.email = "Email is required.";
+      valid = false;
+    }
+
+    setErrors(newErrors);
+    return valid;
+  };
 
   const handleAddUser = () => {
-    const newUserData = {
-      id: Date.now(),
-      ...newUser,
-    };
+    if (!validateInputs(newUser)) return;
+
+    const newUserData = { id: Date.now(), ...newUser };
 
     setUsers((prevUsers) => {
       const updatedUsers = { ...prevUsers };
@@ -29,24 +41,26 @@ const ManageUsers = () => {
       return updatedUsers;
     });
 
-    toast.success(`${newUser.role} added successfully!`);
     setShowModal(false);
     setNewUser({ name: "", role: "CM", email: "" });
+    setErrors({ name: "", email: "" });
   };
 
   const handleEditUser = () => {
+    if (!validateInputs(userToEdit)) return;
+
     const updatedUsers = users[userToEdit.role].map((user) =>
       user.id === userToEdit.id ? userToEdit : user
     );
+
     setUsers((prevUsers) => ({ ...prevUsers, [userToEdit.role]: updatedUsers }));
-    toast.success("User updated successfully!");
     setShowEditModal(false);
+    setErrors({ name: "", email: "" });
   };
 
   const handleDeleteUser = (id, role) => {
     const updatedUsers = users[role].filter((user) => user.id !== id);
     setUsers((prevUsers) => ({ ...prevUsers, [role]: updatedUsers }));
-    toast.success("User deleted successfully!");
   };
 
   return (
@@ -59,7 +73,7 @@ const ManageUsers = () => {
       {/* Main Content */}
       <div className="flex items-center justify-center flex-grow p-4">
         <div className="w-full max-w-3xl bg-white shadow-lg border border-gray-200 rounded-lg p-8">
-          {/* Manage PAs & CMs */}
+          {/* Manage Users Header */}
           <div className="flex gap-4 mb-6 justify-between">
             <h2 className="text-xl font-semibold text-gray-800">Manage Users</h2>
             <button
@@ -71,7 +85,7 @@ const ManageUsers = () => {
             </button>
           </div>
 
-          {/* Manage CMs Section */}
+          {/* Manage CMs */}
           <h3 className="text-lg font-semibold text-gray-800 mb-4">Manage CMs</h3>
           {users.CM.length === 0 ? (
             <p className="text-gray-600">No CMs available</p>
@@ -109,7 +123,7 @@ const ManageUsers = () => {
             </div>
           )}
 
-          {/* Manage PAs Section */}
+          {/* Manage PAs */}
           <h3 className="text-lg font-semibold text-gray-800 mb-4 mt-8">Manage PAs</h3>
           {users.PA.length === 0 ? (
             <p className="text-gray-600">No PAs available</p>
@@ -154,35 +168,30 @@ const ManageUsers = () => {
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded-lg w-96">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New User</h2>
-            <div>
-              <label className="block text-gray-700 mb-2">Name</label>
-              <input
-                type="text"
-                className="w-full p-2 border border-gray-300 rounded-lg mb-4 bg-white text-black"
-                value={newUser.name}
-                onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 mb-2">Email</label>
-              <input
-                type="email"
-                className="w-full p-2 border border-gray-300 rounded-lg mb-4 bg-white text-black"
-                value={newUser.email}
-                onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-2">Role</label>
-              <select
-                className="w-full p-2 border border-gray-300 rounded-lg bg-white text-black"
-                value={newUser.role}
-                onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-              >
-                <option value="CM">CM</option>
-                <option value="PA">PA</option>
-              </select>
-            </div>
+            <input
+              type="text"
+              placeholder="Name"
+              className="w-full p-2 border rounded mb-4 bg-white"
+              value={newUser.name}
+              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+            />
+            {errors.name && <p className="text-red-500 text-sm mb-4">{errors.name}</p>}
+            <input
+              type="email"
+              placeholder="Email"
+              className="w-full p-2 border rounded mb-4 bg-white"
+              value={newUser.email}
+              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+            />
+            {errors.email && <p className="text-red-500 text-sm mb-4">{errors.email}</p>}
+            <select
+              value={newUser.role}
+              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+              className="w-full p-2 border rounded mb-4 bg-white"
+            >
+              <option value="CM">CM</option>
+              <option value="PA">PA</option>
+            </select>
             <div className="flex justify-end gap-4">
               <button
                 className="text-gray-500 hover:text-gray-700"
@@ -191,10 +200,10 @@ const ManageUsers = () => {
                 Cancel
               </button>
               <button
-                className="bg-blue-600 flex items-center gap-3 text-white p-2 rounded"
+                className="bg-blue-600 text-white p-2 rounded"
                 onClick={handleAddUser}
               >
-                <FaPlusCircle /> Add
+                Add
               </button>
             </div>
           </div>
@@ -206,41 +215,34 @@ const ManageUsers = () => {
         <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
           <div className="bg-white p-8 rounded-lg w-96">
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Edit User</h2>
-            <div>
-              <label className="block text-gray-700 mb-2">Name</label>
-              <input
-                type="text"
-                className="w-full p-2 border border-gray-300 rounded-lg mb-4 bg-white text-black"
-                value={userToEdit.name}
-                onChange={(e) =>
-                  setUserToEdit({ ...userToEdit, name: e.target.value })
-                }
-              />
-            </div>
-            <div>
-              <label className="block text-gray-700 mb-2">Email</label>
-              <input
-                type="email"
-                className="w-full p-2 border border-gray-300 rounded-lg mb-4 bg-white text-black"
-                value={userToEdit.email}
-                onChange={(e) =>
-                  setUserToEdit({ ...userToEdit, email: e.target.value })
-                }
-              />
-            </div>
-            <div className="mb-4">
-              <label className="block text-gray-700 mb-2">Role</label>
-              <select
-                className="w-full p-2 border border-gray-300 rounded-lg bg-white text-black"
-                value={userToEdit.role}
-                onChange={(e) =>
-                  setUserToEdit({ ...userToEdit, role: e.target.value })
-                }
-              >
-                <option value="CM">CM</option>
-                <option value="PA">PA</option>
-              </select>
-            </div>
+            <input
+              type="text"
+              className="w-full p-2 border rounded mb-4 bg-white"
+              value={userToEdit.name}
+              onChange={(e) =>
+                setUserToEdit({ ...userToEdit, name: e.target.value })
+              }
+            />
+            {errors.name && <p className="text-red-500 text-sm mb-4">{errors.name}</p>}
+            <input
+              type="email"
+              className="w-full p-2 border rounded mb-4 bg-white"
+              value={userToEdit.email}
+              onChange={(e) =>
+                setUserToEdit({ ...userToEdit, email: e.target.value })
+              }
+            />
+            {errors.email && <p className="text-red-500 text-sm mb-4">{errors.email}</p>}
+            <select
+              value={userToEdit.role}
+              onChange={(e) =>
+                setUserToEdit({ ...userToEdit, role: e.target.value })
+              }
+              className="w-full p-2 border rounded mb-4 bg-white"
+            >
+              <option value="CM">CM</option>
+              <option value="PA">PA</option>
+            </select>
             <div className="flex justify-end gap-4">
               <button
                 className="text-gray-500 hover:text-gray-700"
