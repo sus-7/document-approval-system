@@ -1,175 +1,108 @@
 import React, { useState } from "react";
-import {
-  Button,
-  TextField,
-  Typography,
-  Box,
-  Container,
-  Checkbox,
-  FormControlLabel,
-  Link,
-  ToggleButton,
-  ToggleButtonGroup,
-} from "@mui/material";
-import EmailIcon from "@mui/icons-material/Email";
-import LockIcon from "@mui/icons-material/Lock";
-import VisibilityIcon from "@mui/icons-material/Visibility";
-import PersonIcon from '@mui/icons-material/Person';
+import { Link as RouterLink } from "react-router-dom";
 
 const Register = () => {
-  const [authMode, setAuthMode] = useState("register");
-  const [showPassword, setShowPassword] = useState(false);
-
-  const handleAuthToggle = (event, newAuthMode) => {
-    if (newAuthMode) {
-      setAuthMode(newAuthMode);
-    }
-  };
-
-  const handleClickShowPassword = () => {
-    setShowPassword(!showPassword);
-  };
+  const [selectedToggle, setSelectedToggle] = useState("CM");
 
   return (
-    <Container
-      maxWidth="sm" 
-      style={{
-        backgroundColor: "#f9f9f9",
-        borderRadius: "16px",
-        padding: "24px",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        height: "auto",
-        position: "absolute",
-        top: "0",
-        left: "0",
-        right: "0",
-        bottom: "0",
-        margin: "auto",
-        backdropFilter: "blur(8px)", 
-        maxHeight: "95vh",
-        boxShadow: "0 0 10px 0 rgba(0,0,0,0.1)",
-      }}
-    >
-      <Box
-        display="flex"
-        flexDirection="column"
-        alignItems="center"
-        justifyContent="center"
-        width="90%"
-      >
-        <Typography variant="h4" color="black" gutterBottom sx={{ fontSize: "1.8rem", fontFamily: "Playfair Display, serif" }}>
-          REGISTER
-        </Typography>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
+      <div className="w-96 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
+        <div>
+          {/* Toggle Buttons for CM/PA */}
+          <div className="flex justify-center gap-4 mb-6">
+            <button
+              className={`px-4 py-2 text-sm font-medium rounded-md ${
+                selectedToggle === "CM"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 text-gray-700"
+              }`}
+              onClick={() => setSelectedToggle("CM")}
+            >
+              CM
+            </button>
+            <button
+              className={`px-4 py-2 text-sm font-medium rounded-md ${
+                selectedToggle === "PA"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 text-gray-700"
+              }`}
+              onClick={() => setSelectedToggle("PA")}
+            >
+              PA
+            </button>
+          </div>
 
-        <ToggleButtonGroup
-          value={authMode}
-          exclusive
-          onChange={handleAuthToggle}
-          sx={{ marginBottom: 3} }
-        >
-          <ToggleButton value="login" sx={{ 
-            '&.Mui-selected': {
-              backgroundColor: '#2570b1',
-              color: 'white',
-            }
-          }}>Login</ToggleButton>
-          <ToggleButton value="register"  sx={{ 
-            '&.Mui-selected': {
-              backgroundColor: '#2570b1',
-              color: 'white',
-            }
-          }}>Register</ToggleButton>
-        </ToggleButtonGroup>
+          {/* Title */}
+          <h2 className="text-center text-xl font-semibold text-gray-800 mb-6">
+            Create an Account
+          </h2>
 
-        <Box component="form" noValidate autoComplete="off" width="95%">
-        
-          <Box display="flex" alignItems="center" marginBottom={2}>
-          <PersonIcon style={{color: 'black'}} sx={{ marginRight: 1 }} />
-            <TextField
-              label="Username"
-              variant="standard"
-              fullWidth
-              InputProps={{
-                style: { fontSize: "1rem" },
-              }}
-            />
-          </Box>
-          <Box display="flex" alignItems="center" marginBottom={2}>
-            <EmailIcon style={{color: 'black'}} sx={{ marginRight: 1 }} />
-            <TextField
-              label="Email Address"
-              variant="standard"
-              fullWidth
-              InputProps={{
-                style: { fontSize: "1rem" },
-              }}
-            />
-          </Box>
-          <Box display="flex" alignItems="center" marginBottom={2}>
-            <LockIcon style={{color: 'black'}} sx={{ marginRight: 1 }} />
-            <TextField
-              label="Create Password"
-              variant="standard"
-              type={showPassword ? 'text' : 'password'}
-              fullWidth
-              InputProps={{
-                style: { fontSize: "1rem" },
-                endAdornment: (<VisibilityIcon style={{color:"gray",cursor: 'pointer'}} onClick={handleClickShowPassword}/>),
-              }}
-            />
-          </Box>
-          <Box display="flex" alignItems="center" marginBottom={2}>
-            <LockIcon style={{color: 'black'}} sx={{ marginRight: 1 }} />
-            <TextField
-              label="Re-enter Password"
-              variant="standard"
-              type="password"
-              fullWidth
-              InputProps={{
-                style: { fontSize: "1rem" },
-                endAdornment: (<VisibilityIcon style={{color:"gray", cursor: 'pointer'}}/>),
-              }}
-            />
-          </Box>
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            marginBottom={2}
-          >
-            <FormControlLabel
-              control={<Checkbox defaultChecked />} style={{ color: 'black' }}
-              label ="Remember Me"
-            />
-          </Box>
+          {/* Form */}
+          <form>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Full Name
+              </label>
+              <input
+                type="text"
+                placeholder="Enter your full name"
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-gray-700 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
 
-          <Typography variant="body2" color="textSecondary" marginBottom={2} align="center">
-            By Registering you are agreeing to our{" "}
-            <Link href="#" underline="hover">
-              Terms
-            </Link>{" "}
-            and{" "}
-            <Link href="#" underline="hover">
-              Privacy Policy
-            </Link>
-          </Typography>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Email Address
+              </label>
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500  text-gray-700 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
 
-          <Button
-            variant="contained"
-            color="primary"
-            fullWidth
-            style={{
-              borderRadius: "8px",
-              fontSize: "1rem",
-            }}
-          >
-            REGISTER
-          </Button>
-        </Box>
-      </Box>
-    </Container>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Password
+              </label>
+              <input
+                type="password"
+                placeholder="Enter your password"
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md  text-gray-700  focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                placeholder="Confirm your password"
+                className="w-full px-4 py-2  text-gray-700 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+              />
+            </div>
+
+            <button className="w-full px-4 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 transition duration-200">
+              Register as {selectedToggle}
+            </button>
+          </form>
+
+          {/* Footer */}
+          <div className="text-center mt-6">
+            <span className="text-sm text-gray-600">
+              Already have an account?{" "}
+            </span>
+            <RouterLink
+              to="/"
+              className="text-sm text-blue-500 hover:underline"
+            >
+              Login as {selectedToggle}
+            </RouterLink>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
