@@ -12,21 +12,19 @@ const Login = () => {
           {/* Toggle Buttons for CM/PA */}
           <div className="flex justify-center gap-4 mb-6">
             <button
-              className={`px-4 py-2 text-sm font-medium rounded-md ${
-                selectedToggle === "CM"
+              className={`px-4 py-2 text-sm font-medium rounded-md ${selectedToggle === "CM"
                   ? "bg-blue-500 text-white"
                   : "bg-gray-100 text-gray-700"
-              }`}
+                }`}
               onClick={() => setSelectedToggle("CM")}
             >
               CM
             </button>
             <button
-              className={`px-4 py-2 text-sm font-medium rounded-md ${
-                selectedToggle === "PA"
+              className={`px-4 py-2 text-sm font-medium rounded-md ${selectedToggle === "PA"
                   ? "bg-blue-500 text-white"
                   : "bg-gray-100 text-gray-700"
-              }`}
+                }`}
               onClick={() => setSelectedToggle("PA")}
             >
               PA
@@ -92,7 +90,7 @@ const Login = () => {
               to="/register"
               className="text-sm text-blue-500 hover:underline"
             >
-              Register as {selectedToggle}
+              Register
             </RouterLink>
           </div>
         </div>

@@ -97,7 +97,7 @@ const Register = () => {
               to="/"
               className="text-sm text-blue-500 hover:underline"
             >
-              Login as {selectedToggle}
+              Login 
             </RouterLink>
           </div>
         </div>
