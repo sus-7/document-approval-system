@@ -1,44 +1,75 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Link as RouterLink } from "react-router-dom";
-
 const Register = () => {
-  const [selectedToggle, setSelectedToggle] = useState("CM");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [mobileNo, setMobileNo] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const navigate = useNavigate();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const apiUrl = import.meta.env.VITE_API_URL + "/user/signup";
+    // const apiUrl = "http://localhost:4000/user/signup";
+
+    const formData = {
+      username,
+      password,
+      email,
+      fullName,
+      mobileNo,
+    };
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        console.log(await response.json());
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Signup successful:", result);
+      alert("Signup successful!");
+      navigate("/");
+    } catch (error) {
+      console.error("Error during signup:", error);
+      alert("Signup failed! Please try again.");
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
       <div className="w-96 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
         <div>
-          {/* Toggle Buttons for CM/PA */}
-          <div className="flex justify-center gap-4 mb-6">
-            <button
-              className={`px-4 py-2 text-sm font-medium rounded-md ${
-                selectedToggle === "CM"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100 text-gray-700"
-              }`}
-              onClick={() => setSelectedToggle("CM")}
-            >
-              CM
-            </button>
-            <button
-              className={`px-4 py-2 text-sm font-medium rounded-md ${
-                selectedToggle === "PA"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100 text-gray-700"
-              }`}
-              onClick={() => setSelectedToggle("PA")}
-            >
-              PA
-            </button>
-          </div>
-
           {/* Title */}
           <h2 className="text-center text-xl font-semibold text-gray-800 mb-6">
             Create an Account
           </h2>
 
           {/* Form */}
-          <form>
+          <form onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Username
+              </label>
+              <input
+                type="text"
+                placeholder="Select a username"
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-gray-700 focus:border-blue-500 focus:outline-none"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
+            </div>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Full Name
@@ -47,9 +78,23 @@ const Register = () => {
                 type="text"
                 placeholder="Enter your full name"
                 className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 text-gray-700 focus:border-blue-500 focus:outline-none"
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
               />
             </div>
 
+            <div className="mb-4">
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Mobile Number
+              </label>
+              <input
+                type="number"
+                placeholder="Enter your mobile number"
+                className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500  text-gray-700 focus:border-blue-500 focus:outline-none"
+                value={mobileNo}
+                onChange={(e) => setMobileNo(e.target.value)}
+              />
+            </div>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Email Address
@@ -58,6 +103,8 @@ const Register = () => {
                 type="email"
                 placeholder="Enter your email"
                 className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500  text-gray-700 focus:border-blue-500 focus:outline-none"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
@@ -69,6 +116,8 @@ const Register = () => {
                 type="password"
                 placeholder="Enter your password"
                 className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md  text-gray-700  focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
@@ -80,11 +129,13 @@ const Register = () => {
                 type="password"
                 placeholder="Confirm your password"
                 className="w-full px-4 py-2  text-gray-700 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
               />
             </div>
 
             <button className="w-full px-4 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 transition duration-200">
-              Register as {selectedToggle}
+              Register as Assistant
             </button>
           </form>
 
@@ -97,7 +148,7 @@ const Register = () => {
               to="/"
               className="text-sm text-blue-500 hover:underline"
             >
-              Login 
+              Login
             </RouterLink>
           </div>
         </div>

@@ -2,8 +2,44 @@ import React, { useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const [selectedToggle, setSelectedToggle] = useState("Approver");
+  const [selectedToggle, setSelectedToggle] = useState("Assistant");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const apiUrl = import.meta.env.VITE_API_URL + "/user/signin";
+
+    const formData = {
+      username,
+      password,
+    };
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        console.log(await response.json());
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("Signin successful:", result);
+      alert("Signin successful!");
+      navigate("/notifications");
+    } catch (error) {
+      console.error("Error during signup:", error);
+      alert("Signin failed! Please try again.");
+    }
+  };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
@@ -12,19 +48,21 @@ const Login = () => {
           {/* Toggle Buttons for CM/PA */}
           <div className="flex justify-center gap-4 mb-6">
             <button
-              className={`px-4 py-2 text-sm font-medium rounded-md ${selectedToggle === "Approver"
+              className={`px-4 py-2 text-sm font-medium rounded-md ${
+                selectedToggle === "Approver"
                   ? "bg-blue-500 text-white"
                   : "bg-gray-100 text-gray-700"
-                }`}
+              }`}
               onClick={() => setSelectedToggle("Approver")}
             >
               Approver
             </button>
             <button
-              className={`px-4 py-2 text-sm font-medium rounded-md ${selectedToggle === "Assistant"
+              className={`px-4 py-2 text-sm font-medium rounded-md ${
+                selectedToggle === "Assistant"
                   ? "bg-blue-500 text-white"
                   : "bg-gray-100 text-gray-700"
-                }`}
+              }`}
               onClick={() => setSelectedToggle("Assistant")}
             >
               Assistant
@@ -37,15 +75,17 @@ const Login = () => {
           </h2>
 
           {/* Form */}
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
+                Username
               </label>
               <input
-                type="email"
-                placeholder="Enter your email"
+                type="text"
+                placeholder="Enter your username"
                 className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none text-black"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
               />
             </div>
 
@@ -57,6 +97,8 @@ const Login = () => {
                 type="password"
                 placeholder="Enter your password"
                 className="w-full px-4 py-2 bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none text-black"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
 
@@ -82,17 +124,19 @@ const Login = () => {
           </form>
 
           {/* Footer */}
-          {selectedToggle === "Assistant" && <div className="text-center mt-6">
-            <span className="text-sm text-gray-600">
-              Don't have an account?{" "}
-            </span>
-            <RouterLink
-              to="/register"
-              className="text-sm text-blue-500 hover:underline"
-            >
-              Register
-            </RouterLink>
-          </div>}
+          {selectedToggle === "Assistant" && (
+            <div className="text-center mt-6">
+              <span className="text-sm text-gray-600">
+                Don't have an account?{" "}
+              </span>
+              <RouterLink
+                to="/register"
+                className="text-sm text-blue-500 hover:underline"
+              >
+                Register
+              </RouterLink>
+            </div>
+          )}
         </div>
       </div>
     </div>
