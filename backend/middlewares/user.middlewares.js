@@ -1,31 +1,39 @@
 const Joi = require("joi");
 
-const authDetailsValidator = Joi.object({
-    username: Joi.string().min(5),
+const signUpDetailsSchema = Joi.object({
+    // TODO: change after
+    username: Joi.string().min(2),
     email: Joi.string().email(),
-    password: Joi.string().min(8),
-    fullName: Joi.string().min(5),
+    password: Joi.string().min(2),
+    fullName: Joi.string().min(2),
     mobileNo: Joi.number().min(10),
 });
-const authDetails = (req, res, next) => {
-    const { error } = authDetailsValidator.validate(req.body);
+const signUpDetailsValidator = (req, res, next) => {
+    const { error } = signUpDetailsSchema.validate(req.body);
     if (error) {
-        return res.status(400).json({ message: "Invalid details" });
+        return res.status(400).json({
+            message: "Invalid details",
+            error: error.details[0].message,
+        });
     }
     next();
 };
 
-const loginDetailsValidator = Joi.object({
-    email: Joi.string().email(),
-    password: Joi.string().min(8),
+const signInDetailsSchema = Joi.object({
+    //TODO: change after
+    username: Joi.string().min(2),
+    password: Joi.string().min(2),
 });
 
-const loginDetails = (req, res, next) => {
-    const { error } = loginDetailsValidator.validate(req.body);
+const signiInDetailsValidator = (req, res, next) => {
+    const { error } = signInDetailsSchema.validate(req.body);
     if (error) {
-        return res.status(400).json({ message: "Invalid details" });
+        return res.status(400).json({
+            message: "Invalid details",
+            error: error.details[0].message,
+        });
     }
     next();
-}
+};
 
-module.exports = { authDetails, loginDetails };
+module.exports = { signUpDetailsValidator, signiInDetailsValidator };

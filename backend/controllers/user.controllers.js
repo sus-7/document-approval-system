@@ -1,6 +1,8 @@
 const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const crypto = require("crypto");
+
 const signIn = async (req, res) => {
     try {
         const { username, password } = req.body;
@@ -29,9 +31,10 @@ const signIn = async (req, res) => {
                 maxAge: 24 * 60 * 60 * 1000,
             });
 
-            res.send(200).json({
+            return res.status(200).json({
                 success: true,
                 message: "Login success!",
+                token: token,
             });
         });
     } catch (error) {
@@ -59,6 +62,11 @@ const signUp = async (req, res) => {
                         : "mobileNo",
             });
         }
+        const privateKey = crypto
+            .randomBytes(32)
+            .toString("base64")
+            .replace(/[+/]/g, (m) => (m === "+" ? "-" : "_"));
+
         bcrypt.hash(password, 10, async (err, hash) => {
             if (err) return res.status(500).json({ message: "Server Error" });
             const newUser = await User.create({
@@ -67,10 +75,16 @@ const signUp = async (req, res) => {
                 fullName,
                 email,
                 mobileNo,
+                privateKey,
             });
-            return res
-                .status(201)
-                .json({ message: "User created successfully", data: newUser });
+            return res.status(201).json({
+                message: "User created successfully",
+                user: {
+                    username,
+                    email,
+                    fullName,
+                },
+            });
         });
     } catch (error) {
         console.log("user-controller service :: signup :: error : ", error);
