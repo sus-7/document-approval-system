@@ -5,7 +5,12 @@ require("dotenv").config();
 const userRoutes = require("./routes/user.routes");
 
 const app = express();
-app.use(cors());
+const corsOptions = {
+    origin: "http://localhost:5173",
+    credentials: true,
+};
+
+app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
@@ -16,7 +21,7 @@ connectDB(process.env.MONGODB_URI)
         console.log("MongoDB connection successfull!");
     })
     .catch((error) => {
-        console.log('server service :: connectDB :: error : ', error);
+        console.log("server service :: connectDB :: error : ", error);
         console.log("MongoDB connection failed!!!!!");
     });
 
