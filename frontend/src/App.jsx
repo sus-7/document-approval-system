@@ -5,6 +5,7 @@ import Register from "../src/components/Register";
 import ForgotPassword from "./components/ForgotPassword";
 import RemarkUI from "./components/RemarkUI";
 import Notifications from "./components/Notifications";
+import ManageUsers from "./components/ManageUsers";
 const App = () => {
   return (
    
@@ -14,6 +15,7 @@ const App = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/remark-pdf" element={<RemarkUI />} />
         <Route path="/notifications" element={<Notifications />} />
+        <Route path="/manage/users" element={<ManageUsers />} />
         
       </Routes>
     
