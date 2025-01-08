@@ -14,3 +14,18 @@ const authDetails = (req, res, next) => {
     }
     next();
 };
+
+const loginDetailsValidator = Joi.object({
+    email: Joi.string().email(),
+    password: Joi.string().min(8),
+});
+
+const loginDetails = (req, res, next) => {
+    const { error } = loginDetailsValidator.validate(req.body);
+    if (error) {
+        return res.status(400).json({ message: "Invalid details" });
+    }
+    next();
+}
+
+module.exports = { authDetails, loginDetails };
