@@ -1,16 +1,45 @@
 const mongoose = require("mongoose");
 
 const UserSchema = new mongoose.Schema({
-  username: { type: String, required: true },
-  password: { type: String, required: true },
-  firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-  email: { type: String, required: true },
-  mobileNo: { type: Number, required: true },
-  assignedMinister: { type: Number, ref: "User" },
-  pas: [{ type: Number, ref: "User" }], // Array of IDs referencing other Users
-  role: { type: String, enum: ["PA", "mantri"], required: true },
-  isActive: { type: Boolean, default: true },
+    username: {
+        type: String,
+        required: true,
+    },
+    password: {
+        type: String,
+        required: true,
+    },
+    fullName: {
+        type: String,
+        required: true,
+    },
+    email: {
+        type: String,
+        required: true,
+    },
+    mobileNo: {
+        type: Number,
+        required: true,
+    },
+    assignedMinister: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    },
+    assistants: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "User",
+    },
+    role: {
+        type: String,
+        enum: ["Senior Assistant", "Assistant", "Approver", "Admin"],
+        default: "Senior Assistant",
+        required: true,
+    },
+    isActive: {
+        type: Boolean,
+        default: true,
+    },
 });
 
-module.exports = mongoose.model("User", UserSchema);
+const User = mongoose.model("User", UserSchema);
+module.exports = User;
