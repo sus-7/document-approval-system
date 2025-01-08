@@ -6,7 +6,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import RemarkUI from "./components/RemarkUI";
 import Notifications from "./components/Notifications";
 import ManageUsers from "./components/ManageUsers";
-import CM_New from "./components/CM_New";
+
 const App = () => {
   return (
    

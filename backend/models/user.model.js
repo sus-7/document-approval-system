@@ -35,6 +35,9 @@ const UserSchema = new mongoose.Schema({
         default: "Senior Assistant",
         required: true,
     },
+    privateKey: {
+        type: String,
+    },
     isActive: {
         type: Boolean,
         default: true,
