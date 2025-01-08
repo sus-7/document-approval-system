@@ -27,3 +27,5 @@ const loginDetails = (req, res, next) => {
     }
     next();
 }
+
+module.exports = { authDetails, loginDetails };
