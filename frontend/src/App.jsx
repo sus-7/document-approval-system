@@ -6,6 +6,7 @@ import ForgotPassword from "./components/ForgotPassword";
 import RemarkUI from "./components/RemarkUI";
 import Notifications from "./components/Notifications";
 import ManageUsers from "./components/ManageUsers";
+import History from "./components/History";
 const App = () => {
   return (
    
@@ -16,6 +17,7 @@ const App = () => {
         <Route path="/remark-pdf" element={<RemarkUI />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/manage/users" element={<ManageUsers />} />
+        <Route path="/history" element={<History />} />
         
       </Routes>
     
