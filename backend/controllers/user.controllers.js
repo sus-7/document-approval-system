@@ -187,8 +187,32 @@ const verifyOTP = async (req, res) => {
     }
 };
 
+const resendOTPAndVerify = async (req, res) => {
+    try {
+        const { username, email } = req.body;
+        if (!username || !email) {
+            return res.status(400).json({
+                status: "FAILED",
+                message: "Please provide username and email.",
+            });
+        } else {
+            await UserOTPVerification.deleteMany({ username });
+            sendOTPVerificationEmail({ username, email }, res);
+        }
+    } catch (error) {
+        console.log(
+            "user-controller service :: resendOTPAndVerify :: error : ",
+            error
+        );
+        return res
+            .status(500)
+            .json({ status: "FAILED", message: "Server Error" });
+    }
+};
+
 module.exports = {
     signIn,
     signUp,
     verifyOTP,
+    resendOTPAndVerify,
 };
