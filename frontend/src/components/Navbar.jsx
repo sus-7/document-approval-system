@@ -2,7 +2,7 @@ import React from 'react'
 import { FaHistory, FaBell, FaUserAlt, FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-const Navbar = () => {const navigate = useNavigate();
+const Navbar = ({role}) => {const navigate = useNavigate();
 
     const navigateNoti = () => {
       navigate("/notifications");
@@ -14,7 +14,7 @@ const Navbar = () => {const navigate = useNavigate();
           <FaHistory />
         </button>
         <h1 className="text-center text-lg font-semibold tracking-wider">
-       Assistant   Dashboard
+          {role === "approver" ? "Approver Dashboard" : "Assistant Dashboard"}
         </h1>
         <div className="flex space-x-6">
           <button
