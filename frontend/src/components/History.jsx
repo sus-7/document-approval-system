@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { FaBell, FaArrowLeft, FaUser, FaHistory, FaSearch } from 'react-icons/fa';
+import Navbar from './Navbar';
 
 const History = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -7,16 +8,7 @@ const History = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
       {/* Navbar */}
-      <div className="flex justify-between items-center bg-white shadow-md px-6 py-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-800">HISTORY</h1>
-        <div className="flex gap-4 items-center">
-          <button className="text-gray-500 flex gap-4 transition-colors duration-300">
-            <FaHistory size={24} className="hover:text-gray-700" />
-            <FaBell size={24} className="hover:text-gray-700" />
-            <FaUser size={24} className="hover:text-gray-700" />
-          </button>
-        </div>
-      </div>
+      <Navbar />
 
       {/* Search Bar */}
       <div className="px-6 py-4">
