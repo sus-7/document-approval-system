@@ -11,6 +11,7 @@ import EditProfile from "./components/EditProfile";
 import OTPUI from "./components/OTPUI";
 import ProfileDashboard from "./components/ProfileDashboard";
 import { AuthProvider } from "../src/contexts/AuthContext";
+import ApprovalPage from "./components/ApprovalPage";
 const App = () => {
   return (
     <AuthProvider>
@@ -21,6 +22,7 @@ const App = () => {
         <Route path="/remark-pdf" element={<RemarkUI />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/users/manage" element={<ManageUsers />} />
+        <Route path="/page" element={<ApprovalPage />} />
         <Route path="/dashboard" element={<ApproverDashboard />} />
         <Route path="/history" element={<History />} />
         <Route path="/edit/profile" element={<EditProfile />} />
