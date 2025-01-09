@@ -63,7 +63,7 @@ const signUp = async (req, res) => {
         const existingUser = await User.findOne({
             $or: [{ username }, { email }, { mobileNo }],
         });
-        if (existingUser) {
+        if (existingUser && existingUser.isVerified) {
             return res.status(400).json({
                 message: "duplicate user found",
                 key:
@@ -73,6 +73,9 @@ const signUp = async (req, res) => {
                         ? "email"
                         : "mobileNo",
             });
+        }
+        if (!existingUser.isVerified) {
+            await User.deleteOne({ username });
         }
         const privateKey = crypto
             .randomBytes(32)
