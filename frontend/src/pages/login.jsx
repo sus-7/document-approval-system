@@ -11,7 +11,7 @@ const Login = () => {
 
   useEffect(() => {
     if (loggedInUser) {
-      //todo:roll based access
+      //todo:role based access
       navigate("/dashboard");
     }
   }, [loggedInUser]);
