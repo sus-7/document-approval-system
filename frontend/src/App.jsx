@@ -11,9 +11,9 @@ import EditProfile from "./pages/EditProfile";
 import OTPUI from "./pages/OTPUI";
 import ProfileDashboard from "./pages/ProfileDashboard";
 import { AuthProvider } from "../src/contexts/AuthContext";
-import ChangePassword from "./components/ChangePassword";
-import ApprovalPage from "./components/ApprovalPage";
-import Correction from "./components/Correction";
+import ChangePassword from "./pages/ChangePassword";
+import ApprovalPage from "./pages/ApprovalPage";
+import Correction from "./pages/Correction";
 
 const App = () => {
   return (
