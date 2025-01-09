@@ -1,12 +1,11 @@
-import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Login from  "../src/components/login";
 import Register from "../src/components/Register";
 import ForgotPassword from "./components/ForgotPassword";
 import RemarkUI from "./components/RemarkUI";
 import Notifications from "./components/Notifications";
 import ManageUsers from "./components/ManageUsers";
-
+import PaDashboard from "./components/PaDashboard";
 const App = () => {
   return (
    
@@ -17,7 +16,7 @@ const App = () => {
         <Route path="/remark-pdf" element={<RemarkUI />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/users/manage" element={<ManageUsers />} />
-        <Route path="/cm-new" element={<CM_New/>} />
+        <Route path="/dashboard" element={<PaDashboard/>} />
         
       </Routes>
     
