@@ -1,5 +1,5 @@
 const Joi = require("joi");
-
+const jwt = require("jsonwebtoken");
 const signUpDetailsSchema = Joi.object({
     // TODO: change after
     username: Joi.string().min(2),
@@ -36,4 +36,30 @@ const signiInDetailsValidator = (req, res, next) => {
     next();
 };
 
-module.exports = { signUpDetailsValidator, signiInDetailsValidator };
+const verifyToken = async (req, res, next) => {
+    try {
+        const token = req.cookies.token;
+        if (!token) {
+            return res.status(401).json({
+                status: false,
+                message: "No token found",
+            });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.username = decoded.username;
+        next();
+    } catch (error) {
+        console.log("Auth middleware :: error : ", error);
+        return res.status(500).json({
+            status: false,
+            message: "Server Error",
+        });
+    }
+};
+
+module.exports = {
+    signUpDetailsValidator,
+    signiInDetailsValidator,
+    verifyToken,
+};

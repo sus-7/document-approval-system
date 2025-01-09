@@ -47,6 +47,12 @@ const signIn = async (req, res) => {
                 success: true,
                 message: "Login success!",
                 token: token,
+                user: {
+                    username: user.username,
+                    email: user.email,
+                    role: user.role,
+                    fullName: user.fullName,
+                },
             });
         });
     } catch (error) {
@@ -99,6 +105,34 @@ const signUp = async (req, res) => {
     } catch (error) {
         console.log("user-controller service :: signup :: error : ", error);
         return res.status(500).json({ message: "Server Error" });
+    }
+};
+
+const checkAuthStatus = async (req, res) => {
+    try {
+        const user = await User.findOne({ username: req.username });
+        if (!user) {
+            return res.status(404).json({
+                status: false,
+                message: "User not found",
+            });
+        }
+
+        return res.status(200).json({
+            status: true,
+            user: {
+                username: user.username,
+                email: user.email,
+                role: user.role,
+                fullName: user.fullName,
+            },
+        });
+    } catch (error) {
+        console.log("User controller :: checkAuthStatus :: error : ", error);
+        return res.status(500).json({
+            status: false,
+            message: "Server Error",
+        });
     }
 };
 
@@ -218,4 +252,5 @@ module.exports = {
     signUp,
     verifyOTP,
     resendOTPAndVerify,
+    checkAuthStatus,
 };

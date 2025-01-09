@@ -1,12 +1,20 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
-
+import { AuthContext } from "../contexts/AuthContext";
 const Login = () => {
   const [selectedToggle, setSelectedToggle] = useState("Assistant");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const { tempUser, setTempUser, loggedInUser, setLoggedInUser } =
+    useContext(AuthContext);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (loggedInUser) {
+      //todo:roll based access
+      navigate("/dashboard");
+    }
+  }, [loggedInUser]);
   const handleSubmit = async (e) => {
     e.preventDefault();
     const apiUrl = import.meta.env.VITE_API_URL + "/user/signin";
@@ -33,8 +41,9 @@ const Login = () => {
 
       const result = await response.json();
       console.log("Signin successful:", result);
+      setLoggedInUser(result.user);
       alert("Signin successful!");
-      navigate("/notifications");
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error during signup:", error);
       alert("Signin failed! Please try again.");
