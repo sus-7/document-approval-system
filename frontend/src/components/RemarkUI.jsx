@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { GrView } from "react-icons/gr";
 import { FaDownload, FaBell, FaHistory, FaUser, FaCheckDouble, FaArrowLeft } from "react-icons/fa";
-import { toast } from "react-hot-toast";
+import { toast,Toaster } from "react-hot-toast";
 
 const RemarkUI = () => {
   const [isTicked, setIsTicked] = useState(false);
@@ -18,6 +18,7 @@ const RemarkUI = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
+      <Toaster/>
       {/* Navbar */}
       <div className="flex justify-between items-center bg-white shadow-md px-6 py-4 border-b border-gray-200">
         <h1 className="text-lg font-bold text-gray-800">CORRECTION</h1>

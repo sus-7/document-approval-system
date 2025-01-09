@@ -8,6 +8,8 @@ import ManageUsers from "./components/ManageUsers";
 import ApproverDashboard from "./components/ApproverDashboard";
 import History from "./components/History";
 import EditProfile from "./components/EditProfile";
+import OTPUI from "./components/OTPUI";
+import ProfileDashboard from "./components/ProfileDashboard";
 const App = () => {
   return (
    
@@ -21,6 +23,8 @@ const App = () => {
         <Route path="/dashboard" element={<ApproverDashboard/>} />
         <Route path="/history" element={<History/>} />
         <Route path="/edit/profile" element={<EditProfile/>} />
+        <Route path="/otp" element={<OTPUI/>} />
+        <Route path="/profile" element={<ProfileDashboard/>} />
         
       </Routes>
     
