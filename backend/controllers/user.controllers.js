@@ -74,7 +74,7 @@ const signUp = async (req, res) => {
                         : "mobileNo",
             });
         }
-        if (!existingUser.isVerified) {
+        if (existingUser && !existingUser.isVerified) {
             await User.deleteOne({ username });
         }
         const privateKey = crypto

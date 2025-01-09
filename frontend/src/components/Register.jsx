@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link as RouterLink } from "react-router-dom";
+import { AuthContext } from "../contexts/AuthContext";
 const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -8,6 +9,7 @@ const Register = () => {
   const [fullName, setFullName] = useState("");
   const [mobileNo, setMobileNo] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const { setTempUser } = useContext(AuthContext);
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,14 +35,22 @@ const Register = () => {
       });
 
       if (!response.ok) {
-        console.log(await response.json());
+        const error = await response.json();
+        console.log(error.message);
+        alert(error.message);
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
-      console.log("Signup successful:", result);
-      alert("Signup successful!");
-      navigate("/");
+      console.log("Please verify the account:", result.message);
+      alert("Please verify the account!");
+      setTempUser({
+        username,
+        fullName,
+        email,
+        mobileNo,
+      });
+      navigate("/otp/verify");
     } catch (error) {
       console.error("Error during signup:", error);
       alert("Signup failed! Please try again.");

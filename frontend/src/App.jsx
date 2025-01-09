@@ -1,5 +1,5 @@
 import { Routes, Route } from "react-router-dom";
-import Login from  "../src/components/login";
+import Login from "../src/components/login";
 import Register from "../src/components/Register";
 import ForgotPassword from "./components/ForgotPassword";
 import RemarkUI from "./components/RemarkUI";
@@ -10,9 +10,10 @@ import History from "./components/History";
 import EditProfile from "./components/EditProfile";
 import OTPUI from "./components/OTPUI";
 import ProfileDashboard from "./components/ProfileDashboard";
+import { AuthProvider } from "../src/contexts/AuthContext";
 const App = () => {
   return (
-   
+    <AuthProvider>
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -20,14 +21,13 @@ const App = () => {
         <Route path="/remark-pdf" element={<RemarkUI />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/users/manage" element={<ManageUsers />} />
-        <Route path="/dashboard" element={<ApproverDashboard/>} />
-        <Route path="/history" element={<History/>} />
-        <Route path="/edit/profile" element={<EditProfile/>} />
-        <Route path="/otp" element={<OTPUI/>} />
-        <Route path="/profile" element={<ProfileDashboard/>} />
-        
+        <Route path="/dashboard" element={<ApproverDashboard />} />
+        <Route path="/history" element={<History />} />
+        <Route path="/edit/profile" element={<EditProfile />} />
+        <Route path="/otp/verify" element={<OTPUI />} />
+        <Route path="/profile" element={<ProfileDashboard />} />
       </Routes>
-    
+    </AuthProvider>
   );
 };
 
