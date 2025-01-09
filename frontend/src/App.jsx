@@ -33,6 +33,7 @@ const App = () => {
         <Route path="/profile" element={<ProfileDashboard />} />
         <Route path="/changepassword" element={<ChangePassword/>} />
         <Route path="/correction" element={<Correction/>} />
+        <Route path="/approval" element={<ApprovalPage/>} />
       </Routes>
     </AuthProvider>
   );
