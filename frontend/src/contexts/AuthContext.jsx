@@ -1,4 +1,4 @@
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
 export const AuthContext = createContext();
 
@@ -13,6 +13,35 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setIsAuthenticated(false);
   };
+
+  const checkAuthStatus = async () => {
+    try {
+      const authUrl = import.meta.env.VITE_API_URL + "/user/status";
+      const response = await fetch(authUrl, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        console.log(error.message);
+        alert(error.message);
+        throw new Error(`${response.message}`);
+      }
+
+      const result = await response.json();
+      console.log("Auth status:", result);
+      setLoggedInUser(result.user);
+    } catch (error) {
+      console.log("AuthContext service :: checkAuthStatus :: error : ", error);
+    }
+  };
+  useEffect(() => {
+    checkAuthStatus();
+  }, []);
 
   return (
     <AuthContext.Provider
