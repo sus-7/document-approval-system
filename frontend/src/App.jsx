@@ -5,8 +5,9 @@ import ForgotPassword from "./components/ForgotPassword";
 import RemarkUI from "./components/RemarkUI";
 import Notifications from "./components/Notifications";
 import ManageUsers from "./components/ManageUsers";
-import PaDashboard from "./components/PaDashboard";
+import ApproverDashboard from "./components/ApproverDashboard";
 import History from "./components/History";
+import EditProfile from "./components/EditProfile";
 const App = () => {
   return (
    
@@ -17,8 +18,9 @@ const App = () => {
         <Route path="/remark-pdf" element={<RemarkUI />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/users/manage" element={<ManageUsers />} />
-        <Route path="/dashboard" element={<PaDashboard/>} />
+        <Route path="/dashboard" element={<ApproverDashboard/>} />
         <Route path="/history" element={<History/>} />
+        <Route path="/edit/profile" element={<EditProfile/>} />
         
       </Routes>
     

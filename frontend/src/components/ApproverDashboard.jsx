@@ -4,14 +4,14 @@ import NewCm from "./NewCm";
 import SentBackTabContent from "./SentBackTabContent";
 import Navbar from "./Navbar";
 
-const PaDashboard = () => {
+const ApproverDashboard = () => {
   const [selectedTab, setSelectedTab] = useState("SENT BACK");
   
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
       {/* Navbar */}
-     <Navbar/>
+     <Navbar role = "Assistant"/>
 
       {/* Main Content */}
       <div className="flex items-center mt-3 h-auto justify-center flex-grow">
@@ -54,4 +54,4 @@ const PaDashboard = () => {
   );
 };
 
-export default PaDashboard;
+export default ApproverDashboard;
