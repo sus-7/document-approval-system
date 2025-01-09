@@ -12,8 +12,8 @@ const ApprovalPage = () => {
       <Navbar role="Approver" />
 
       {/* Main Content */}
-      <div className="flex items-center justify-center flex-grow mt-6">
-        <div className="w-[90%] max-w-[80vh] bg-white shadow-lg border border-gray-200 rounded-lg h-[90vh] p-4 flex flex-col">
+      <div className="flex items-center justify-center flex-grow mt-6 px-4 sm:px-6 lg:px-8">
+        <div className="w-full max-w-[90vw] lg:max-w-[80vh] bg-white shadow-lg border border-gray-200 rounded-lg h-[90vh] p-4 flex flex-col">
           {/* Search Section */}
           <div className="relative mb-4">
             <FaSearch className="absolute top-3 left-3 text-gray-400" />
@@ -25,8 +25,8 @@ const ApprovalPage = () => {
           </div>
 
           {/* Filters */}
-          <div className="flex space-x-4 mb-4">
-            <select className="flex-1 px-4 py-2 rounded-md bg-gray-200 text-gray-700 border border-gray-300">
+          <div className="flex flex-col sm:flex-row sm:space-x-4 mb-4">
+            <select className="w-full sm:w-1/2 px-4 py-2 rounded-md bg-gray-200 text-gray-700 border border-gray-300">
               <option>Category</option>
               <option>Health</option>
               <option>Education</option>
@@ -35,12 +35,12 @@ const ApprovalPage = () => {
             </select>
             <input
               type="date"
-              className="flex-1 px-4 py-2 rounded-md bg-gray-200 text-gray-700 border border-gray-300"
+              className="w-full sm:w-1/2 px-4 py-2 mt-4 sm:mt-0 rounded-md bg-gray-200 text-gray-700 border border-gray-300"
             />
           </div>
 
           {/* Tabs */}
-          <div className="tabs flex justify-around items-center text-sm text-gray-700 mb-4 border-b border-gray-200">
+          <div className="tabs flex flex-wrap justify-between sm:justify-around items-center text-sm text-gray-700 mb-4 border-b border-gray-200">
             {["APPROVED", "REJECTED", "REMARK", "PENDING"].map((tab) => (
               <button
                 key={tab}
