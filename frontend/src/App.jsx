@@ -10,6 +10,8 @@ import History from "./components/History";
 import EditProfile from "./components/EditProfile";
 import OTPUI from "./components/OTPUI";
 import ProfileDashboard from "./components/ProfileDashboard";
+import ChangePassword from "./components/ChangePassword";
+import ApprovalPage from "./components/ApprovalPage";
 const App = () => {
   return (
    
@@ -25,6 +27,8 @@ const App = () => {
         <Route path="/edit/profile" element={<EditProfile/>} />
         <Route path="/otp" element={<OTPUI/>} />
         <Route path="/profile" element={<ProfileDashboard/>} />
+        <Route path="/changepassword" element={<ChangePassword/>} />
+        <Route path="/approval" element={<ApprovalPage/>} />
         
       </Routes>
     
