@@ -28,7 +28,6 @@ export const AuthProvider = ({ children }) => {
       if (!response.ok) {
         const error = await response.json();
         console.log(error.message);
-        alert(error.message);
         throw new Error(`${response.message}`);
       }
 
