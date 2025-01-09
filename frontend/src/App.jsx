@@ -23,6 +23,7 @@ const App = () => {
         <Route path="/remark-pdf" element={<RemarkUI />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/users/manage" element={<ManageUsers />} />
+        <Route path="/page" element={<ApprovalPage />} />
         <Route path="/dashboard" element={<ApproverDashboard />} />
         <Route path="/history" element={<History />} />
         <Route path="/edit/profile" element={<EditProfile />} />
