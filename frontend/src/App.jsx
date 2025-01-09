@@ -21,7 +21,7 @@ const App = () => {
         <Route path="/manage/users" element={<ManageUsers />} />
         <Route path="/history" element={<History />} />
         <Route path="/edit-profile" element={<EditProfile />} />
-        
+         
         
       </Routes>
     
