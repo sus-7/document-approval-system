@@ -1,20 +1,30 @@
-import React from 'react'
-import { FaHistory, FaBell, FaUserAlt, FaSearch } from "react-icons/fa";
+import React from "react";
+import { FaHistory, FaBell, FaUserAlt, FaSearch, FaHome } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-const Navbar = ({role}) => {const navigate = useNavigate();
+const Navbar = ({ role }) => {
+  const navigate = useNavigate();
 
-    const navigateNoti = () => {
-      navigate("/notifications");
-    };
+  const navigateNoti = () => {
+    navigate("/notifications");
+  };
+
+  const navigateHome = () => {
+    navigate("/dashboard");
+  };
+
   return (
     <div>
-         <div className="navbar w-full h-[8vh] flex items-center justify-between bg-white text-gray-700 px-8 shadow-md">
+      <div className="navbar w-full h-[8vh] flex items-center justify-between bg-white text-gray-700 px-8 shadow-md">
         <button className="text-lg text-gray-600 hover:text-blue-500">
           <FaHistory />
         </button>
         <h1 className="text-center text-lg font-semibold tracking-wider">
-          {role === "approver" ? "Approver Dashboard" : "Assistant Dashboard"}
+          {role === "approver"
+            ? "Approver Dashboard"
+            : role === "assistant"
+            ? "Assistant Dashboard"
+            : "Profile Dashboard"}
         </h1>
         <div className="flex space-x-6">
           <button
@@ -23,13 +33,22 @@ const Navbar = ({role}) => {const navigate = useNavigate();
           >
             <FaBell />
           </button>
-          <button className="text-gray-600 hover:text-blue-500">
-            <FaUserAlt />
-          </button>
+          {role === "approver" || role === "assistant" ? (
+            <button className="text-gray-600 hover:text-blue-500">
+              <FaUserAlt />
+            </button>
+          ) : (
+            <button
+              onClick={navigateHome}
+              className="text-gray-600 hover:text-blue-500"
+            >
+              <FaHome />
+            </button>
+          )}
         </div>
-      </div>̥
+      </div>
     </div>
-  )
-}
+  );
+};
 
-export default Navbar
+export default Navbar;
