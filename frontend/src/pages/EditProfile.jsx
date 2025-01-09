@@ -146,56 +146,7 @@ const EditProfile = () => {
           </button>
         </form>
         {/* Change Password Section */}
-        <div>
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Change Password</h2>
-          <form onSubmit={handleChangePassword}>
-            <div className="mb-4">
-              <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
-                Current Password
-              </label>
-              <input
-                type="password"
-                id="currentPassword"
-                className="mt-1 px-4 py-2 w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none text-gray-900"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
-                New Password
-              </label>
-              <input
-                type="password"
-                id="newPassword"
-                className="mt-1 px-4 py-2 w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none text-gray-900"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                required
-              />
-            </div>
-            <div className="mb-4">
-              <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
-                Confirm Password
-              </label>
-              <input
-                type="password"
-                id="confirmPassword"
-                className="mt-1 px-4 py-2 w-full bg-white border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none text-gray-900"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-              />
-            </div>
-            <button
-              type="submit"
-              className="w-full px-4 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 transition duration-200"
-            >
-              Change Password
-            </button>
-          </form>
-        </div>
+       
       </div>
     </div>
   );

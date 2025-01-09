@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FaHistory, FaBell, FaUserAlt, FaSearch } from "react-icons/fa";
 import NewCm from "./NewCm";
 import SentBackTabContent from "./SentBackTabContent";
-import Navbar from "./Navbar";
+import Navbar from "../components/Navbar.jsx";
 
 const ApproverDashboard = () => {
   const [selectedTab, setSelectedTab] = useState("SENT BACK");
@@ -11,7 +11,7 @@ const ApproverDashboard = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
       {/* Navbar */}
-     <Navbar role = "Assistant"/>
+     <Navbar role = "assistant"/>
 
       {/* Main Content */}
       <div className="flex items-center mt-3 h-auto justify-center flex-grow">
