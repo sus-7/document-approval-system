@@ -7,6 +7,9 @@ import Notifications from "./components/Notifications";
 import ManageUsers from "./components/ManageUsers";
 import PaDashboard from "./components/PaDashboard";
 import History from "./components/History";
+import EditProfile from "./components/EditProfile";
+import OTPUI from "./components/OTPUI.jsx";
+
 const App = () => {
   return (
    
@@ -16,9 +19,12 @@ const App = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/remark-pdf" element={<RemarkUI />} />
         <Route path="/notifications" element={<Notifications />} />
-        <Route path="/users/manage" element={<ManageUsers />} />
-        <Route path="/dashboard" element={<PaDashboard/>} />
-        <Route path="/history" element={<History/>} />
+        <Route path="/manage/users" element={<ManageUsers />} />
+        <Route path="/history" element={<History />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} /> 
+        <Route path="/otp" element={<OTPUI/>} /> 
+
         
       </Routes>
     
