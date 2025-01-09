@@ -1,11 +1,12 @@
-import React, { useState, useEffect } from "react";
-import { Link as RouterLink } from "react-router-dom";
-import { toast,Toaster } from "react-hot-toast";
-
+import React, { useState, useEffect, useContext } from "react";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
+import { toast, Toaster } from "react-hot-toast";
+import { AuthContext } from "../contexts/AuthContext";
 const OTPUI = () => {
   const [otp, setOtp] = useState("");
   const [timer, setTimer] = useState(10);
-
+  const { tempUser, loggedInUser, setLoggedInUser } = useContext(AuthContext);
+  const navigate = useNavigate();
   // Countdown timer effect
   useEffect(() => {
     if (timer > 0) {
@@ -16,17 +17,75 @@ const OTPUI = () => {
     }
   }, [timer]);
 
-  const handleResendOtp = () => {
-    setTimer(10); // Reset timer
-    toast.success("OTP Resent Successfully!", {
-      position: "top-right",
-      duration: 3000,
-    });  
-  };
+  const handleResendOtp = async () => {
+    try {
+      const otpUrl = import.meta.env.VITE_API_URL + "/user/resendOTP";
+      const response = fetch(otpUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: tempUser.username,
+          email: tempUser.email,
+        }),
+        credentials: "include",
+      });
 
+      if (!response.ok) {
+        const error = await response.json();
+        console.log(error.message);
+        alert(error.message);
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      console.log("OTP sent:", result.message);
+      alert("OTP sent!");
+    } catch (error) {
+      console.log(error);
+      toast.error("Error sending OTP");
+    }
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    try {
+      const otpUrl = import.meta.env.VITE_API_URL + "/user/verifyOTP";
+      const response = await fetch(otpUrl, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: tempUser.username,
+          otp,
+        }),
+        credentials: "include",
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message || `HTTP error! status: ${response.status}`
+        );
+      }
+
+      setLoggedInUser({
+        ...loggedInUser,
+        username: tempUser.username,
+      });
+      alert("OTP verified!");
+      navigate("/");
+    } catch (error) {
+      console.error("OTP verification failed:", error);
+      alert(error.message);
+    }
+  };
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
-      <Toaster/>
+      <Toaster />
       <div className="w-96 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
         <div>
           {/* Title */}
@@ -35,7 +94,7 @@ const OTPUI = () => {
           </h2>
 
           {/* Form */}
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Enter OTP
