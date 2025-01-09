@@ -8,6 +8,7 @@ import Notifications from "./components/Notifications";
 import ManageUsers from "./components/ManageUsers";
 import History from "./components/History";
 import EditProfile from "./components/EditProfile";
+import ForgotPassword from './OTPUI.jsx'; 
 
 const App = () => {
   return (
@@ -21,7 +22,7 @@ const App = () => {
         <Route path="/manage/users" element={<ManageUsers />} />
         <Route path="/history" element={<History />} />
         <Route path="/edit-profile" element={<EditProfile />} />
-        
+        <Route path="/forgot-password" element={<ForgotPassword />} /> 
         
       </Routes>
     
