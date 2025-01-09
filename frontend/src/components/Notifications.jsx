@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { FaBell, FaArrowLeft, FaUser, FaHistory, FaCheckCircle, FaTimesCircle, FaExclamationCircle } from "react-icons/fa";
 import { toast } from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import Navbar from "./Navbar";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([
@@ -8,6 +10,12 @@ const Notifications = () => {
     { id: 2, title: "Document Rejected", description: "Your Document was Rejected By CM.", time: "1 hour ago", type: "rejected", read: false },
     { id: 3, title: "Correction Spotted", description: "Document has Correction.", time: "3 hours ago", type: "correction", read: false },
   ]);
+  
+  const navigate = useNavigate();
+
+  const navigateback = () => {
+    navigate("/dashboard");
+  };
 
   const handleMarkAsRead = (id) => {
     setNotifications((prevNotifications) =>
@@ -24,11 +32,11 @@ const Notifications = () => {
   const getNotificationColor = (type) => {
     switch (type) {
       case "accepted":
-        return "bg-green-200 text-green-600";
+        return "bg-green-100 text-green-600";
       case "rejected":
-        return "bg-red-200 text-red-600";
+        return "bg-red-100 text-red-600";
       case "correction":
-        return "bg-yellow-200 text-white";
+        return "bg-yellow-100 text-yellow-600";
       default:
         return "bg-blue-50 text-blue-600";
     }
@@ -50,22 +58,18 @@ const Notifications = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
       {/* Navbar */}
-      <div className="flex justify-between items-center bg-white shadow-md px-6 py-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-800">NOTIFICATIONS</h1>
-        <div className="flex gap-4 items-center">
-          <button className="text-gray-500 flex gap-4  transition-colors duration-300">
-            <FaHistory size={24} className="hover:text-gray-700" />
-            <FaUser size={24} className="hover:text-gray-700"  />
-          </button>
-        </div>
-      </div>
+     <Navbar/>
 
       {/* Main Content */}
       <div className="flex items-center justify-center flex-grow">
-        <div className="w-96 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
+        <div className="w-full max-w-3xl bg-white shadow-lg border border-gray-200 rounded-lg p-8">
           {/* Back Button */}
-          <button className="text-blue-600 hover:text-blue-800 mb-6 flex items-center transition-colors duration-300">
+          <button
+            className="text-blue-600 hover:text-blue-800 mb-6 flex items-center transition-colors duration-300"
+            onClick={navigateback}
+          >
             <FaArrowLeft size={24} className="mr-2" />
+            Back to Dashboard
           </button>
 
           {/* Notifications List */}
@@ -74,19 +78,19 @@ const Notifications = () => {
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`flex justify-between items-center p-4 mb-4 rounded-lg ${getNotificationColor(notification.type)} transition-all`}
+                className={`flex justify-between items-center p-4 mb-4 rounded-lg ${getNotificationColor(notification.type)} shadow-md transform transition-all  `}
               >
                 <div className="flex items-center gap-4">
-                  {getNotificationIcon(notification.type)}
+                  <div className="p-2 bg-white rounded-full shadow-md">{getNotificationIcon(notification.type)}</div>
                   <div>
                     <h3 className="text-lg font-semibold text-gray-800">{notification.title}</h3>
-                    <p className="text-sm text-zinc-900">{notification.description}</p>
-                    <span className="text-xs font-semibold text-zinc-900">{notification.time}</span>
+                    <p className="text-sm text-gray-600">{notification.description}</p>
+                    <span className="text-xs font-medium text-gray-500">{notification.time}</span>
                   </div>
                 </div>
                 <button
                   onClick={() => handleMarkAsRead(notification.id)}
-                  className="text-blue-600 hover:text-blue-800 w-20 font-semibold transition-colors duration-300"
+                  className="text-blue-600 hover:text-blue-800 w-24 font-semibold transition-colors duration-300 text-sm"
                 >
                   {notification.read ? "Read" : "Mark as Read"}
                 </button>
