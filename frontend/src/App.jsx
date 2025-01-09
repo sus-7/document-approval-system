@@ -13,6 +13,8 @@ import ProfileDashboard from "./components/ProfileDashboard";
 import { AuthProvider } from "../src/contexts/AuthContext";
 import ChangePassword from "./components/ChangePassword";
 import ApprovalPage from "./components/ApprovalPage";
+import Correction from "./components/Correction";
+
 const App = () => {
   return (
     <AuthProvider>
@@ -30,7 +32,7 @@ const App = () => {
         <Route path="/otp/verify" element={<OTPUI />} />
         <Route path="/profile" element={<ProfileDashboard />} />
         <Route path="/changepassword" element={<ChangePassword/>} />
-        <Route path="/approval" element={<ApprovalPage/>} />
+        <Route path="/correction" element={<Correction/>} />
       </Routes>
     </AuthProvider>
   );
