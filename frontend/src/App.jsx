@@ -18,7 +18,8 @@ const App = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/remark-pdf" element={<RemarkUI />} />
         <Route path="/notifications" element={<Notifications />} />
-        <Route path="/manage/users" element={<ManageUsers />} />
+        <Route path="/manage
+        /users" element={<ManageUsers />} />
         <Route path="/history" element={<History />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         
