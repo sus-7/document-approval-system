@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { FaHistory, FaBell, FaUserAlt } from "react-icons/fa";
+import { FaBell, FaUserAlt } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { IconButton, Menu, MenuItem } from '@mui/material';
-import DashboardIcon from '@mui/icons-material/Dashboard';
-import { Tooltip } from '@mui/material';
+import { IconButton, Menu, MenuItem } from "@mui/material";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import { Tooltip } from "@mui/material";
 
 const Navbar = ({ role }) => {
   const navigate = useNavigate();
@@ -41,16 +41,13 @@ const Navbar = ({ role }) => {
     <div>
       <div className="navbar w-full h-[8vh] flex items-center justify-between bg-white text-gray-700 px-8 shadow-md">
         
-        {/* History Button */}
-         
-
         {/* Title based on Role */}
         <h1 className="text-center text-lg font-semibold tracking-wider">
           {role === "approver"
             ? "Approver Dashboard"
             : role === "assistant"
             ? "Assistant Dashboard"
-            : "Profile Dashboard"}
+            : ""}
         </h1>
 
         <div className="flex space-x-6">
@@ -58,7 +55,6 @@ const Navbar = ({ role }) => {
           <Tooltip title="Notifications" arrow>
             <button
               onClick={navigateNoti}
-              
               className="text-gray-600 text-xl hover:text-blue-500"
               aria-label="Notifications"
             >
@@ -97,13 +93,17 @@ const Navbar = ({ role }) => {
             PaperProps={{
               style: {
                 maxHeight: 200,
-                width: '20ch',
+                width: "20ch",
               },
             }}
           >
-            <MenuItem onClick={navigateProfile}>View Profile</MenuItem>
-            <MenuItem onClick={() => navigate('/history')}>History</MenuItem>
-            <MenuItem onClick={() => navigate('/')}>Logout</MenuItem>
+            {role === "approver" || role === "assistant" ? (
+              <>
+                <MenuItem onClick={navigateProfile}>View Profile</MenuItem>
+                <MenuItem onClick={navigateHistory}>History</MenuItem>
+              </>
+            ) : null}
+            <MenuItem onClick={() => navigate("/")}>Logout</MenuItem>
           </Menu>
         </div>
       </div>

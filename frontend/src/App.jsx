@@ -16,6 +16,8 @@ import ApprovalPage from "./pages/ApprovalPage";
 import Correction from "./pages/Correction";
 import AdminLogin from "./pages/AdminLogin";
 import Support from "./pages/Support";
+import AdminDashboard from "./pages/AdminDashboard";
+import 'react-dates/lib/css/_datepicker.css';
 
 const App = () => {
   return (
@@ -33,6 +35,7 @@ const App = () => {
         <Route path="/edit/profile" element={<EditProfile />} />
         <Route path="/otp/verify" element={<OTPUI />} />
         <Route path="/profile" element={<ProfileDashboard />} />
+        <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/changepassword" element={<ChangePassword/>} />
         <Route path="/correction" element={<Correction/>} />
         <Route path="/approval" element={<ApprovalPage/>} />
