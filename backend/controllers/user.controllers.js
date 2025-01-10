@@ -66,23 +66,27 @@ const signIn = async (req, res) => {
 const signUp = async (req, res) => {
     try {
         const { username, password, fullName, email, mobileNo } = req.body;
-        const existingUser = await User.findOne({
+        const existingVerifiedUser = await User.findOne({
             $or: [{ username }, { email }, { mobileNo }],
+            isVerified: true,
         });
-        if (existingUser && existingUser.isVerified) {
+
+        if (existingVerifiedUser) {
             return res.status(400).json({
                 message: "duplicate user found",
                 key:
-                    existingUser.username === username
+                    existingVerifiedUser.username === username
                         ? "username"
-                        : existingUser.email === email
+                        : existingVerifiedUser.email === email
                         ? "email"
                         : "mobileNo",
             });
         }
-        if (existingUser && !existingUser.isVerified) {
-            await User.deleteMany({ username });
-        }
+        await User.deleteMany({
+            $or: [{ username }, { email }, { mobileNo }],
+            isVerified: false,
+        });
+
         const privateKey = crypto
             .randomBytes(32)
             .toString("base64")
