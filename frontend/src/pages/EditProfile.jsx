@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
+import {toast,Toaster} from "react-hot-toast";
 
 const EditProfile = () => {
   const [name, setName] = useState("");
@@ -47,10 +48,18 @@ const EditProfile = () => {
         address,
       };
       console.log("Saved Data:", updatedData);
-      alert("Profile updated successfully!");
+      toast.success("Profile updated successfully!", {
+        position: "top-right",
+        duration: 3000,
+      }); 
+
+
     } catch (error) {
       console.error("Error saving changes:", error);
-      alert("Failed to update profile. Please try again.");
+      toast.error("Failed to update profile. Please try again.", {
+        position: "top-right",
+        duration: 3000,
+      });
     }
   };
 
@@ -77,6 +86,7 @@ const EditProfile = () => {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
+      <Toaster/>
       <div className="w-full max-w-2xl bg-white shadow-lg border border-gray-200 rounded-lg p-8 space-y-6">
         <div className="flex items-start justify-start mb-6 cursor-pointer">
           <IoArrowBack
