@@ -1,6 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
+import {toast,Toaster} from "react-hot-toast";
 const Login = () => {
   const [selectedToggle, setSelectedToggle] = useState("Assistant");
   const [username, setUsername] = useState("");
@@ -42,16 +43,24 @@ const Login = () => {
       const result = await response.json();
       console.log("Signin successful:", result);
       setLoggedInUser(result.user);
-      alert("Signin successful!");
+      toast.success("Login successful!", {
+        position: "top-right",
+        duration: 2000,
+      });
       navigate("/dashboard");
     } catch (error) {
       console.error("Error during signup:", error);
-      alert("Signin failed! Please try again.");
+      toast.error("Login failed! Please try again.", {
+        position: "top-right",
+        duration: 2000,
+      });
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100"> 
+      <Toaster/>
+      <button className="absolute top-4 bg-red-600 text-white p-2 rounded-md  right-4" onClick={() => navigate("/adminLogin")}>Admin</button>  
       <div className="w-96 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
         <div>
           {/* Toggle Buttons for CM/PA */}

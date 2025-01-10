@@ -14,6 +14,8 @@ import { AuthProvider } from "../src/contexts/AuthContext";
 import ChangePassword from "./pages/ChangePassword";
 import ApprovalPage from "./pages/ApprovalPage";
 import Correction from "./pages/Correction";
+import AdminLogin from "./pages/AdminLogin";
+import Support from "./pages/Support";
 
 const App = () => {
   return (
@@ -34,6 +36,8 @@ const App = () => {
         <Route path="/changepassword" element={<ChangePassword/>} />
         <Route path="/correction" element={<Correction/>} />
         <Route path="/approval" element={<ApprovalPage/>} />
+        <Route path="/adminLogin" element={<AdminLogin/>} />
+        <Route path="/support" element={<Support/>} />
       </Routes>
     </AuthProvider>
   );
