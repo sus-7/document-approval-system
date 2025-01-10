@@ -39,7 +39,7 @@ const Register = () => {
         const error = await response.json();
         console.log(error.message);
         toast.error(error.message, {
-            position: "top-right",
+          position: "top-center",
             duration: 2000,
           }
         );
@@ -49,7 +49,7 @@ const Register = () => {
       const result = await response.json();
       console.log("Please verify the account:", result.message);
       toast.success("Signup successful! Please verify the account.", {
-        position: "top-right",
+        position: "top-center",
         duration: 2000,
       });
       setTempUser({
@@ -62,7 +62,7 @@ const Register = () => {
     } catch (error) {
       console.error("Error during signup:", error);
       toast.error("Signup failed! Please try again.", {
-        position: "top-right",
+        position: "top-center",
         duration: 2000,
       });
     }

@@ -10,7 +10,9 @@ const Support = () => {
     e.preventDefault();
 
     if (!name || !email || !message) {
-      toast.error("All fields are required!");
+      toast.error("All fields are required!",{
+        position: "top-center",
+      });
       return;
     }
 
@@ -31,13 +33,17 @@ const Support = () => {
         throw new Error("Failed to send the message.");
       }
 
-      toast.success("Message sent successfully!");
+      toast.success("Message sent successfully!",{
+        position: "top-center",
+      });
       setName("");
       setEmail("");
       setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
-      toast.error("Failed to send the message. Please try again.");
+      toast.error("Failed to send the message. Please try again.",{
+        position: "top-center",
+      });
     }
   };
 

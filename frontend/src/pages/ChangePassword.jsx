@@ -37,7 +37,7 @@ const ChangePassword = () => {
 
     // Simulate successful password change
     toast.success("Password changed successfully!", {
-      position: "top-right",
+      position: "top-center",
       duration: 3000,
     });
     setCurrentPassword("");
