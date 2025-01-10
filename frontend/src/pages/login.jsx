@@ -43,11 +43,17 @@ const Login = () => {
       const result = await response.json();
       console.log("Signin successful:", result);
       setLoggedInUser(result.user);
-      alert("Signin successful!");
+      toast.success("Login successful!", {
+        position: "top-right",
+        duration: 2000,
+      });
       navigate("/dashboard");
     } catch (error) {
       console.error("Error during signup:", error);
-      alert("Signin failed! Please try again.");
+      toast.error("Login failed! Please try again.", {
+        position: "top-right",
+        duration: 2000,
+      });
     }
   };
 

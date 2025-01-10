@@ -2,6 +2,7 @@ import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { Link as RouterLink } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
+import { toast, Toaster } from "react-hot-toast";
 const Register = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -37,13 +38,20 @@ const Register = () => {
       if (!response.ok) {
         const error = await response.json();
         console.log(error.message);
-        alert(error.message);
-        throw new Error(`HTTP error! status: ${response.status}`);
+        toast.error(error.message, {
+            position: "top-right",
+            duration: 2000,
+          }
+        );
+        throw new Error(`HTTP error{! status: ${response.status}`);
       }
 
       const result = await response.json();
       console.log("Please verify the account:", result.message);
-      alert("Please verify the account!");
+      toast.success("Signup successful! Please verify the account.", {
+        position: "top-right",
+        duration: 2000,
+      });
       setTempUser({
         username,
         fullName,
@@ -53,12 +61,16 @@ const Register = () => {
       navigate("/otp/verify");
     } catch (error) {
       console.error("Error during signup:", error);
-      alert("Signup failed! Please try again.");
+      toast.error("Signup failed! Please try again.", {
+        position: "top-right",
+        duration: 2000,
+      });
     }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
+      <Toaster />
       <div className="w-96 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
         <div>
           {/* Title */}

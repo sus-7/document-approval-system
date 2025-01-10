@@ -67,7 +67,10 @@ const EditProfile = () => {
   const handleChangePassword = async (e) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      alert("New password and confirm password do not match.");
+      toast.success("New password and confirm password do not match.", {
+        position: "top-right",
+        duration: 3000,
+      });  // Clear previous messages
       return;
     }
     try {
@@ -77,10 +80,16 @@ const EditProfile = () => {
         newPassword,
       };
       console.log("Password Data:", passwordData);
-      alert("Password changed successfully!");
+        toast.success("Password changed successfully!", {
+        position: "top-right",
+        duration: 3000,
+      });
     } catch (error) {
       console.error("Error changing password:", error);
-      alert("Failed to change password. Please try again.");
+      toast.error("Failed to change password. Please try again.", {
+        position: "top-right",
+        duration: 3000,
+      });
     }
   };
 

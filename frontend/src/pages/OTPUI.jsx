@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
 import { AuthContext } from "../contexts/AuthContext";
+
 const OTPUI = () => {
   const [otp, setOtp] = useState("");
   const [timer, setTimer] = useState(10);
@@ -35,13 +36,25 @@ const OTPUI = () => {
       if (!response.ok) {
         const error = await response.json();
         console.log(error.message);
-        alert(error.message);
+        toast.success("Error sending OTP",{
+          position: "top-right",
+          duration: 3000,
+        });
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
       console.log("OTP sent:", result.message);
-      alert("OTP sent!");
+
+      toast.success("OTP sent successfully!", {
+        position: "top-right",
+        duration: 3000,
+      });
+
+      toast.success("OTP sent successfully!", {
+        position: "top-right",
+        duration: 3000,
+      });
     } catch (error) {
       console.log(error);
       toast.error("Error sending OTP");
@@ -76,11 +89,22 @@ const OTPUI = () => {
         ...loggedInUser,
         username: tempUser.username,
       });
-      alert("OTP verified!");
+      toast.success("OTP verified successfully!", {
+        position: "top-right",
+        duration: 3000,
+      });
       navigate("/");
     } catch (error) {
       console.error("OTP verification failed:", error);
-      alert(error.message);
+      toast.error("Error verifying OTP", {   
+          position: "top-right",
+          duration: 3000,
+        }
+      );
+      toast.error("Invalid OTP",{
+        position: "top-right",
+        duration: 3000,
+      });
     }
   };
   return (
