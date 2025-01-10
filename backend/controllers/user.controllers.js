@@ -66,23 +66,27 @@ const signIn = async (req, res) => {
 const signUp = async (req, res) => {
     try {
         const { username, password, fullName, email, mobileNo } = req.body;
-        const existingUser = await User.findOne({
+        const existingVerifiedUser = await User.findOne({
             $or: [{ username }, { email }, { mobileNo }],
+            isVerified: true,
         });
-        if (existingUser && existingUser.isVerified) {
+
+        if (existingVerifiedUser) {
             return res.status(400).json({
                 message: "duplicate user found",
                 key:
-                    existingUser.username === username
+                    existingVerifiedUser.username === username
                         ? "username"
-                        : existingUser.email === email
+                        : existingVerifiedUser.email === email
                         ? "email"
                         : "mobileNo",
             });
         }
-        if (existingUser && !existingUser.isVerified) {
-            await User.deleteOne({ username });
-        }
+        await User.deleteMany({
+            $or: [{ username }, { email }, { mobileNo }],
+            isVerified: false,
+        });
+
         const privateKey = crypto
             .randomBytes(32)
             .toString("base64")
@@ -143,7 +147,7 @@ const sendOTPVerificationEmail = async ({ username, email }, res) => {
             from: process.env.AUTH_EMAIL,
             to: email,
             subject: "Verify your email",
-            html: `<p>Enter the OTP : <b>${otp}</b> on verification page to complete your registration</p><p>The OTP will expire in 1 hour</p>`,
+            html: `<p>Enter the OTP : <b>${otp}</b> on verification page to complete your registration</p><p>The OTP will expire in 10 minutes</p>`,
         };
 
         //generate hashed otp
@@ -153,7 +157,7 @@ const sendOTPVerificationEmail = async ({ username, email }, res) => {
             username,
             otp: hashedOtp,
             createdAt: new Date(),
-            expiresAt: new Date(Date.now() + 3600000),
+            expiresAt: new Date(Date.now() + 600000),
         });
         await newOTPVerification.save();
         await transporter.sendMail(mailOptions);
@@ -247,6 +251,89 @@ const resendOTPAndVerify = async (req, res) => {
     }
 };
 
+const sendPasswordResetOTP = async (user, res) => {
+    try {
+        const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
+        const mailOptions = {
+            from: process.env.AUTH_EMAIL,
+            to: email,
+            subject: "OTP for reseting password",
+            html: `<p>Enter the OTP : <b>${otp}</b> on verification page for changing your password</p><p>The OTP will expire in 10 minutes</p>`,
+        };
+
+        //generate hashed otp
+        const saltRounds = 10;
+        const hashedOtp = await bcrypt.hash(otp, saltRounds);
+        const newOTPVerification = await new UserOTPVerification({
+            username,
+            otp: hashedOtp,
+            createdAt: new Date(),
+            expiresAt: new Date(Date.now() + 600000),
+        });
+        await newOTPVerification.save();
+        await transporter.sendMail(mailOptions);
+        const sptoken = jwt.sign(
+            { username, email, usage: "OTP" },
+            process.env.JWT_SECRET
+        );
+        res.cookie("sptoken", sptoken, {
+            httpOnly: true,
+            sameSite: "strict",
+            maxAge: 10 * 60 * 1000,
+        });
+        return res.status(200).json({
+            status: "pending",
+            message: "OTP sent successfully",
+            data: {
+                username,
+                email,
+            },
+        });
+    } catch (error) {
+        console.log(
+            "user-controller service :: sendUserVerificationEmail :: error : ",
+            error
+        );
+        return res
+            .status(500)
+            .json({ status: "failed", message: "Server Error" });
+    }
+};
+
+const resetPassword = async (req, res) => {
+    try {
+        if (req.usage === "OTP") {
+            const { newPassword } = req.body;
+            const username = req.username;
+            bcrypt.hash(newPassword, 10, async (err, hash) => {
+                if (err)
+                    return res.status(500).json({ message: "Server Error" });
+                await User.updateOne({ username }, { password: hash });
+                return res.status(200).json({
+                    status: "SUCCESS",
+                    message: "Password updated successfully",
+                });
+            });
+        }
+        const { username, newPassword } = req.body;
+        bcrypt.hash(newPassword, 10, async (err, hash) => {
+            if (err) return res.status(500).json({ message: "Server Error" });
+            await User.updateOne({ username }, { password: hash });
+            return res.status(200).json({
+                status: "SUCCESS",
+                message: "Password updated successfully",
+            });
+        });
+    } catch (error) {
+        console.log(
+            "user-controller service :: verifyOTPAndResetPassword :: error : ",
+            error
+        );
+        return res
+            .status(500)
+            .json({ status: "failed", message: "Server Error" });
+    }
+};
 module.exports = {
     signIn,
     signUp,

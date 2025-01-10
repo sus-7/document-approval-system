@@ -24,7 +24,7 @@ const Notifications = () => {
       )
     );
     toast.success("Notification marked as read!", {
-      position: "top-right",
+      position: "top-center",
       duration: 3000,
     });
   };

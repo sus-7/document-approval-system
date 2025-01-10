@@ -10,7 +10,7 @@ const RemarkUI = () => {
     if (!isTicked) {
       setIsTicked(true);
       toast.success("Marked as complete!", {
-        position: "top-right",
+        position: "top-center",
         duration: 3000,
       });
     }

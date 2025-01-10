@@ -22,7 +22,7 @@ const AdminLogin = () => {
     const formData = {
       username,
       password,
-    };
+    }
 
     try {
       const response = await fetch(apiUrl, {
@@ -41,13 +41,17 @@ const AdminLogin = () => {
 
       const result = await response.json();
       setLoggedInUser(result.user);
-      toast.success("Sign-in successful!");
+        toast.success("Sign-in successful!", {
+          position: "top-center", // Center the notification
+      });
       navigate("/dashboard");
     } catch (error) {
       console.error("Error during sign-in:", error);
-      toast.error("Sign-in failed! Please try again.");
-    }
-  };
+      toast.error("Sign-in failed! Please try again.", {
+        position: "top-center",
+      });
+      }
+    };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
