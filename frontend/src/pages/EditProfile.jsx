@@ -49,7 +49,7 @@ const EditProfile = () => {
       };
       console.log("Saved Data:", updatedData);
       toast.success("Profile updated successfully!", {
-        position: "top-right",
+        position: "top-center",
         duration: 3000,
       }); 
 
@@ -57,7 +57,7 @@ const EditProfile = () => {
     } catch (error) {
       console.error("Error saving changes:", error);
       toast.error("Failed to update profile. Please try again.", {
-        position: "top-right",
+        position: "top-center",
         duration: 3000,
       });
     }
@@ -68,7 +68,7 @@ const EditProfile = () => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
       toast.success("New password and confirm password do not match.", {
-        position: "top-right",
+        position: "top-center",
         duration: 3000,
       });  // Clear previous messages
       return;
@@ -81,13 +81,13 @@ const EditProfile = () => {
       };
       console.log("Password Data:", passwordData);
         toast.success("Password changed successfully!", {
-        position: "top-right",
+          position: "top-center",
         duration: 3000,
       });
     } catch (error) {
       console.error("Error changing password:", error);
       toast.error("Failed to change password. Please try again.", {
-        position: "top-right",
+        position: "top-center",
         duration: 3000,
       });
     }

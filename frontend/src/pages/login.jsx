@@ -44,14 +44,14 @@ const Login = () => {
       console.log("Signin successful:", result);
       setLoggedInUser(result.user);
       toast.success("Login successful!", {
-        position: "top-right",
+        position: "top-center",
         duration: 2000,
       });
       navigate("/dashboard");
     } catch (error) {
       console.error("Error during signup:", error);
       toast.error("Login failed! Please try again.", {
-        position: "top-right",
+        position: "top-center",
         duration: 2000,
       });
     }

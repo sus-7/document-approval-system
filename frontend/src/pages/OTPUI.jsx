@@ -37,7 +37,7 @@ const OTPUI = () => {
         const error = await response.json();
         console.log(error.message);
         toast.success("Error sending OTP",{
-          position: "top-right",
+          position: "top-center",
           duration: 3000,
         });
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -47,17 +47,15 @@ const OTPUI = () => {
       console.log("OTP sent:", result.message);
 
       toast.success("OTP sent successfully!", {
-        position: "top-right",
+        position: "top-center",
         duration: 3000,
       });
 
-      toast.success("OTP sent successfully!", {
-        position: "top-right",
-        duration: 3000,
-      });
     } catch (error) {
       console.log(error);
-      toast.error("Error sending OTP");
+      toast.error("Error sending OTP",{
+        position: "top-center",
+      });
     }
   };
   const handleSubmit = async (e) => {
@@ -85,21 +83,24 @@ const OTPUI = () => {
         );
       }
 
-      // setLoggedInUser({
-      //   ...loggedInUser,
-      //   username: tempUser.username,
-      // });
-      alert("OTP verified!Please login again");
+      setLoggedInUser({
+        ...loggedInUser,
+        username: tempUser.username,
+      });
+      toast.success("OTP verified successfully!", {
+        position: "top-center",
+        duration: 3000,
+      });
       navigate("/");
     } catch (error) {
       console.error("OTP verification failed:", error);
       toast.error("Error verifying OTP", {   
-          position: "top-right",
+        position: "top-center",
           duration: 3000,
         }
       );
       toast.error("Invalid OTP",{
-        position: "top-right",
+        position: "top-center",
         duration: 3000,
       });
     }
