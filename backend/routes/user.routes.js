@@ -25,7 +25,7 @@ router.get("/status", verifyToken, checkAuthStatus);
 router.post("/verifyOTP", verifyOTP);
 router.post("/resendOTP", resendOTPAndVerify);
 
-router.get("/sendPasswordResetOTP", sendPasswordResetOTP);
+router.post("/sendPasswordResetOTP", sendPasswordResetOTP);
 router.post("/verifySpOTP", verifySpOTP);
 router.post("/resetPassword", verifySpToken, resetPassword);
 module.exports = router;
