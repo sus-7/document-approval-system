@@ -72,11 +72,11 @@ const OTPUI = () => {
         );
       }
 
-      setLoggedInUser({
-        ...loggedInUser,
-        username: tempUser.username,
-      });
-      alert("OTP verified!");
+      // setLoggedInUser({
+      //   ...loggedInUser,
+      //   username: tempUser.username,
+      // });
+      alert("OTP verified!Please login again");
       navigate("/");
     } catch (error) {
       console.error("OTP verification failed:", error);

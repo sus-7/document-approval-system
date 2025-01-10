@@ -20,4 +20,7 @@ router.get("/status", verifyToken, checkAuthStatus);
 //TODO: add otp validation middleware
 router.post("/verifyOTP", verifyOTP);
 router.post("/resendOTP", resendOTPAndVerify);
+
+// router.get("/passwordResetOTP", passwordResetOTP);
+// router.post("/forgotAndResetPassword", verifySpToken, resetPassword);
 module.exports = router;
