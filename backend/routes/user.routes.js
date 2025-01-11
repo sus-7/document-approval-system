@@ -5,11 +5,15 @@ const {
     verifyOTP,
     resendOTPAndVerify,
     checkAuthStatus,
+    sendPasswordResetOTP,
+    resetPassword,
+    verifySpOTP,
 } = require("../controllers/user.controllers");
 const {
     signUpDetailsValidator,
     signiInDetailsValidator,
     verifyToken,
+    verifySpToken,
 } = require("../middlewares/user.middlewares");
 
 const router = express.Router();
@@ -21,6 +25,7 @@ router.get("/status", verifyToken, checkAuthStatus);
 router.post("/verifyOTP", verifyOTP);
 router.post("/resendOTP", resendOTPAndVerify);
 
-// router.get("/passwordResetOTP", passwordResetOTP);
-// router.post("/forgotAndResetPassword", verifySpToken, resetPassword);
+router.post("/sendPasswordResetOTP", sendPasswordResetOTP);
+router.post("/verifySpOTP", verifySpOTP);
+router.post("/resetPassword", verifySpToken, resetPassword);
 module.exports = router;

@@ -228,6 +228,61 @@ const verifyOTP = async (req, res) => {
     }
 };
 
+const verifySpOTP = async (req, res) => {
+    try {
+        const { otp, email } = req.body;
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({
+                status: false,
+                message: "User not found",
+            });
+        }
+        const username = user.username;
+        const userOTPVerificationReacords = await UserOTPVerification.find({
+            username,
+        });
+        if (userOTPVerificationReacords.length <= 0)
+            return res.status(404).json({ message: "OTP not found" });
+        else {
+            const { expiresAt } = userOTPVerificationReacords[0];
+            const hashedOtp =
+                userOTPVerificationReacords[
+                    userOTPVerificationReacords.length - 1
+                ].otp;
+
+            if (expiresAt < Date.now()) {
+                await UserOTPVerification.deleteMany({ username });
+                return res.status(400).json({ message: "OTP expired" });
+            } else {
+                console.log(otp);
+                const isValid = await bcrypt.compare(otp, hashedOtp);
+                if (!isValid)
+                    return res.status(400).json({ message: "OTP invalid" });
+                else {
+                    await User.updateOne({ username }, { isVerified: true });
+                    await UserOTPVerification.deleteMany({ username });
+                    const sptoken = jwt.sign(
+                        { username: user.username, email, usage: "OTP" },
+                        process.env.JWT_SECRET
+                    );
+                    res.cookie("sptoken", sptoken, {
+                        httpOnly: true,
+                        sameSite: "strict",
+                        maxAge: 10 * 60 * 1000,
+                    });
+                    return res.status(200).json({ status: true });
+                }
+            }
+        }
+    } catch (error) {
+        console.log(
+            "user-controller service :: verifySpOTP :: error : ",
+            error
+        );
+        return res.status(500).json({ status: false, message: "Server error" });
+    }
+};
 const resendOTPAndVerify = async (req, res) => {
     try {
         const { username, email } = req.body;
@@ -251,8 +306,14 @@ const resendOTPAndVerify = async (req, res) => {
     }
 };
 
-const sendPasswordResetOTP = async (user, res) => {
+const sendPasswordResetOTP = async (req, res) => {
     try {
+        const { email } = req.body;
+        if (!email) {
+            return res
+                .status(400)
+                .json({ status: "FAILED", message: "Email is required" });
+        }
         const otp = `${Math.floor(1000 + Math.random() * 9000)}`;
         const mailOptions = {
             from: process.env.AUTH_EMAIL,
@@ -264,28 +325,20 @@ const sendPasswordResetOTP = async (user, res) => {
         //generate hashed otp
         const saltRounds = 10;
         const hashedOtp = await bcrypt.hash(otp, saltRounds);
+        const user = await User.findOne({ email });
         const newOTPVerification = await new UserOTPVerification({
-            username,
+            username: user.username,
             otp: hashedOtp,
             createdAt: new Date(),
             expiresAt: new Date(Date.now() + 600000),
         });
         await newOTPVerification.save();
         await transporter.sendMail(mailOptions);
-        const sptoken = jwt.sign(
-            { username, email, usage: "OTP" },
-            process.env.JWT_SECRET
-        );
-        res.cookie("sptoken", sptoken, {
-            httpOnly: true,
-            sameSite: "strict",
-            maxAge: 10 * 60 * 1000,
-        });
         return res.status(200).json({
             status: "pending",
             message: "OTP sent successfully",
             data: {
-                username,
+                username: user.username,
                 email,
             },
         });
@@ -302,42 +355,47 @@ const sendPasswordResetOTP = async (user, res) => {
 
 const resetPassword = async (req, res) => {
     try {
+        let username;
+        const { newPassword } = req.body;
+
         if (req.usage === "OTP") {
-            const { newPassword } = req.body;
-            const username = req.username;
-            bcrypt.hash(newPassword, 10, async (err, hash) => {
-                if (err)
-                    return res.status(500).json({ message: "Server Error" });
-                await User.updateOne({ username }, { password: hash });
-                return res.status(200).json({
-                    status: "SUCCESS",
-                    message: "Password updated successfully",
-                });
+            username = req.username;
+        } else {
+            username = req.body.username;
+        }
+        if (!newPassword || !username) {
+            return res.status(400).json({
+                status: "FAILED",
+                message: `Please provide ${
+                    username ? "new password" : "username"
+                }`,
             });
         }
-        const { username, newPassword } = req.body;
-        bcrypt.hash(newPassword, 10, async (err, hash) => {
-            if (err) return res.status(500).json({ message: "Server Error" });
-            await User.updateOne({ username }, { password: hash });
-            return res.status(200).json({
-                status: "SUCCESS",
-                message: "Password updated successfully",
-            });
+        const hash = await bcrypt.hash(newPassword, 10);
+        await User.updateOne({ username }, { password: hash });
+        return res.status(200).json({
+            status: "SUCCESS",
+            message: "Password updated successfully",
         });
     } catch (error) {
-        console.log(
+        console.error(
             "user-controller service :: verifyOTPAndResetPassword :: error : ",
             error
         );
-        return res
-            .status(500)
-            .json({ status: "failed", message: "Server Error" });
+        return res.status(500).json({
+            status: "FAILED",
+            message: "Server Error",
+        });
     }
 };
+
 module.exports = {
     signIn,
     signUp,
     verifyOTP,
     resendOTPAndVerify,
     checkAuthStatus,
+    sendPasswordResetOTP,
+    resetPassword,
+    verifySpOTP,
 };

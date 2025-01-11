@@ -1,6 +1,8 @@
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
+const UserOTPVerification = require("../models/userotp.model");
 const signUpDetailsSchema = Joi.object({
     // TODO: change after
     username: Joi.string().min(2),
@@ -76,45 +78,9 @@ const verifySpToken = async (req, res, next) => {
                 message: "No token found",
             });
         }
-
-        const user = await User.findOne({ username: decoded.username });
-        if (!user) {
-            return res.status(404).json({
-                status: false,
-                message: "User not found",
-            });
-        }
-
-        const username = user.username;
-        const userOTPVerificationReacords = await UserOTPVerification.find({
-            username,
-        });
-        if (userOTPVerificationReacords.length <= 0)
-            return res.status(404).json({ message: "OTP not found" });
-        else {
-            const { expiresAt } = userOTPVerificationReacords[0];
-            const hashedOtp =
-                userOTPVerificationReacords[
-                    userOTPVerificationReacords.length - 1
-                ].otp;
-
-            if (expiresAt < Date.now()) {
-                await UserOTPVerification.deleteMany({ username });
-                return res.status(400).json({ message: "OTP expired" });
-            } else {
-                const isValid = await bcrypt.compare(otp, hashedOtp);
-                console.log(otp);
-                if (!isValid)
-                    return res.status(400).json({ message: "OTP invalid" });
-                else {
-                    await User.updateOne({ username }, { isVerified: true });
-                    await UserOTPVerification.deleteMany({ username });
-                    req.usage = "OTP";
-                    req.username = username;
-                    next();
-                }
-            }
-        }
+        req.username = decoded.username;
+        req.usage = decoded.usage;
+        next();
     } catch (error) {
         console.log("Auth middleware :: error : ", error);
         return res.status(500).json({
@@ -143,5 +109,5 @@ module.exports = {
     signUpDetailsValidator,
     signiInDetailsValidator,
     verifyToken,
-    verifySpToken
+    verifySpToken,
 };

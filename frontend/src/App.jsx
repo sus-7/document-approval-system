@@ -17,6 +17,9 @@ import Correction from "./pages/Correction";
 import AdminLogin from "./pages/AdminLogin";
 import Support from "./pages/Support";
 import AdminDashboard from "./pages/AdminDashboard";
+import ForgotPassOTP from "./pages/ForgotPassOTP";
+import SetNewPassword from "./pages/SetNewPassword";
+// import 'react-dates/lib/css/_datepicker.css';
 
 const App = () => {
   return (
@@ -25,6 +28,8 @@ const App = () => {
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/forgot-password-otp" element={<ForgotPassOTP />} />
+        <Route path="/set-new-pass" element={<SetNewPassword />} />
         <Route path="/remark-pdf" element={<RemarkUI />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/users/manage" element={<ManageUsers />} />
@@ -35,11 +40,11 @@ const App = () => {
         <Route path="/otp/verify" element={<OTPUI />} />
         <Route path="/profile" element={<ProfileDashboard />} />
         <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/changepassword" element={<ChangePassword/>} />
-        <Route path="/correction" element={<Correction/>} />
-        <Route path="/approval" element={<ApprovalPage/>} />
-        <Route path="/adminLogin" element={<AdminLogin/>} />
-        <Route path="/support" element={<Support/>} />
+        <Route path="/changepassword" element={<ChangePassword />} />
+        <Route path="/correction" element={<Correction />} />
+        <Route path="/approval" element={<ApprovalPage />} />
+        <Route path="/adminLogin" element={<AdminLogin />} />
+        <Route path="/support" element={<Support />} />
       </Routes>
     </AuthProvider>
   );
