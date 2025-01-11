@@ -19,7 +19,6 @@ import Support from "./pages/Support";
 import AdminDashboard from "./pages/AdminDashboard";
 import ForgotPassOTP from "./pages/ForgotPassOTP";
 import SetNewPassword from "./pages/SetNewPassword";
-// import 'react-dates/lib/css/_datepicker.css';
 
 const App = () => {
   return (
