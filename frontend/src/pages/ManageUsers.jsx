@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { FaUserPlus, FaEdit, FaTrashAlt } from "react-icons/fa";
+import { Toaster, toast } from "react-hot-toast";
 
 const ManageUsers = () => {
   const [users, setUsers] = useState({
@@ -41,6 +42,11 @@ const ManageUsers = () => {
       return updatedUsers;
     });
 
+    toast.success("User added successfully", {
+      position: "top-right",
+      duration: 3000,
+    });
+
     setShowModal(false);
     setNewUser({ name: "", role: "Approver", email: "" });
     setErrors({ name: "", email: "" });
@@ -54,6 +60,12 @@ const ManageUsers = () => {
     );
 
     setUsers((prevUsers) => ({ ...prevUsers, [userToEdit.role]: updatedUsers }));
+
+    toast.success("User details updated successfully", {
+      position: "top-right",
+      duration: 3000,
+    });
+
     setShowEditModal(false);
     setErrors({ name: "", email: "" });
   };
@@ -61,10 +73,25 @@ const ManageUsers = () => {
   const handleDeleteUser = (id, role) => {
     const updatedUsers = users[role].filter((user) => user.id !== id);
     setUsers((prevUsers) => ({ ...prevUsers, [role]: updatedUsers }));
+
+    toast.error("User deleted successfully", {
+      position: "top-right",
+      duration: 3000,
+    });
+  };
+
+  const handleCancelAdd = () => {
+    setShowModal(false);
+    setNewUser({ name: "", role: "Approver", email: "" });
+  };
+
+  const handleCancelEdit = () => {
+    setShowEditModal(false);
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
+      <Toaster />
       {/* Navbar */}
       <div className="flex justify-between items-center bg-white shadow-md px-6 py-4 border-b border-gray-200">
         <h1 className="text-2xl font-bold text-gray-800">Manage Users</h1>
@@ -170,7 +197,7 @@ const ManageUsers = () => {
             <input
               type="text"
               placeholder="Name"
-              className="w-full p-2 border rounded mb-4 bg-white"
+              className="w-full p-2 border rounded mb-4 text-black bg-white"
               value={newUser.name}
               onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
             />
@@ -178,15 +205,15 @@ const ManageUsers = () => {
             <input
               type="email"
               placeholder="Email"
-              className="w-full p-2 border rounded mb-4 bg-white"
+              className="w-full p-2 border text-black rounded mb-4 bg-white"
               value={newUser.email}
               onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
             />
-            {errors.email && <p className="text-red-500 text-sm mb-4">{errors.email}</p>}
+            {errors.email && <p className="text-red-500  text-sm mb-4">{errors.email}</p>}
             <select
               value={newUser.role}
               onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-              className="w-full p-2 border rounded mb-4 bg-white"
+              className="w-full p-2 border rounded mb-4 text-black bg-white"
             >
               <option value="Approver">Approver</option>
               <option value="Assistant">Assistant</option>
@@ -194,7 +221,7 @@ const ManageUsers = () => {
             <div className="flex justify-end gap-4">
               <button
                 className="text-gray-500 hover:text-gray-700"
-                onClick={() => setShowModal(false)}
+                onClick={handleCancelAdd}
               >
                 Cancel
               </button>
@@ -216,7 +243,7 @@ const ManageUsers = () => {
             <h2 className="text-xl font-semibold text-gray-800 mb-4">Edit User</h2>
             <input
               type="text"
-              className="w-full p-2 border rounded mb-4 bg-white"
+              className="w-full p-2 border text-black rounded mb-4 bg-white"
               value={userToEdit.name}
               onChange={(e) =>
                 setUserToEdit({ ...userToEdit, name: e.target.value })
@@ -225,27 +252,17 @@ const ManageUsers = () => {
             {errors.name && <p className="text-red-500 text-sm mb-4">{errors.name}</p>}
             <input
               type="email"
-              className="w-full p-2 border rounded mb-4 bg-white"
+              className="w-full p-2 border text-black rounded mb-4 bg-white"
               value={userToEdit.email}
               onChange={(e) =>
                 setUserToEdit({ ...userToEdit, email: e.target.value })
               }
             />
             {errors.email && <p className="text-red-500 text-sm mb-4">{errors.email}</p>}
-            <select
-              value={userToEdit.role}
-              onChange={(e) =>
-                setUserToEdit({ ...userToEdit, role: e.target.value })
-              }
-              className="w-full p-2 border rounded mb-4 bg-white"
-            >
-              <option value="Approver">Approver</option>
-              <option value="Assistant">Assistant</option>
-            </select>
             <div className="flex justify-end gap-4">
               <button
                 className="text-gray-500 hover:text-gray-700"
-                onClick={() => setShowEditModal(false)}
+                onClick={handleCancelEdit}
               >
                 Cancel
               </button>
