@@ -17,7 +17,6 @@ import Correction from "./pages/Correction";
 import AdminLogin from "./pages/AdminLogin";
 import Support from "./pages/Support";
 import AdminDashboard from "./pages/AdminDashboard";
-import 'react-dates/lib/css/_datepicker.css';
 
 const App = () => {
   return (
