@@ -33,7 +33,7 @@ const signIn = async (req, res) => {
                     .json({ message: "Invalid username or password" });
             }
             const token = jwt.sign(
-                { username: username, email: user.email },
+                { username: username, email: user.email, role: user.role },
                 process.env.JWT_SECRET
             );
             res.cookie("token", token, {
