@@ -26,7 +26,7 @@ const ForgotPassOTP = () => {
     e.preventDefault();
 
     try {
-      const otpUrl = import.meta.env.VITE_API_URL + "/user/verifySpOTP";
+      const otpUrl = import.meta.env.VITE_API_URL + "/user/verify-sp-otp";
       const response = await fetch(otpUrl, {
         method: "POST",
         headers: {

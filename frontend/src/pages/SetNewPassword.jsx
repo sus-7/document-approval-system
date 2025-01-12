@@ -33,7 +33,7 @@ const SetNewPassword = () => {
       return;
     }
     try {
-      const submitUrl = import.meta.env.VITE_API_URL + "/user/resetPassword";
+      const submitUrl = import.meta.env.VITE_API_URL + "/user/reset-password";
       const response = await fetch(submitUrl, {
         method: "POST",
         headers: {

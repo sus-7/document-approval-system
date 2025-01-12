@@ -1,0 +1,3 @@
+- loggedInUser validation for all pages
+- move Toaster to App.jsx
+- Add a loading spinner for all pages

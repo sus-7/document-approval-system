@@ -19,8 +19,12 @@ const OTPUI = () => {
   }, [timer]);
 
   const handleResendOtp = async () => {
+    toast.loading("Resending OTP...", {
+      position: "top-center",
+      duration: 5000,
+    });
     try {
-      const otpUrl = import.meta.env.VITE_API_URL + "/user/resendOTP";
+      const otpUrl = import.meta.env.VITE_API_URL + "/user/resend-otp";
       const response = fetch(otpUrl, {
         method: "POST",
         headers: {
@@ -36,7 +40,7 @@ const OTPUI = () => {
       if (!response.ok) {
         const error = await response.json();
         console.log(error.message);
-        toast.success("Error sending OTP",{
+        toast.success("Error sending OTP", {
           position: "top-center",
           duration: 3000,
         });
@@ -50,19 +54,21 @@ const OTPUI = () => {
         position: "top-center",
         duration: 3000,
       });
-
     } catch (error) {
       console.log(error);
-      toast.error("Error sending OTP",{
+      toast.error("Error sending OTP", {
         position: "top-center",
       });
     }
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    toast.loading("Verifying OTP...", {
+      position: "top-center",
+      duration: 5000,
+    });
     try {
-      const otpUrl = import.meta.env.VITE_API_URL + "/user/verifyOTP";
+      const otpUrl = import.meta.env.VITE_API_URL + "/user/verify-otp";
       const response = await fetch(otpUrl, {
         method: "POST",
         headers: {
@@ -94,12 +100,7 @@ const OTPUI = () => {
       navigate("/");
     } catch (error) {
       console.error("OTP verification failed:", error);
-      toast.error("Error verifying OTP", {   
-        position: "top-center",
-          duration: 3000,
-        }
-      );
-      toast.error("Invalid OTP",{
+      toast.error("Invalid OTP", {
         position: "top-center",
         duration: 3000,
       });

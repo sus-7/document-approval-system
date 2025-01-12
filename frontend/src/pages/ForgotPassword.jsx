@@ -9,7 +9,8 @@ const ForgotPassword = () => {
   const navigate = useNavigate();
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const otpUrl = import.meta.env.VITE_API_URL + "/user/sendPasswordResetOTP";
+    const otpUrl =
+      import.meta.env.VITE_API_URL + "/user/send-password-reset-otp";
     try {
       const response = await fetch(otpUrl, {
         method: "POST",
