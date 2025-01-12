@@ -8,6 +8,7 @@ const {
     sendPasswordResetOTP,
     resetPassword,
     verifySpOTP,
+    signOut,
 } = require("../controllers/user.controllers");
 const {
     signUpDetailsValidator,
@@ -20,6 +21,7 @@ const router = express.Router();
 
 router.post("/signup", signUpDetailsValidator, signUp);
 router.post("/signin", signiInDetailsValidator, signIn);
+router.post("/signout", signOut);
 router.get("/status", verifyToken, checkAuthStatus);
 //TODO: add otp validation middleware
 router.post("/verify-otp", verifyOTP);

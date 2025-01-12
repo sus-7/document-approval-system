@@ -112,6 +112,17 @@ const signUp = async (req, res) => {
     }
 };
 
+const signOut = async (req, res) => {
+    try {
+        res.clearCookie("token");
+        console.log("cookie removed");
+        return res.status(200).json({ message: "Logged out successfully" });
+    } catch (error) {
+        console.log("user-controller service :: signOut :: error : ", error);
+        return res.status(500).json({ message: "Server Error" });
+    }
+};
+
 const checkAuthStatus = async (req, res) => {
     try {
         const user = await User.findOne({ username: req.username });
@@ -398,4 +409,5 @@ module.exports = {
     sendPasswordResetOTP,
     resetPassword,
     verifySpOTP,
+    signOut,
 };
