@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const { transporter, MailOptions } = require("../utils/sendemail");
 
-const createAssistant = async (req, res) => {
+const createAssistant = async (req, res, next) => {
     try {
         const { username, password, fullName, email, mobileNo } = req.body;
         const existingVerifiedUser = await User.findOne({
@@ -17,7 +17,9 @@ const createAssistant = async (req, res) => {
                     : existingVerifiedUser.email === email
                     ? "email"
                     : "mobileNo";
-            throw new Error(`duplicate user found with ${key}`);
+            const error = new Error(`duplicate user found with ${key}`);
+            error.statusCode = 400;
+            return next(error);
         }
         await User.deleteMany({
             $or: [{ username }, { email }, { mobileNo }],
@@ -35,7 +37,7 @@ const createAssistant = async (req, res) => {
 
         bcrypt.hash(password, 10, async (err, hash) => {
             if (err) {
-                throw new Error("Server Error");
+                return next(err);
             }
             const newUser = await new User({
                 username,
@@ -53,7 +55,7 @@ const createAssistant = async (req, res) => {
                     process.env.AUTH_EMAIL,
                     email,
                     "Your account credentials",
-                    `<p>Your account credentials for document approval system</p><p>Username: ${username}</p><p>Password: ${password}</p>`
+                    `<p>Your account credentials for document approval system</p><p><b>Username:</b> ${username}</p><p><b>Password:</b> ${password}</p>`
                 );
                 await transporter.sendMail(mailOptions);
                 //save new user in senior assistan's asstants list
@@ -76,12 +78,109 @@ const createAssistant = async (req, res) => {
             "user-controller service :: createAssistant :: error : ",
             error
         );
-        return res
-            .status(500)
-            .json({ status: "FAILED", message: error.message });
+        return next(error);
+    }
+};
+
+const createApprover = async (req, res, next) => {
+    try {
+        const seniorAssistant = await User.findOne({
+            username: req.user.username,
+            isVerified: true,
+        });
+        if (seniorAssistant.assignedMinister) {
+            const error = new Error("Max Approver limit reached!");
+            error.statusCode = 400;
+            return next(error);
+        }
+        const { username, password, fullName, email, mobileNo } = req.body;
+        const existingVerifiedUser = await User.findOne({
+            $or: [{ username }, { email }, { mobileNo }],
+            isVerified: true,
+        });
+        if (existingVerifiedUser) {
+            const key =
+                existingVerifiedUser.username === username
+                    ? "username"
+                    : existingVerifiedUser.email === email
+                    ? "email"
+                    : "mobileNo";
+            const error = new Error(`duplicate user found with ${key}`);
+            error.statusCode = 400;
+            return next(error);
+        }
+        await User.deleteMany({
+            $or: [{ username }, { email }, { mobileNo }],
+            isVerified: false,
+        });
+
+        //assign minister to all assistants under senior assistant
+        bcrypt.hash(password, 10, async (err, hash) => {
+            if (err) {
+                return next(err);
+            }
+            const newUser = await new User({
+                username,
+                password: hash,
+                fullName,
+                email,
+                mobileNo,
+                role: "Approver",
+                isVerified: true,
+            }).save();
+
+            newUser.assistants.push(
+                seniorAssistant._id,
+                ...seniorAssistant.createdAssistants
+            );
+            await newUser.save();
+
+            for (let assistant of seniorAssistant.createdAssistants) {
+                await User.findByIdAndUpdate(
+                    assistant,
+                    { $set: { assignedMinister: newUser._id } },
+                    { $new: true }
+                );
+            }
+            seniorAssistant.assignedMinister = newUser._id;
+            await seniorAssistant.save();
+
+            const mailOptions = new MailOptions(
+                process.env.AUTH_EMAIL,
+                email,
+                "Your account credentials",
+                `<p>Your account credentials for document approval system</p><p><b>Username:</b> ${username}</p><p><b>Password:</b> ${password}</p>`
+            );
+            await transporter.sendMail(mailOptions);
+            return res.status(200).json({
+                status: true,
+                message: "Approver created successfully",
+                data: {
+                    username,
+                    email,
+                    role: "Assistant",
+                    fullName,
+                },
+            });
+        });
+    } catch (error) {
+        console.log(
+            "user-controller service :: createApprover :: error : ",
+            error
+        );
+        return next(error);
+    }
+};
+
+const createUser = async (req, res, next) => {
+    const { role } = req.body;
+    if (role === "Assistant") {
+        await createAssistant(req, res, next);
+    } else if (role === "Approver") {
+        await createApprover(req, res, next);
     }
 };
 
 module.exports = {
-    createAssistant,
+    createUser,
 };

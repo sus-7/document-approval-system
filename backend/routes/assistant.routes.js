@@ -3,14 +3,15 @@ const router = express.Router();
 const {
     createUserValidator,
     verifySeniorAssistant,
+    verifyApproverLimits,
 } = require("../middlewares/assistant.middlewares");
-const { createAssistant } = require("../controllers/assistant.controllers");
+const { createUser } = require("../controllers/assistant.controllers");
 
 router.post(
     "/create-user",
     verifySeniorAssistant,
     createUserValidator,
-    createAssistant
+    createUser
 );
 
 module.exports = router;

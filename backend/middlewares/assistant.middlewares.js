@@ -2,12 +2,12 @@ const User = require("../models/user.model");
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
 const createUserValidationsSchema = Joi.object({
-    username: Joi.string().min(2),
-    fullName: Joi.string().min(2),
-    mobileNo: Joi.number().min(10),
-    email: Joi.string().email(),
-    password: Joi.string().min(2),
-    role: Joi.string().valid("Assistant", "Approver"),
+    username: Joi.string().min(2).required(),
+    fullName: Joi.string().min(2).required(),
+    mobileNo: Joi.number().min(10).required(),
+    email: Joi.string().email().required(),
+    password: Joi.string().min(2).required(),
+    role: Joi.string().valid("Assistant", "Approver").required(),
 });
 
 const createUserValidator = (req, res, next) => {
@@ -19,30 +19,32 @@ const createUserValidator = (req, res, next) => {
     next();
 };
 
-const verifySeniorAssistant = (req, res, next) => {
+const verifySeniorAssistant = async (req, res, next) => {
     const { token } = req.cookies;
     if (!token) {
-        // throw new Error("Access Denied!");
         const error = new Error("Access Denied!");
         error.statusCode = 401;
         return next(error);
     }
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        if (decoded.role !== "Senior Assistant") {
+        const user = await User.findOne({ username: decoded.username });
+        if (!user) {
+            const error = new Error("Access Denied!");
+            error.statusCode = 400;
+            return next(error);
+        }
+        if (user.role !== "Senior Assistant") {
             throw new Error("Access Denied!");
         }
-        req.user = decoded;
+        req.user = user;
         next();
     } catch (error) {
-        // return res.status(401).json({
-        //     status: false,
-        //     message: error.message,
-        // });
         error.statusCode = 401;
         return next(error);
     }
 };
+
 module.exports = {
     createUserValidator,
     verifySeniorAssistant,
