@@ -3,9 +3,12 @@ const router = express.Router();
 const {
     createUserValidator,
     verifySeniorAssistant,
-    verifyApproverLimits,
 } = require("../middlewares/assistant.middlewares");
-const { createUser } = require("../controllers/assistant.controllers");
+const {
+    createUser,
+    getCreatedAssistants,
+    getApprover,
+} = require("../controllers/assistant.controllers");
 
 router.post(
     "/create-user",
@@ -13,5 +16,13 @@ router.post(
     createUserValidator,
     createUser
 );
+
+router.get(
+    "/get-created-assistants",
+    verifySeniorAssistant,
+    getCreatedAssistants
+);
+
+router.get("/get-approver", verifySeniorAssistant, getApprover);
 
 module.exports = router;

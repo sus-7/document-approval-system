@@ -28,7 +28,10 @@ const verifySeniorAssistant = async (req, res, next) => {
     }
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findOne({ username: decoded.username });
+        const user = await User.findOne({
+            username: decoded.username,
+            isVerified: true,
+        });
         if (!user) {
             const error = new Error("Access Denied!");
             error.statusCode = 400;

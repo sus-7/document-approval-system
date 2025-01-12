@@ -27,7 +27,7 @@ const UserSchema = new mongoose.Schema({
     privateKey: {
         type: String,
     },
-    assignedMinister: {
+    assignedApprover: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     },

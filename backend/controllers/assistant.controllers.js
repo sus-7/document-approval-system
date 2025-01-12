@@ -2,6 +2,7 @@ const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const { transporter, MailOptions } = require("../utils/sendemail");
+const path = require("path");
 
 const createAssistant = async (req, res, next) => {
     try {
@@ -29,7 +30,7 @@ const createAssistant = async (req, res, next) => {
             username: req.user.username,
             isVerified: true,
         });
-        const assignedMinister = seniorAssistant.assignedMinister;
+        const assignedApprover = seniorAssistant.assignedApprover;
         const privateKey = crypto
             .randomBytes(32)
             .toString("base64")
@@ -47,7 +48,7 @@ const createAssistant = async (req, res, next) => {
                 mobileNo,
                 privateKey,
                 role: "Assistant",
-                assignedMinister: assignedMinister,
+                assignedApprover,
                 isVerified: true,
             }).save();
             newUser.save().then(async () => {
@@ -88,7 +89,7 @@ const createApprover = async (req, res, next) => {
             username: req.user.username,
             isVerified: true,
         });
-        if (seniorAssistant.assignedMinister) {
+        if (seniorAssistant.assignedApprover) {
             const error = new Error("Max Approver limit reached!");
             error.statusCode = 400;
             return next(error);
@@ -138,11 +139,11 @@ const createApprover = async (req, res, next) => {
             for (let assistant of seniorAssistant.createdAssistants) {
                 await User.findByIdAndUpdate(
                     assistant,
-                    { $set: { assignedMinister: newUser._id } },
+                    { $set: { assignedApprover: newUser._id } },
                     { $new: true }
                 );
             }
-            seniorAssistant.assignedMinister = newUser._id;
+            seniorAssistant.assignedApprover = newUser._id;
             await seniorAssistant.save();
 
             const mailOptions = new MailOptions(
@@ -181,6 +182,57 @@ const createUser = async (req, res, next) => {
     }
 };
 
+const getCreatedAssistants = async (req, res, next) => {
+    try {
+        const seniorAssistant = await req.user.populate({
+            path: "createdAssistants",
+            select: "-password -privateKey",
+        });
+        if (seniorAssistant.createdAssistants.length === 0) {
+            const error = new Error("No assistants created");
+            error.statusCode = 400;
+            return next(error);
+        }
+        return res.status(200).json({
+            status: true,
+            message: "Assistants fetched successfully",
+            assistants: seniorAssistant.createdAssistants,
+        });
+    } catch (error) {
+        console.log(
+            "user-controller service :: getCreatedAssistants :: error : ",
+            error
+        );
+        return next(error);
+    }
+};
+
+const getApprover = async (req, res, next) => {
+    try {
+        const seniorAssistant = await req.user.populate({
+            path: "assignedApprover",
+            select: "-password -privateKey",
+        });
+        if (!seniorAssistant.assignedApprover) {
+            const error = new Error("No approver assigned");
+            error.statusCode = 400;
+            return next(error);
+        }
+        return res.status(200).json({
+            status: true,
+            message: "Approver fetched successfully",
+            approver: seniorAssistant.assignedApprover,
+        });
+    } catch (error) {
+        console.log(
+            "user-controller service :: getApprover :: error : ",
+            error
+        );
+        return next(error);
+    }
+};
 module.exports = {
     createUser,
+    getCreatedAssistants,
+    getApprover,
 };
