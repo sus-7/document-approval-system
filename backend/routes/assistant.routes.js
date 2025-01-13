@@ -3,6 +3,7 @@ const router = express.Router();
 const {
     createUserValidator,
     verifySeniorAssistant,
+    verifyAssistant,
 } = require("../middlewares/assistant.middlewares");
 const {
     createUser,
@@ -23,6 +24,6 @@ router.get(
     getCreatedAssistants
 );
 
-router.get("/get-approver", verifySeniorAssistant, getApprover);
+router.get("/get-approver", verifyAssistant, getApprover);
 
 module.exports = router;
