@@ -1,21 +1,13 @@
-import React, { useState, useEffect, useRef } from "react";
-import {
-  FaSearch,
-  FaHome,
-  FaFileAlt,
-  FaUsers,
-  FaCog,
-  FaBars, // Hamburger menu icon
-} from "react-icons/fa";
-import Navbar from "../components/Navbar"; // Assuming Navbar is already created
+import React, { useState, useEffect } from "react";
+import { FaSearch, FaBars } from "react-icons/fa";
+import Navbar from "../components/Navbar";
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, IconButton } from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
 
 const ApprovalPage = () => {
-  const [selectedFilters, setSelectedFilters] = useState("PENDING");
+  const [selectedTab, setSelectedTab] = useState("PENDING");
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const sidebarRef = useRef(null);
-  const searchBarRef = useRef(null);
-  const [selectAll, setSelectAll] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [remarks, setRemarks] = useState("");
@@ -23,6 +15,11 @@ const ApprovalPage = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [newDocDialogOpen, setNewDocDialogOpen] = useState(false);
+  const [newDocTitle, setNewDocTitle] = useState("");
+  const [newDocDepartment, setNewDocDepartment] = useState("");
+  const [newDocFile, setNewDocFile] = useState(null);
+  const [newDocDesc, setNewDocDesc] = useState("");
 
   const sampleData = [
     { id: 1, name: "Policy Draft", category: "Finance", date: "2025-01-10", status: "PENDING" },
@@ -34,20 +31,18 @@ const ApprovalPage = () => {
   useEffect(() => {
     const filtered = sampleData.filter(
       (item) =>
-        (item.status === selectedFilters || selectAll) &&
+        (item.status === selectedTab || selectedTab === "ALL") &&
         item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
         (!selectedCategory || item.category === selectedCategory) &&
         (!startDate || new Date(item.date) >= new Date(startDate)) &&
         (!endDate || new Date(item.date) <= new Date(endDate))
     );
     setFilteredData(filtered);
-  }, [selectedFilters, searchQuery, selectAll, selectedCategory, startDate, endDate]);
+  }, [selectedTab, searchQuery, selectedCategory, startDate, endDate]);
 
   const handleAcceptReject = (id, status) => {
     setFilteredData((prevData) =>
-      prevData.map((item) =>
-        item.id === id ? { ...item, status: status } : item
-      )
+      prevData.map((item) => (item.id === id ? { ...item, status } : item))
     );
   };
 
@@ -65,164 +60,128 @@ const ApprovalPage = () => {
     }
   };
 
-  const toggleSelectAll = () => {
-    setSelectAll((prev) => !prev);
-    setSelectedFilters(""); 
+  const handleNewDocSubmit = () => {
+    // Handle new document submission logic here
+    setNewDocDialogOpen(false);
   };
 
   return (
-    <div className="flex min-h-screen bg-gray-100 text-gray-800">
-      <div className="flex-grow">
-        <Navbar role="Personal Assistant - Approval Dashboard" />
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="md:hidden p-2 text-gray-600 rounded-md"
-        >
-          <FaBars />
-        </button>
+    <div className="flex flex-col min-h-screen bg-gray-100 text-gray-800">
+      <Navbar role="Personal Assistant - Approval Dashboard" />
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="md:hidden p-2 text-gray-600 rounded-md"
+      >
+        <FaBars />
+      </button>
 
-        {!openDialog && (
-          <div ref={searchBarRef} className={`relative w-full max-w-xs mx-auto p-4 ${sidebarOpen ? "z-10" : "z-40"}`}>
-            <div className="flex flex-col items-center">
-              <FaSearch className="absolute top-8 left-6 text-gray-400" />
-              <input
-                type="text"
-                placeholder="Search documents..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 rounded-md border bg-white border-gray-300 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              />
-            </div>
-          </div>
-        )}
+      <main className="p-6 flex-grow">
+        <div className="flex flex-wrap gap-4 mb-6 border-b">
+          {["ALL", "PENDING", "APPROVED", "REJECTED", "REMARKS"].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setSelectedTab(tab)}
+              className={`px-4 py-2 ${selectedTab === tab
+                ? "border-b-2 border-blue-500 text-blue-500"
+                : "text-gray-600 hover:text-blue-500"
+                }`}
+            >
+              {tab}
+            </button>
+          ))}
+        </div>
 
-        <main className="p-6">
-          <div className="flex items-center gap-4 mb-6">
-            <label className="inline-flex items-center space-x-2 text-sm">
-              <input
-                type="checkbox"
-                checked={selectAll}
-                onChange={toggleSelectAll}
-                className="text-blue-500 border-gray-300 focus:ring-blue-500"
-              />
-              <span>Select All</span>
+        <div className="relative w-full max-w-xs mx-auto mb-6">
+          <FaSearch className="absolute top-3 left-3 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search documents..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-10 pr-4 py-2.5 rounded-md border bg-white border-gray-300 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+        </div>
+
+        <div className="mb-4 flex flex-col md:flex-row gap-4">
+          <div className="flex-shrink-0">
+            <label
+              htmlFor="category"
+              className="block text-sm font-medium text-gray-700"
+            >
+              Category
             </label>
-            {["PENDING", "APPROVED", "REJECTED", "REMARKS"].map((status) => (
-              <label key={status} className="inline-flex items-center space-x-2 text-sm">
-                <input
-                  type="radio"
-                  name="statusFilter"
-                  value={status}
-                  checked={selectedFilters === status && !selectAll}
-                  onChange={() => {
-                    setSelectAll(false);
-                    setSelectedFilters(status);
-                  }}
-                  className="text-blue-500 border-gray-300 focus:ring-blue-500"
-                />
-                <span>{status}</span>
-              </label>
-            ))}
+            <select
+              id="category"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="block w-full md:w-auto mt-1 p-2 text-sm border border-gray-300 bg-white rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            >
+              <option value="">All Categories</option>
+              <option value="Finance">Finance</option>
+              <option value="Education">Education</option>
+              <option value="Health">Health</option>
+              <option value="Transportation">Transportation</option>
+            </select>
           </div>
 
-          {/* Category and Date Range Picker */}
-          <div className="mb-4 flex gap-4">
-            <div className="flex-shrink-0">
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700">Category</label>
-              <select
-                id="category"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-                className="block w-fit mt-1 p-2 text-sm border border-gray-300 bg-white rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              >
-                <option value="">All Categories</option>
-                <option value="Finance">Finance</option>
-                <option value="Education">Education</option>
-                <option value="Health">Health</option>
-                <option value="Transportation">Transportation</option>
-              </select>
-            </div>
-
-            <div className="flex-grow">
-              <label className="block text-sm font-medium text-gray-700">Date Range</label>
-              <div className="flex gap-4">
-                <input
-                  type="date"
-                  value={startDate}
-                  onChange={(e) => setStartDate(e.target.value)}
-                  className="p-2 border bg-white border-gray-300 rounded-md"
-                />
-                <input
-                  type="date"
-                  value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
-                  className="p-2 border bg-white text-black border-gray-300 rounded-md"
-                  min={startDate}
-                />
-              </div>
+          <div className="flex-grow">
+            <label className="block text-sm font-medium text-gray-700">
+              Date Range
+            </label>
+            <div className="flex flex-col md:flex-row gap-4">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="p-2 border bg-white border-gray-300 rounded-md"
+              />
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="p-2 border bg-white text-black border-gray-300 rounded-md"
+                min={startDate}
+              />
             </div>
           </div>
+        </div>
 
-          <div className="bg-white p-4 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-medium mb-4">Selected Filters: {selectAll ? "ALL" : selectedFilters}</h3>
+        <div className="flex justify-end mb-4">
+          <IconButton color="primary" onClick={() => setNewDocDialogOpen(true)}>
+            <AddIcon />
+          </IconButton>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-2">
+          <div className="bg-white p-4 w-full md:w-2/3 rounded-lg border border-gray-200">
+            <h3 className="text-lg font-medium mb-4">Filtered Documents</h3>
             {filteredData.length > 0 ? (
-              <table className="w-full text-sm">
-                <thead className="text-left border-b">
-                  <tr>
-                    <th className="py-2">Document Name</th>
-                    <th className="py-2">Category</th>
-                    <th className="py-2">Date</th>
-                    {selectAll && <th className="py-2">Status</th>}
-                    <th className="py-2">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.map((item) => (
-                    <tr key={item.id} className="hover:bg-gray-50">
-                      <td className="py-2">{item.name}</td>
-                      <td className="py-2">{item.category}</td>
-                      <td className="py-2">{item.date}</td>
-                      {selectAll && <td className="py-2">{item.status}</td>}
-                      <td className="py-2">
-                        {item.status === "PENDING" && (
-                          <>
-                            <button
-                              className="text-blue-500 hover:underline mr-2"
-                              onClick={() => handleAcceptReject(item.id, "APPROVED")}
-                            >
-                              Accept
-                            </button>
-                            <button
-                              className="text-red-500 hover:underline"
-                              onClick={() => handleAcceptReject(item.id, "REJECTED")}
-                            >
-                              Reject
-                            </button>
-                            <button
-                              className="text-yellow-500 hover:underline ml-3"
-                              onClick={() => {
-                                setCurrentDocumentId(item.id);
-                                setOpenDialog(true);
-                              }}
-                            >
-                              Add Remark
-                            </button>
-                          </>
-                        )}
-                        {item.status === "REMARKS" && (
-                          <span className="text-yellow-500">Remarked</span>
-                        )}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead className="text-left border-b">
+                    <tr>
+                      <th className="py-2 px-4">Document Name</th>
+                      <th className="py-2 px-4">Category</th>
+                      <th className="py-2 px-4">Date</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {filteredData.map((item) => (
+                      <tr key={item.id} className="hover:bg-gray-50">
+                        <td className="py-2 px-4">{item.name}</td>
+                        <td className="py-2 px-4">{item.category}</td>
+                        <td className="py-2 px-4">{item.date}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             ) : (
               <p className="text-gray-500">No documents found for selected filters.</p>
             )}
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
 
       {openDialog && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
@@ -252,6 +211,53 @@ const ApprovalPage = () => {
           </div>
         </div>
       )}
+
+      <Dialog open={newDocDialogOpen} onClose={() => setNewDocDialogOpen(false)}>
+        <DialogTitle>Prepare New Document</DialogTitle>
+        <DialogContent>
+          <TextField
+            margin="dense"
+            label="Document Title"
+            type="text"
+            fullWidth
+            value={newDocTitle}
+            onChange={(e) => setNewDocTitle(e.target.value)}
+          />
+          <TextField
+            margin="dense"
+            label="Department"
+            type="text"
+            fullWidth
+            value={newDocDepartment}
+            onChange={(e) => setNewDocDepartment(e.target.value)}
+          />
+          <input
+            type="file"
+            onChange={(e) => setNewDocFile(e.target.files[0])}
+            className="my-4"
+          />
+          <TextField
+            margin="dense"
+            label="Description"
+            type="text"
+            fullWidth
+            multiline
+            rows={4}
+            value={newDocDesc}
+            onChange={(e) => setNewDocDesc(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setNewDocDialogOpen(false)} color="primary">
+            Cancel
+          </Button>
+
+
+          <Button onClick={handleNewDocSubmit} color="primary">
+            Submit
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
