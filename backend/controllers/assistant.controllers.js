@@ -1,6 +1,7 @@
 const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const { hashPassword, verifyPassword } = require("../utils/hashPassword");
 const { transporter, MailOptions } = require("../utils/sendemail");
 const path = require("path");
 
@@ -36,42 +37,40 @@ const createAssistant = async (req, res, next) => {
             .toString("base64")
             .replace(/[+/]/g, (m) => (m === "+" ? "-" : "_"));
 
-        bcrypt.hash(password, 10, async (err, hash) => {
-            if (err) {
-                return next(err);
-            }
-            const newUser = await new User({
-                username,
-                password: hash,
-                fullName,
+        const hashedPassword = await hashPassword(password); // Using argon2 to hash the password
+
+        const newUser = await new User({
+            username,
+            password: hashedPassword,
+            fullName,
+            email,
+            mobileNo,
+            privateKey,
+            role: "Assistant",
+            assignedApprover,
+            isVerified: true,
+        }).save();
+
+        newUser.save().then(async () => {
+            const mailOptions = new MailOptions(
+                process.env.AUTH_EMAIL,
                 email,
-                mobileNo,
-                privateKey,
-                role: "Assistant",
-                assignedApprover,
-                isVerified: true,
-            }).save();
-            newUser.save().then(async () => {
-                const mailOptions = new MailOptions(
-                    process.env.AUTH_EMAIL,
+                "Your account credentials",
+                `<p>Your account credentials for document approval system</p><p><b>Username:</b> ${username}</p><p><b>Password:</b> ${password}</p>`
+            );
+            await transporter.sendMail(mailOptions);
+            //save new user in senior assistant's assistants list
+            seniorAssistant.createdAssistants.push(newUser._id);
+            await seniorAssistant.save();
+            return res.status(200).json({
+                status: true,
+                message: "Assistant created successfully",
+                data: {
+                    username,
                     email,
-                    "Your account credentials",
-                    `<p>Your account credentials for document approval system</p><p><b>Username:</b> ${username}</p><p><b>Password:</b> ${password}</p>`
-                );
-                await transporter.sendMail(mailOptions);
-                //save new user in senior assistan's asstants list
-                seniorAssistant.createdAssistants.push(newUser._id);
-                await seniorAssistant.save();
-                return res.status(200).json({
-                    status: true,
-                    message: "Assistant created successfully",
-                    data: {
-                        username,
-                        email,
-                        role: "Assistant",
-                        fullName,
-                    },
-                });
+                    role: "Assistant",
+                    fullName,
+                },
             });
         });
     } catch (error) {
@@ -115,54 +114,51 @@ const createApprover = async (req, res, next) => {
             isVerified: false,
         });
 
-        //assign minister to all assistants under senior assistant
-        bcrypt.hash(password, 10, async (err, hash) => {
-            if (err) {
-                return next(err);
-            }
-            const newUser = await new User({
+        // Hash the password using argon2
+        const hashedPassword = await hashPassword(password);
+
+        const newUser = await new User({
+            username,
+            password: hashedPassword,
+            fullName,
+            email,
+            mobileNo,
+            role: "Approver",
+            isVerified: true,
+        }).save();
+
+        newUser.assistants.push(
+            seniorAssistant._id,
+            ...seniorAssistant.createdAssistants
+        );
+        await newUser.save();
+
+        for (let assistant of seniorAssistant.createdAssistants) {
+            await User.findByIdAndUpdate(
+                assistant,
+                { $set: { assignedApprover: newUser._id } },
+                { $new: true }
+            );
+        }
+        seniorAssistant.assignedApprover = newUser._id;
+        await seniorAssistant.save();
+
+        const mailOptions = new MailOptions(
+            process.env.AUTH_EMAIL,
+            email,
+            "Your account credentials",
+            `<p>Your account credentials for document approval system</p><p><b>Username:</b> ${username}</p><p><b>Password:</b> ${password}</p>`
+        );
+        await transporter.sendMail(mailOptions);
+        return res.status(200).json({
+            status: true,
+            message: "Approver created successfully",
+            data: {
                 username,
-                password: hash,
+                email,
+                role: "Assistant",
                 fullName,
-                email,
-                mobileNo,
-                role: "Approver",
-                isVerified: true,
-            }).save();
-
-            newUser.assistants.push(
-                seniorAssistant._id,
-                ...seniorAssistant.createdAssistants
-            );
-            await newUser.save();
-
-            for (let assistant of seniorAssistant.createdAssistants) {
-                await User.findByIdAndUpdate(
-                    assistant,
-                    { $set: { assignedApprover: newUser._id } },
-                    { $new: true }
-                );
-            }
-            seniorAssistant.assignedApprover = newUser._id;
-            await seniorAssistant.save();
-
-            const mailOptions = new MailOptions(
-                process.env.AUTH_EMAIL,
-                email,
-                "Your account credentials",
-                `<p>Your account credentials for document approval system</p><p><b>Username:</b> ${username}</p><p><b>Password:</b> ${password}</p>`
-            );
-            await transporter.sendMail(mailOptions);
-            return res.status(200).json({
-                status: true,
-                message: "Approver created successfully",
-                data: {
-                    username,
-                    email,
-                    role: "Assistant",
-                    fullName,
-                },
-            });
+            },
         });
     } catch (error) {
         console.log(

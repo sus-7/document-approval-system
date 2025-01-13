@@ -4,3 +4,4 @@
 -   add isverified to all routes
 -   specify role in email body
 -   turn on validations
+-   isActive isVerified validation middlewares
