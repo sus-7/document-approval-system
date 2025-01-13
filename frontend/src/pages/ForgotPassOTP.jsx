@@ -3,10 +3,11 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
 import { AuthContext } from "../contexts/AuthContext";
 
-const OTPUI = () => {
+const ForgotPassOTP = () => {
   const [otp, setOtp] = useState("");
   const [timer, setTimer] = useState(10);
-  const { tempUser, loggedInUser, setLoggedInUser } = useContext(AuthContext);
+  const { tempUser, setTempUser, loggedInUser, setLoggedInUser } =
+    useContext(AuthContext);
   const navigate = useNavigate();
   // Countdown timer effect
   useEffect(() => {
@@ -19,63 +20,20 @@ const OTPUI = () => {
   }, [timer]);
 
   const handleResendOtp = async () => {
-    toast.loading("Resending OTP...", {
-      position: "top-center",
-      duration: 5000,
-    });
-    try {
-      const otpUrl = import.meta.env.VITE_API_URL + "/user/resend-otp";
-      const response = fetch(otpUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: tempUser.username,
-          email: tempUser.email,
-        }),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        console.log(error.message);
-        toast.success("Error sending OTP", {
-          position: "top-center",
-          duration: 3000,
-        });
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const result = await response.json();
-      console.log("OTP sent:", result.message);
-
-      toast.success("OTP sent successfully!", {
-        position: "top-center",
-        duration: 3000,
-      });
-    } catch (error) {
-      console.log(error);
-      toast.error("Error sending OTP", {
-        position: "top-center",
-      });
-    }
+    navigate("/forgot-password");
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.loading("Verifying OTP...", {
-      position: "top-center",
-      duration: 5000,
-    });
+
     try {
-      const otpUrl = import.meta.env.VITE_API_URL + "/user/verify-otp";
+      const otpUrl = import.meta.env.VITE_API_URL + "/user/verify-sp-otp";
       const response = await fetch(otpUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          username: tempUser.username,
+          email: tempUser.email,
           otp,
         }),
         credentials: "include",
@@ -89,18 +47,14 @@ const OTPUI = () => {
         );
       }
 
-      setLoggedInUser({
-        ...loggedInUser,
-        username: tempUser.username,
-      });
       toast.success("OTP verified successfully!", {
         position: "top-center",
         duration: 3000,
       });
-      navigate("/");
+      navigate("/set-new-pass");
     } catch (error) {
       console.error("OTP verification failed:", error);
-      toast.error("Invalid OTP", {
+      toast.error(error.message, {
         position: "top-center",
         duration: 3000,
       });
@@ -162,4 +116,4 @@ const OTPUI = () => {
   );
 };
 
-export default OTPUI;
+export default ForgotPassOTP;

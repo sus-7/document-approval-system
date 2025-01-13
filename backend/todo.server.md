@@ -1,0 +1,7 @@
+-   migrate from bcrypt to argon2
+-   dont just rely on jwt token for auth but also check for user in DB
+-   token revokation on logout
+-   add isverified to all routes
+-   specify role in email body
+-   turn on validations
+-   isActive isVerified validation middlewares
