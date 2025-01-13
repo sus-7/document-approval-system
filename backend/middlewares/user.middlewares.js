@@ -28,6 +28,7 @@ const signInDetailsSchema = Joi.object({
     password: Joi.string().min(2),
 });
 
+//todo: check if user is verified
 const signiInDetailsValidator = (req, res, next) => {
     const { error } = signInDetailsSchema.validate(req.body);
     if (error) {

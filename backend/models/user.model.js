@@ -24,11 +24,18 @@ const UserSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    assignedMinister: {
+    privateKey: {
+        type: String,
+    },
+    assignedApprover: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     },
     assistants: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "User",
+    },
+    createdAssistants: {
         type: [mongoose.Schema.Types.ObjectId],
         ref: "User",
     },
@@ -37,9 +44,6 @@ const UserSchema = new mongoose.Schema({
         enum: ["Senior Assistant", "Assistant", "Approver", "Admin"],
         default: "Senior Assistant",
         required: true,
-    },
-    privateKey: {
-        type: String,
     },
     isActive: {
         type: Boolean,
