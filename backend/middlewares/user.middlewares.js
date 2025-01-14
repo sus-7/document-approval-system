@@ -1,5 +1,8 @@
 const Joi = require("joi");
-
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const User = require("../models/user.model");
+const UserOTPVerification = require("../models/userotp.model");
 const signUpDetailsSchema = Joi.object({
     // TODO: change after
     username: Joi.string().min(2),
@@ -25,6 +28,7 @@ const signInDetailsSchema = Joi.object({
     password: Joi.string().min(2),
 });
 
+//todo: check if user is verified
 const signiInDetailsValidator = (req, res, next) => {
     const { error } = signInDetailsSchema.validate(req.body);
     if (error) {
@@ -36,4 +40,72 @@ const signiInDetailsValidator = (req, res, next) => {
     next();
 };
 
-module.exports = { signUpDetailsValidator, signiInDetailsValidator };
+const verifyToken = async (req, res, next) => {
+    try {
+        const token = req.cookies.token;
+        if (!token) {
+            const error = new Error("User not logged in");
+            error.statusCode = 401;
+            return next(error);
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.username = decoded.username;
+        next();
+    } catch (error) {
+        console.log("Auth middleware :: error : ", error);
+        error.statusCode = 500;
+        return next(error);
+    }
+};
+
+const verifySpToken = async (req, res, next) => {
+    try {
+        const token = req.cookies.sptoken;
+        if (!token) {
+            return res.status(401).json({
+                status: false,
+                message: "No token found",
+            });
+        }
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        if (decoded.usage !== "OTP") {
+            return res.status(401).json({
+                status: false,
+                message: "No token found",
+            });
+        }
+        req.username = decoded.username;
+        req.usage = decoded.usage;
+        next();
+    } catch (error) {
+        console.log("Auth middleware :: error : ", error);
+        return res.status(500).json({
+            status: false,
+            message: "Server Error",
+        });
+    }
+};
+
+const resetPasswordSchema = Joi.object({
+    username: Joi.string().min(2),
+    newPassword: Joi.string().min(2),
+});
+
+const resetPasswordValidator = (req, res, next) => {
+    const { error } = resetPasswordSchema.validate(req.body);
+    if (error) {
+        return res.status(400).json({
+            message: "Invalid details",
+            error: error.details[0].message,
+        });
+    }
+    next();
+};
+module.exports = {
+    signUpDetailsValidator,
+    signiInDetailsValidator,
+    verifyToken,
+    verifySpToken,
+};

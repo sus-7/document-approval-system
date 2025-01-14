@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { FaBell, FaArrowLeft, FaUser, FaHistory, FaCheckCircle, FaTimesCircle, FaExclamationCircle } from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
-import Navbar from "./Navbar";
+import Navbar from "../components/Navbar.jsx";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([
@@ -24,7 +24,7 @@ const Notifications = () => {
       )
     );
     toast.success("Notification marked as read!", {
-      position: "top-right",
+      position: "top-center",
       duration: 3000,
     });
   };

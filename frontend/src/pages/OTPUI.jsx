@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { toast, Toaster } from "react-hot-toast";
 import { AuthContext } from "../contexts/AuthContext";
+
 const OTPUI = () => {
   const [otp, setOtp] = useState("");
   const [timer, setTimer] = useState(10);
@@ -18,8 +19,12 @@ const OTPUI = () => {
   }, [timer]);
 
   const handleResendOtp = async () => {
+    toast.loading("Resending OTP...", {
+      position: "top-center",
+      duration: 5000,
+    });
     try {
-      const otpUrl = import.meta.env.VITE_API_URL + "/user/resendOTP";
+      const otpUrl = import.meta.env.VITE_API_URL + "/user/resend-otp";
       const response = fetch(otpUrl, {
         method: "POST",
         headers: {
@@ -35,23 +40,35 @@ const OTPUI = () => {
       if (!response.ok) {
         const error = await response.json();
         console.log(error.message);
-        alert(error.message);
+        toast.success("Error sending OTP", {
+          position: "top-center",
+          duration: 3000,
+        });
         throw new Error(`HTTP error! status: ${response.status}`);
       }
 
       const result = await response.json();
       console.log("OTP sent:", result.message);
-      alert("OTP sent!");
+
+      toast.success("OTP sent successfully!", {
+        position: "top-center",
+        duration: 3000,
+      });
     } catch (error) {
       console.log(error);
-      toast.error("Error sending OTP");
+      toast.error("Error sending OTP", {
+        position: "top-center",
+      });
     }
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    toast.loading("Verifying OTP...", {
+      position: "top-center",
+      duration: 5000,
+    });
     try {
-      const otpUrl = import.meta.env.VITE_API_URL + "/user/verifyOTP";
+      const otpUrl = import.meta.env.VITE_API_URL + "/user/verify-otp";
       const response = await fetch(otpUrl, {
         method: "POST",
         headers: {
@@ -76,11 +93,17 @@ const OTPUI = () => {
         ...loggedInUser,
         username: tempUser.username,
       });
-      alert("OTP verified!");
+      toast.success("OTP verified successfully!", {
+        position: "top-center",
+        duration: 3000,
+      });
       navigate("/");
     } catch (error) {
       console.error("OTP verification failed:", error);
-      alert(error.message);
+      toast.error("Invalid OTP", {
+        position: "top-center",
+        duration: 3000,
+      });
     }
   };
   return (

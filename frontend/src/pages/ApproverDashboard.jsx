@@ -1,17 +1,23 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { FaHistory, FaBell, FaUserAlt, FaSearch } from "react-icons/fa";
 import NewCm from "./NewCm";
 import SentBackTabContent from "./SentBackTabContent";
-import Navbar from "./Navbar";
-
+import Navbar from "../components/Navbar.jsx";
+import { AuthContext } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 const ApproverDashboard = () => {
   const [selectedTab, setSelectedTab] = useState("SENT BACK");
-  
-
+  const { loggedInUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!loggedInUser) {
+      navigate("/");
+    }
+  }, [loggedInUser]);
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
       {/* Navbar */}
-     <Navbar role = "Assistant"/>
+      <Navbar role="assistant" />
 
       {/* Main Content */}
       <div className="flex items-center mt-3 h-auto justify-center flex-grow">
@@ -42,11 +48,7 @@ const ApproverDashboard = () => {
 
           {/* Content */}
           <div className="content p-4">
-            {selectedTab === "NEW" ? (
-              <NewCm />
-            ) : (
-              <SentBackTabContent />
-            )}
+            {selectedTab === "NEW" ? <NewCm /> : <SentBackTabContent />}
           </div>
         </div>
       </div>
