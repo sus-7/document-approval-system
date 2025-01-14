@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
-import {toast,Toaster} from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 const Login = () => {
   const [selectedToggle, setSelectedToggle] = useState("Assistant");
   const [username, setUsername] = useState("");
@@ -13,7 +13,11 @@ const Login = () => {
   useEffect(() => {
     if (loggedInUser) {
       //todo:role based access
-      navigate("/dashboard");
+      if (loggedInUser.role === "Approver") {
+        navigate("/dashboard");
+      } else if (loggedInUser.role === "Senior Assistant") {
+        navigate("/page");
+      }
     }
   }, [loggedInUser]);
   const handleSubmit = async (e) => {
@@ -47,7 +51,6 @@ const Login = () => {
         position: "top-center",
         duration: 2000,
       });
-      navigate("/dashboard");
     } catch (error) {
       console.error("Error during signup:", error);
       toast.error("Login failed! Please try again.", {
@@ -57,14 +60,15 @@ const Login = () => {
     }
   };
 
-  function handle() {
-      navigate("/approval");
-    } 
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100"> 
-      <Toaster/>
-      <button className="absolute top-4 bg-red-600 text-white p-2 rounded-md  right-4" onClick={() => navigate("/adminLogin")}>Admin</button>  
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
+      <Toaster />
+      <button
+        className="absolute top-4 bg-red-600 text-white p-2 rounded-md  right-4"
+        onClick={() => navigate("/adminLogin")}
+      >
+        Admin
+      </button>
       <div className="w-96 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
         <div>
           {/* Toggle Buttons for CM/PA */}
@@ -72,8 +76,7 @@ const Login = () => {
             <button
               className={`px-4 py-2 text-sm font-medium rounded-md ${
                 selectedToggle === "Approver"
-
-                ? "bg-blue-500 text-white"
+                  ? "bg-blue-500 text-white"
                   : "bg-gray-100 text-gray-700"
               }`}
               onClick={() => setSelectedToggle("Approver")}
@@ -141,7 +144,7 @@ const Login = () => {
               </RouterLink>
             </div>
 
-            <button onClick={handle} className="w-full px-4 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 transition duration-200">
+            <button className="w-full px-4 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 transition duration-200">
               Login as {selectedToggle}
             </button>
           </form>

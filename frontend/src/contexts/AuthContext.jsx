@@ -6,6 +6,7 @@ export const AuthProvider = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [tempUser, setTempUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const login = () => {
     setIsAuthenticated(true);
   };
@@ -16,6 +17,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuthStatus = async () => {
     try {
+      setIsLoading(true);
       const authUrl = import.meta.env.VITE_API_URL + "/user/status";
       const response = await fetch(authUrl, {
         method: "GET",
@@ -36,6 +38,8 @@ export const AuthProvider = ({ children }) => {
       setLoggedInUser(result.user);
     } catch (error) {
       console.log("AuthContext service :: checkAuthStatus :: error : ", error);
+    } finally {
+      setIsLoading(false);
     }
   };
   useEffect(() => {

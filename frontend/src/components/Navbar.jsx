@@ -10,7 +10,7 @@ import { AuthContext } from "../contexts/AuthContext";
 const Navbar = ({ role }) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null); // State to control the dropdown
-  const { loggedInUser, setLoggedInUser } = useContext(AuthContext);
+  const { loggedInUser, setLoggedInUser, isLoading } = useContext(AuthContext);
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget); // Open the dropdown
   };
@@ -74,13 +74,15 @@ const Navbar = ({ role }) => {
     <div>
       <div className="navbar w-full h-[8vh] flex items-center justify-between bg-white text-gray-700 px-8 shadow-md">
         {/* Title based on Role */}
-        <h1 className="text-center text-lg font-semibold tracking-wider">
-          {role === "approver"
-            ? "Approver Dashboard"
-            : role === "assistant"
-            ? "Assistant Dashboard"
-            : ""}
-        </h1>
+        {!loggedInUser ? (
+          <h1 className="text-center text-lg font-semibold tracking-wider">
+            Loading...
+          </h1>
+        ) : (
+          <h1 className="text-center text-lg font-semibold tracking-wider">
+            {`${loggedInUser.role}'s Dashboard`}
+          </h1>
+        )}
 
         <div className="flex space-x-6">
           {/* Notifications Button */}
@@ -95,27 +97,16 @@ const Navbar = ({ role }) => {
           </Tooltip>
 
           {/* Profile Dropdown Icon */}
-          {role === "approver" || role === "assistant" ? (
-            <Tooltip title="Profile" arrow>
-              <IconButton
-                className="text-gray-600 hover:text-blue-500"
-                onClick={handleMenuOpen}
-                aria-label="Profile"
-              >
-                <FaUserAlt />
-              </IconButton>
-            </Tooltip>
-          ) : (
-            <Tooltip title="Assistant Dashboard" arrow>
-              <button
-                onClick={navigateHome}
-                className="text-gray-600 text-xl hover:text-blue-500"
-                aria-label="Dashboard"
-              >
-                <DashboardIcon />
-              </button>
-            </Tooltip>
-          )}
+
+          <Tooltip title="Profile" arrow>
+            <IconButton
+              className="text-gray-600 hover:text-blue-500"
+              onClick={handleMenuOpen}
+              aria-label="Profile"
+            >
+              <FaUserAlt />
+            </IconButton>
+          </Tooltip>
 
           {/* Dropdown Menu */}
           <Menu

@@ -1,8 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { FaUserPlus, FaEdit, FaTrashAlt } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
+import { UsersContext } from "../contexts/UsersContext";
+import { AuthContext } from "../contexts/AuthContext";
 import axios from "axios";
 const AddUser = ({ showAddUser, setShowAddUser }) => {
+  const navigate = useNavigate();
+  const { refreshUsers } = useContext(UsersContext);
+  const { loggedInUser } = useContext(AuthContext);
   const [newUser, setNewUser] = useState({
     fullName: "",
     role: "Approver",
@@ -11,82 +17,101 @@ const AddUser = ({ showAddUser, setShowAddUser }) => {
     password: "",
     confirmPassword: "",
   });
-  const [errors, setErrors] = useState({
-    username: "",
-    fullName: "",
-    email: "",
-    mobileNo: "",
-    password: "",
-    confirmPassword: "",
-  });
+  const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [role, setRole] = useState("Assistant");
+  const [email, setEmail] = useState("");
+  const [mobileNo, setMobileNo] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  // useEffect(() => {
+  //   if (!loggedInUser) {
+  //     navigate("/");
+  //   }
+  // }, [loggedInUser]);
   const validateInputs = (user) => {
     let valid = true;
-    const newErrors = {
-      username: "",
-      name: "",
-      email: "",
-      mno: "",
-      password: "",
-      confirmPassword: "",
-    };
+    if (!username.trim()) {
+      toast.error("username is required.", {
+        position: "top-right",
+        duration: 3000,
+      });
+      valid = false;
+    }
+    if (!fullName.trim()) {
+      toast.error("Full Name is required.", {
+        position: "top-right",
+        duration: 3000,
+      });
+      valid = false;
+    }
+    if (!email.trim()) {
+      toast.error("Email is required.", {
+        position: "top-right",
+        duration: 3000,
+      });
+      valid = false;
+    }
+    if (!mobileNo.trim() || !/^\d{10}$/.test(mobileNo)) {
+      toast.error("A valid 10-digit Mobile Number is required.", {
+        position: "top-right",
+        duration: 3000,
+      });
+      valid = false;
+    }
+    if (!password.trim() || password.length < 6) {
+      toast.error("Password must be at least 6 characters long.", {
+        position: "top-right",
+        duration: 3000,
+      });
+      valid = false;
+    }
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match.", {
+        position: "top-right",
+        duration: 3000,
+      });
+      valid = false;
+    }
 
-    if (!user.username.trim()) {
-      newErrors.username = "username is required.";
-      valid = false;
-    }
-    if (!user.fullName.trim()) {
-      newErrors.fullName = "full name is required.";
-      valid = false;
-    }
-    if (!user.email.trim()) {
-      newErrors.email = "Email is required.";
-      valid = false;
-    }
-    if (!user.mobileNo.trim() || !/^\d{10}$/.test(user.mobileNo)) {
-      newErrors.mobileNo = "A valid 10-digit Mobile Number is required.";
-      valid = false;
-    }
-    if (!user.password.trim() || user.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters long.";
-      valid = false;
-    }
-    if (user.password !== user.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match.";
-      valid = false;
-    }
-
-    setErrors(newErrors);
     return valid;
   };
 
   const handleAddUser = async () => {
+    const newUser = {
+      username,
+      fullName,
+      role,
+      email,
+      mobileNo,
+      password,
+      confirmPassword,
+    };
     if (!validateInputs(newUser)) return;
-
-    // const newUserData = { id: Date.now(), ...newUser };
     try {
       delete newUser.confirmPassword;
-      const response = await axios.post(
-        "http://localhost:4000/assistant/create-user",
-        newUser,
-        {
-          withCredentials: true,
-        }
-      );
+      const createUserUrl =
+        import.meta.env.VITE_API_URL + "/assistant/create-user";
+      const response = await axios.post(createUserUrl, newUser, {
+        withCredentials: true,
+      });
+
       if (response.status === 200) {
+        refreshUsers();
         toast.success("User added successfully", {
           position: "top-right",
           duration: 3000,
         });
-        setShowModal(false);
+        setShowAddUser(false);
         setNewUser({
           fullName: "",
-          role: "Approver",
+          role: "Assistant",
           email: "",
           mobileNo: "",
           password: "",
           confirmPassword: "",
         });
-        setErrors({});
       } else {
         toast.error("Error adding user", {
           position: "top-right",
@@ -94,34 +119,15 @@ const AddUser = ({ showAddUser, setShowAddUser }) => {
         });
       }
     } catch (error) {
-      console.log(error.response.data.message);
+      console.log("AddUser service :: handleAddUser :: error : ", error);
       toast.error(error.response.data.message, {
         position: "top-right",
         duration: 3000,
       });
       return;
     }
-    setUsers((prevUsers) => {
-      const updatedUsers = { ...prevUsers };
-      updatedUsers[newUser.role].push(newUserData);
-      return updatedUsers;
-    });
-
-    toast.success("User added successfully", {
-      position: "top-right",
-      duration: 3000,
-    });
-
-    setShowModal(false);
-    setNewUser({
-      fullName: "",
-      role: "Approver",
-      email: "",
-      mobileNo: "",
-      password: "",
-      confirmPassword: "",
-    });
   };
+
   const handleCancelAdd = () => {
     setShowAddUser(false);
     setNewUser({
@@ -145,77 +151,49 @@ const AddUser = ({ showAddUser, setShowAddUser }) => {
             type="text"
             placeholder="Username"
             className="w-full p-2 border rounded mb-4 text-black bg-white"
-            value={newUser.username}
-            onChange={(e) =>
-              setNewUser({ ...newUser, username: e.target.value })
-            }
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
           />
-          {errors.username && (
-            <p className="text-red-500 text-sm mb-4">{errors.username}</p>
-          )}
+
           <input
             type="text"
             placeholder="Full Name"
             className="w-full p-2 border rounded mb-4 text-black bg-white"
-            value={newUser.fullName}
-            onChange={(e) =>
-              setNewUser({ ...newUser, fullName: e.target.value })
-            }
+            value={fullName}
+            onChange={(e) => setFullName(e.target.value)}
           />
-          {errors.fullName && (
-            <p className="text-red-500 text-sm mb-4">{errors.fullName}</p>
-          )}
+
           <input
             type="email"
             placeholder="Email"
             className="w-full p-2 border text-black rounded mb-4 bg-white"
-            value={newUser.email}
-            onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
-          {errors.email && (
-            <p className="text-red-500 text-sm mb-4">{errors.email}</p>
-          )}
           <input
             type="text"
             placeholder="Mobile No"
             className="w-full p-2 border text-black rounded mb-4 bg-white"
-            value={newUser.mobileNo}
-            onChange={(e) =>
-              setNewUser({ ...newUser, mobileNo: e.target.value })
-            }
+            value={mobileNo}
+            onChange={(e) => setMobileNo(e.target.value)}
           />
-          {errors.mobileNo && (
-            <p className="text-red-500 text-sm mb-4">{errors.mobileNo}</p>
-          )}
           <input
             type="password"
             placeholder="Password"
             className="w-full p-2 border text-black rounded mb-4 bg-white"
-            value={newUser.password}
-            onChange={(e) =>
-              setNewUser({ ...newUser, password: e.target.value })
-            }
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
           />
-          {errors.password && (
-            <p className="text-red-500 text-sm mb-4">{errors.password}</p>
-          )}
           <input
             type="password"
             placeholder="Confirm Password"
             className="w-full p-2 border text-black rounded mb-4 bg-white"
-            value={newUser.confirmPassword}
-            onChange={(e) =>
-              setNewUser({ ...newUser, confirmPassword: e.target.value })
-            }
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
           />
-          {errors.confirmPassword && (
-            <p className="text-red-500 text-sm mb-4">
-              {errors.confirmPassword}
-            </p>
-          )}
           <select
-            value={newUser.role}
-            onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+            value={role}
+            onChange={(e) => setRole(e.target.value)}
             className="w-full p-2 border rounded mb-4 text-black bg-white"
           >
             <option value="Approver">Approver</option>
