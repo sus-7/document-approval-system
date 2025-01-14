@@ -19,7 +19,6 @@ import Support from "./pages/Support";
 import AdminDashboard from "./pages/AdminDashboard";
 import ForgotPassOTP from "./pages/ForgotPassOTP";
 import SetNewPassword from "./pages/SetNewPassword";
-import NewCm from "./pages/NewCm";
 
 const App = () => {
   return (
@@ -44,7 +43,6 @@ const App = () => {
         <Route path="/correction" element={<Correction />} />
         <Route path="/approval" element={<ApprovalPage />} />
         <Route path="/adminLogin" element={<AdminLogin />} />
-        <Route path="/newcm" element={<NewCm />} />
         <Route path="/support" element={<Support />} />
       </Routes>
     </AuthProvider>
