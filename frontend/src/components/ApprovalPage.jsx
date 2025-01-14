@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { BsPlus, BsPersonCircle } from "react-icons/bs";
 import { FaSearch } from "react-icons/fa"; // Import FaSearch icon
-import Navbar from "./Navbar";
 
 const ApprovalPage = () => {
   const [selectedTab, setSelectedTab] = useState("APPROVED");

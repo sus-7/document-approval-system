@@ -13,6 +13,7 @@ import ProfileDashboard from "./components/ProfileDashboard";
 import { AuthProvider } from "../src/contexts/AuthContext";
 import ChangePassword from "./components/ChangePassword";
 import ApprovalPage from "./components/ApprovalPage";
+import PrepareLetter from "./components/PrepareLetter";
 const App = () => {
   return (
     <AuthProvider>
@@ -31,6 +32,7 @@ const App = () => {
         <Route path="/profile" element={<ProfileDashboard />} />
         <Route path="/changepassword" element={<ChangePassword/>} />
         <Route path="/approval" element={<ApprovalPage/>} />
+        <Route path="/prepareletter" element={<PrepareLetter />} />
       </Routes>
     </AuthProvider>
   );

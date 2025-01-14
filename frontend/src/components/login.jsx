@@ -41,6 +41,10 @@ const Login = () => {
     }
   };
 
+  function handle() {
+      navigate("/approval");
+    } 
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
       <div className="w-96 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
@@ -50,7 +54,8 @@ const Login = () => {
             <button
               className={`px-4 py-2 text-sm font-medium rounded-md ${
                 selectedToggle === "Approver"
-                  ? "bg-blue-500 text-white"
+
+                ? "bg-blue-500 text-white"
                   : "bg-gray-100 text-gray-700"
               }`}
               onClick={() => setSelectedToggle("Approver")}
@@ -118,7 +123,7 @@ const Login = () => {
               </RouterLink>
             </div>
 
-            <button className="w-full px-4 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 transition duration-200">
+            <button onClick={handle} className="w-full px-4 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 transition duration-200">
               Login as {selectedToggle}
             </button>
           </form>
