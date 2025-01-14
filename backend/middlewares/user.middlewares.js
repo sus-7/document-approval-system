@@ -44,10 +44,9 @@ const verifyToken = async (req, res, next) => {
     try {
         const token = req.cookies.token;
         if (!token) {
-            return res.status(401).json({
-                status: false,
-                message: "No token found",
-            });
+            const error = new Error("User not logged in");
+            error.statusCode = 401;
+            return next(error);
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -55,10 +54,8 @@ const verifyToken = async (req, res, next) => {
         next();
     } catch (error) {
         console.log("Auth middleware :: error : ", error);
-        return res.status(500).json({
-            status: false,
-            message: "Server Error",
-        });
+        error.statusCode = 500;
+        return next(error);
     }
 };
 

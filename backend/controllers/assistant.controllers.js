@@ -56,7 +56,7 @@ const createAssistant = async (req, res, next) => {
                 process.env.AUTH_EMAIL,
                 email,
                 "Your account credentials",
-                `<p>Your account credentials for document approval system</p><p><b>Username:</b> ${username}</p><p><b>Password:</b> ${password}</p>`
+                `<b>You are now an assistant colleague for ${seniorAssistant.fullName}</b><p>Your account credentials for document approval system</p><p><b>Username:</b> ${username}</p><p><b>Password:</b> ${password}</p>`
             );
             await transporter.sendMail(mailOptions);
             //save new user in senior assistant's assistants list
@@ -147,7 +147,7 @@ const createApprover = async (req, res, next) => {
             process.env.AUTH_EMAIL,
             email,
             "Your account credentials",
-            `<p>Your account credentials for document approval system</p><p><b>Username:</b> ${username}</p><p><b>Password:</b> ${password}</p>`
+            `<b>You are now an approver for ${seniorAssistant.fullName}</b><p>Your account credentials for document approval system</p><p><b>Username:</b> ${username}</p><p><b>Password:</b> ${password}</p>`
         );
         await transporter.sendMail(mailOptions);
         return res.status(200).json({
