@@ -20,7 +20,8 @@ import Support from "./pages/Support";
 import AdminDashboard from "./pages/AdminDashboard";
 import ForgotPassOTP from "./pages/ForgotPassOTP";
 import SetNewPassword from "./pages/SetNewPassword";
-
+import LoginRestrictedRoute from "./components/LoginRestrictedRoute";
+import SARestrictedRoute from "./components/SARestrictedRoute";
 const App = () => {
   return (
     <AuthProvider>
@@ -32,8 +33,22 @@ const App = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/forgot-password-otp" element={<ForgotPassOTP />} />
           <Route path="/set-new-pass" element={<SetNewPassword />} />
-          <Route path="/dashboard" element={<ApproverDashboard />} />
-          <Route path="/users/manage" element={<ManageUsers />} />
+          <Route
+            path="/dashboard"
+            element={
+              <LoginRestrictedRoute>
+                <ApproverDashboard />
+              </LoginRestrictedRoute>
+            }
+          />
+          <Route
+            path="/users/manage"
+            element={
+              <SARestrictedRoute>
+                <ManageUsers />
+              </SARestrictedRoute>
+            }
+          />
           <Route path="/page" element={<ApprovalPage />} />
           <Route path="/remark-pdf" element={<RemarkUI />} />
           <Route path="/notifications" element={<Notifications />} />

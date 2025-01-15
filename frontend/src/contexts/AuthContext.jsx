@@ -1,23 +1,26 @@
 import React, { createContext, useEffect, useState } from "react";
-
+import { useNavigate } from "react-router-dom";
 export const AuthContext = createContext();
-
+export const useAuth = () => React.useContext(AuthContext);
 export const AuthProvider = ({ children }) => {
+  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [loggedInUser, setLoggedInUser] = useState(null);
   const [tempUser, setTempUser] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const login = () => {
-    setIsAuthenticated(true);
-  };
+  const [loading, setLoading] = useState(true);
+  // const login = () => {
+  //   setIsAuthenticated(true);
+  // };
 
   const logout = () => {
+    setLoggedInUser(null);
     setIsAuthenticated(false);
+    navigate("/");
   };
 
   const checkAuthStatus = async () => {
     try {
-      setIsLoading(true);
+      setLoading(true);
       const authUrl = import.meta.env.VITE_API_URL + "/user/status";
       const response = await fetch(authUrl, {
         method: "GET",
@@ -38,8 +41,10 @@ export const AuthProvider = ({ children }) => {
       setLoggedInUser(result.user);
     } catch (error) {
       console.log("AuthContext service :: checkAuthStatus :: error : ", error);
+      setLoggedInUser(null);
     } finally {
-      setIsLoading(false);
+      setLoading(false);
+      setLoading(true);
     }
   };
   useEffect(() => {
@@ -50,7 +55,6 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider
       value={{
         isAuthenticated,
-        login,
         logout,
         loggedInUser,
         setLoggedInUser,

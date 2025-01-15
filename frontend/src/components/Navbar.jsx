@@ -6,11 +6,11 @@ import { useNavigate } from "react-router-dom";
 import { IconButton, Menu, MenuItem } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import { Tooltip } from "@mui/material";
-import { AuthContext } from "../contexts/AuthContext";
+import { useAuth } from "../contexts/AuthContext";
 const Navbar = ({ role }) => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null); // State to control the dropdown
-  const { loggedInUser, setLoggedInUser, isLoading } = useContext(AuthContext);
+  const { loggedInUser, setLoggedInUser, loading, logout } = useAuth();
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget); // Open the dropdown
   };
@@ -60,8 +60,7 @@ const Navbar = ({ role }) => {
         position: "top-center",
         duration: 2000,
       });
-      setLoggedInUser(null);
-      navigate("/");
+      logout();
     } catch (error) {
       console.error("Error during logout:", error);
       toast.error(error.message, {

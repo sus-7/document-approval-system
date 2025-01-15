@@ -1,14 +1,15 @@
 import React, { useState, useContext, useEffect } from "react";
 import { FaUserPlus, FaEdit, FaTrashAlt } from "react-icons/fa";
 import { Toaster, toast } from "react-hot-toast";
-// import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import AddUser from "../components/AddUser";
 import { UsersContext } from "../contexts/UsersContext";
-// import { AuthContext } from "../contexts/AuthContext";
+import { AuthContext } from "../contexts/AuthContext";
 const ManageUsers = () => {
   const { approver, assistants } = useContext(UsersContext);
-  // const { loggedInUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+  const { loggedInUser } = useContext(AuthContext);
   const [users, setUsers] = useState({ Approver: [], Assistant: [] });
   const [showAddUser, setShowAddUser] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
@@ -19,11 +20,11 @@ const ManageUsers = () => {
     setShowEditModal(false);
   };
 
-  // useEffect(() => {
-  //   if (!loggedInUser) {
-  //     navigate("/");
-  //   }
-  // }, [loggedInUser]);
+  useEffect(() => {
+    if (!loggedInUser) {
+      navigate("/");
+    }
+  }, [loggedInUser]);
   const handleDeleteUser = (id, role) => {};
 
   const handleCancelEdit = () => {

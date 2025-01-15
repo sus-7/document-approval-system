@@ -47,6 +47,8 @@ const Login = () => {
       const result = await response.json();
       console.log("Signin successful:", result);
       setLoggedInUser(result.user);
+      setUsername("");
+      setPassword("");
       toast.success("Login successful!", {
         position: "top-center",
         duration: 2000,
