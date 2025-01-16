@@ -135,14 +135,16 @@ const signOut = async (req, res, next) => {
     }
 };
 
-const checkAuthStatus = async (req, res) => {
+const checkAuthStatus = async (req, res, next) => {
     try {
-        const user = await User.findOne({ username: req.username });
+        const user = await User.findOne({
+            username: req.username,
+            isVerified: true,
+        });
         if (!user) {
-            return res.status(404).json({
-                status: false,
-                message: "User not found",
-            });
+            const error = new Error("User not found");
+            error.statusCode = 404;
+            return next(error);
         }
 
         return res.status(200).json({
@@ -156,10 +158,8 @@ const checkAuthStatus = async (req, res) => {
         });
     } catch (error) {
         console.log("User controller :: checkAuthStatus :: error : ", error);
-        return res.status(500).json({
-            status: false,
-            message: "Server Error",
-        });
+        error.statusCode = 500;
+        return next(error);
     }
 };
 
