@@ -2,7 +2,6 @@ import React, { useState, useContext, useEffect } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import { toast, Toaster } from "react-hot-toast";
-
 const Login = () => {
   const [selectedToggle, setSelectedToggle] = useState("Assistant");
   const [username, setUsername] = useState("");
@@ -13,6 +12,7 @@ const Login = () => {
 
   useEffect(() => {
     if (loggedInUser) {
+      //todo:role based access
       if (loggedInUser.role === "Approver") {
         navigate("/dashboard");
       } else if (loggedInUser.role === "Senior Assistant") {
@@ -69,13 +69,8 @@ const Login = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
       <Toaster />
-      {loading && (
-        <div className="absolute inset-0 bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
-          <div className="spinner-border text-white w-16 h-16 border-4 border-t-4 rounded-full"></div>
-        </div>
-      )}
       <button
-        className="absolute top-4 right-4 bg-red-600 text-white p-2 rounded-md"
+        className="absolute top-4 bg-red-600 text-white p-2 rounded-md  right-4"
         onClick={() => navigate("/adminLogin")}
       >
         Admin
