@@ -146,11 +146,7 @@ const ApprovalPage = () => {
           </div>
         </div>
 
-        <div className="flex justify-end mb-4">
-          <IconButton color="primary" onClick={() => setNewDocDialogOpen(true)}>
-            <AddIcon />
-          </IconButton>
-        </div>
+      
 
         <div className="flex flex-col md:flex-row gap-2">
           <div className="bg-white p-4 w-full md:w-2/3 rounded-lg border border-gray-200">
@@ -258,6 +254,7 @@ const ApprovalPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+   
     </div>
   );
 };

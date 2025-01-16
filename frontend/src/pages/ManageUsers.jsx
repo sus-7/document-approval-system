@@ -1,11 +1,37 @@
 import React, { useState } from "react";
-import { FaUserPlus, FaEdit, FaTrashAlt } from "react-icons/fa";
+import { FaUserPlus, FaEdit, FaTrashAlt, FaKey, FaEye, FaEyeSlash } from "react-icons/fa"; // Import FaKey, FaEye, and FaEyeSlash icons
 import { Toaster, toast } from "react-hot-toast";
+
+// Reusable Password Input Component
+const PasswordInput = ({ placeholder, value, onChange, error }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  return (
+    <div className="relative mb-4">
+      <input
+        type={showPassword ? "text" : "password"}
+        placeholder={placeholder}
+        className="w-full p-2 border rounded text-black bg-white"
+        value={value}
+        onChange={onChange}
+      />
+      <button
+        type="button"
+        onClick={() => setShowPassword(!showPassword)}
+        className="absolute right-3 top-3 text-gray-500"
+      >
+        {showPassword ? <FaEyeSlash /> : <FaEye />}
+      </button>
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+    </div>
+  );
+};
 
 const ManageUsers = () => {
   const [users, setUsers] = useState({ Approver: [], Assistant: [] });
   const [showModal, setShowModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
   const [newUser, setNewUser] = useState({
     name: "",
     role: "Approver",
@@ -15,6 +41,12 @@ const ManageUsers = () => {
     confirmPassword: "",
   });
   const [userToEdit, setUserToEdit] = useState(null);
+  const [userToChangePassword, setUserToChangePassword] = useState(null);
+  const [passwords, setPasswords] = useState({
+    currentPassword: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [errors, setErrors] = useState({
     name: "",
     email: "",
@@ -103,6 +135,63 @@ const ManageUsers = () => {
     setErrors({});
   };
 
+  const handleChangePassword = (user) => {
+    setUserToChangePassword(user);
+    setShowChangePasswordModal(true);
+  };
+
+  const validatePasswordChange = () => {
+    const newErrors = {};
+    
+    if (!passwords.currentPassword) {
+      newErrors.currentPassword = "Current password is required";
+    }
+    
+    if (!passwords.password || passwords.password.length < 6) {
+      newErrors.password = "New password must be at least 6 characters";
+    }
+    
+    if (passwords.password !== passwords.confirmPassword) {
+      newErrors.confirmPassword = "Passwords do not match";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSavePassword = () => {
+    if (!validatePasswordChange()) return;
+
+    // Verify current password matches (in real app, this would be an API call)
+    if (passwords.currentPassword !== userToChangePassword.password) {
+      setErrors({ currentPassword: "Current password is incorrect" });
+      return;
+    }
+
+    const updatedUsers = users[userToChangePassword.role].map((user) =>
+      user.id === userToChangePassword.id 
+        ? { ...user, password: passwords.password }
+        : user
+    );
+
+    setUsers((prevUsers) => ({
+      ...prevUsers,
+      [userToChangePassword.role]: updatedUsers
+    }));
+
+    toast.success("Password changed successfully", { position: "top-right", duration: 3000 });
+
+    setShowChangePasswordModal(false);
+    setPasswords({ currentPassword: "", password: "", confirmPassword: "" });
+    setErrors({});
+  };
+
+  const handleCancelChangePassword = () => {
+    setShowChangePasswordModal(false);
+    setPasswords({ currentPassword: "", password: "", confirmPassword: "" });
+    setErrors({});
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
       <Toaster />
@@ -156,6 +245,13 @@ const ManageUsers = () => {
                     >
                       <FaTrashAlt />
                     </button>
+                    <button
+                      title="Change Password"
+                      onClick={() => handleChangePassword(user)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      <FaKey />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -196,6 +292,13 @@ const ManageUsers = () => {
                     >
                       <FaTrashAlt />
                     </button>
+                    <button
+                      title="Change Password"
+                      onClick={() => handleChangePassword(user)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      <FaKey />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -233,22 +336,18 @@ const ManageUsers = () => {
               onChange={(e) => setNewUser({ ...newUser, mno: e.target.value })}
             />
             {errors.mno && <p className="text-red-500 text-sm mb-4">{errors.mno}</p>}
-            <input
-              type="password"
+            <PasswordInput
               placeholder="Password"
-              className="w-full p-2 border text-black rounded mb-4 bg-white"
               value={newUser.password}
               onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+              error={errors.password}
             />
-            {errors.password && <p className="text-red-500 text-sm mb-4">{errors.password}</p>}
-            <input
-              type="password"
+            <PasswordInput
               placeholder="Confirm Password"
-              className="w-full p-2 border text-black rounded mb-4 bg-white"
               value={newUser.confirmPassword}
               onChange={(e) => setNewUser({ ...newUser, confirmPassword: e.target.value })}
+              error={errors.confirmPassword}
             />
-            {errors.confirmPassword && <p className="text-red-500 text-sm mb-4">{errors.confirmPassword}</p>}
             <select
               value={newUser.role}
               onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
@@ -312,6 +411,41 @@ const ManageUsers = () => {
               </button>
               <button className="bg-blue-600 text-white p-2 rounded" onClick={handleEditUser}>
                 Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {showChangePasswordModal && userToChangePassword && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-lg w-96">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Change Password</h2>
+            <PasswordInput
+              placeholder="Current Password"
+              value={passwords.currentPassword}
+              onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
+              error={errors.currentPassword}
+            />
+            <PasswordInput
+              placeholder="New Password"
+              value={passwords.password}
+              onChange={(e) => setPasswords({ ...passwords, password: e.target.value })}
+              error={errors.password}
+            />
+            <PasswordInput
+              placeholder="Confirm New Password"
+              value={passwords.confirmPassword}
+              onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+              error={errors.confirmPassword}
+            />
+            <div className="flex justify-end gap-4">
+              <button className="text-gray-500 hover:text-gray-700" onClick={handleCancelChangePassword}>
+                Cancel
+              </button>
+              <button className="bg-blue-600 text-white p-2 rounded" onClick={handleSavePassword}>
+                Save
               </button>
             </div>
           </div>
