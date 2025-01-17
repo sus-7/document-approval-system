@@ -34,6 +34,10 @@ const Navbar = () => {
     handleMenuClose();
   };
 
+  const navigateManageUsers = () => {
+    navigate("/users/manage");
+    handleMenuClose();
+  };
   const navigateHome = () => {
     navigate("/dashboard");
     handleMenuClose();
@@ -121,6 +125,9 @@ const Navbar = () => {
           >
             <MenuItem onClick={navigateProfile}>View Profile</MenuItem>
             <MenuItem onClick={navigateHistory}>History</MenuItem>
+            {loggedInUser.role == "Senior Assistant" ? (
+              <MenuItem onClick={navigateManageUsers}>Manage Users</MenuItem>
+            ) : null}
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
           </Menu>
         </div>

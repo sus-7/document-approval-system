@@ -7,7 +7,7 @@ import AddUser from "../components/AddUser";
 import { UsersContext } from "../contexts/UsersContext";
 import { AuthContext } from "../contexts/AuthContext";
 const ManageUsers = () => {
-  const { approver, assistants } = useContext(UsersContext);
+  const { approver, assistants, refreshUsers } = useContext(UsersContext);
   const navigate = useNavigate();
   const { loggedInUser } = useContext(AuthContext);
   const [users, setUsers] = useState({ Approver: [], Assistant: [] });
@@ -23,6 +23,8 @@ const ManageUsers = () => {
   useEffect(() => {
     if (!loggedInUser) {
       navigate("/");
+    } else {
+      refreshUsers();
     }
   }, [loggedInUser]);
   const handleDeleteUser = (id, role) => {};
