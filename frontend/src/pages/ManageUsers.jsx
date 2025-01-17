@@ -1,34 +1,189 @@
 import React, { useState, useContext, useEffect } from "react";
-import { FaUserPlus, FaEdit, FaTrashAlt } from "react-icons/fa";
+import { FaUserPlus, FaEdit, FaTrashAlt, FaKey, FaEye, FaEyeSlash } from "react-icons/fa";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import AddUser from "../components/AddUser";
 import { UsersContext } from "../contexts/UsersContext";
 import { AuthContext } from "../contexts/AuthContext";
+
+// Reusable Password Input Component
+const PasswordInput = ({ placeholder, value, onChange, error }) => {
+  const [showPassword, setShowPassword] = useState(false);
+
+  return (
+    <div className="relative mb-4">
+      <input
+        type={showPassword ? "text" : "password"}
+        placeholder={placeholder}
+        className="w-full p-2 border rounded text-black bg-white"
+        value={value}
+        onChange={onChange}
+      />
+      <button
+        type="button"
+        onClick={() => setShowPassword(!showPassword)}
+        className="absolute right-3 top-3 text-gray-500"
+      >
+        {showPassword ? <FaEyeSlash /> : <FaEye />}
+      </button>
+      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
+    </div>
+  );
+};
+
 const ManageUsers = () => {
-  const { approver, assistants } = useContext(UsersContext);
-  const navigate = useNavigate();
+  const { approver, assistants, setUsers } = useContext(UsersContext);
   const { loggedInUser } = useContext(AuthContext);
-  const [users, setUsers] = useState({ Approver: [], Assistant: [] });
+  const [users, setLocalUsers] = useState({ Approver: [], Assistant: [] });
   const [showAddUser, setShowAddUser] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
+  const [newUser, setNewUser] = useState({
+    name: "",
+    role: "Approver",
+    email: "",
+    mno: "",
+    password: "",
+    confirmPassword: "",
+  });
   const [userToEdit, setUserToEdit] = useState(null);
-
-  const handleEditUser = () => {
-    if (!validateInputs(userToEdit)) return;
-    setShowEditModal(false);
-  };
+  const [userToChangePassword, setUserToChangePassword] = useState(null);
+  const [passwords, setPasswords] = useState({
+    currentPassword: "",
+    password: "",
+    confirmPassword: "",
+  });
 
   useEffect(() => {
-    if (!loggedInUser) {
-      navigate("/");
+    // Fetch users on component load
+    const fetchUsers = async () => {
+      try {
+        const response = await axios.get("http://localhost:3000/user");
+        setLocalUsers(response.data);
+        setUsers(response.data);
+      } catch (error) {
+        toast.error("Failed to load users", { position: "top-right", duration: 3000 });
+      }
+    };
+
+    fetchUsers();
+  }, [setUsers]);
+
+  const handleAddUser = async () => {
+    const { name, email, mno, password, confirmPassword, role } = newUser;
+
+    // Validate inputs
+    if (!name || !email || !mno || !password || !confirmPassword) {
+      toast.error("All fields are required", { position: "top-right", duration: 3000 });
+      return;
     }
-  }, [loggedInUser]);
-  const handleDeleteUser = (id, role) => {};
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      toast.error("Invalid email format", { position: "top-right", duration: 3000 });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters", { position: "top-right", duration: 3000 });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match", { position: "top-right", duration: 3000 });
+      return;
+    }
+
+    try {
+      const response = await axios.post("http://localhost:3000/api/user/signup", newUser);
+      setLocalUsers((prevUsers) => ({
+        ...prevUsers,
+        [role]: [...prevUsers[role], response.data],
+      }));
+      toast.success("User added successfully", { position: "top-right", duration: 3000 });
+      setShowAddUser(false);
+    } catch (error) {
+      console.error("Failed to add user:", error.response || error.message);
+      toast.error("Failed to add user", { position: "top-right", duration: 3000 });
+    }
+  };
+
+  const handleEditUser = async () => {
+    try {
+      await axios.put(`http://localhost:3000/user/${userToEdit.id}`, userToEdit);
+      setLocalUsers((prevUsers) => {
+        const updatedUsers = prevUsers[userToEdit.role].map((user) =>
+          user.id === userToEdit.id ? userToEdit : user
+        );
+        return { ...prevUsers, [userToEdit.role]: updatedUsers };
+      });
+      toast.success("User updated successfully", { position: "top-right", duration: 3000 });
+      setShowEditModal(false);
+    } catch (error) {
+      toast.error("Failed to update user", { position: "top-right", duration: 3000 });
+    }
+  };
+
+  const handleDeleteUser = async (id, role) => {
+    try {
+      await axios.delete(`http://localhost:3000/user/${id}`);
+      setLocalUsers((prevUsers) => ({
+        ...prevUsers,
+        [role]: prevUsers[role].filter((user) => user.id !== id),
+      }));
+      toast.success("User deleted successfully", { position: "top-right", duration: 3000 });
+    } catch (error) {
+      toast.error("Failed to delete user", { position: "top-right", duration: 3000 });
+    }
+  };
+
+  const handleSavePassword = async () => {
+    const { currentPassword, password, confirmPassword } = passwords;
+
+    if (!currentPassword || !password || !confirmPassword) {
+      toast.error("All fields are required", { position: "top-right", duration: 3000 });
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters", { position: "top-right", duration: 3000 });
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match", { position: "top-right", duration: 3000 });
+      return;
+    }
+
+    try {
+      await axios.patch(`http://localhost:3000/user/${userToChangePassword.id}/password`, {
+        currentPassword,
+        newPassword: password,
+      });
+      toast.success("Password changed successfully", { position: "top-right", duration: 3000 });
+      setShowChangePasswordModal(false);
+    } catch (error) {
+      toast.error("Failed to change password", { position: "top-right", duration: 3000 });
+    }
+  };
+
+  const handleCancelAdd = () => {
+    setShowAddUser(false);
+    setNewUser({ name: "", role: "Approver", email: "", mno: "", password: "", confirmPassword: "" });
+  };
 
   const handleCancelEdit = () => {
     setShowEditModal(false);
+  };
+
+  const handleCancelChangePassword = () => {
+    setShowChangePasswordModal(false);
+    setPasswords({ currentPassword: "", password: "", confirmPassword: "" });
+  };
+
+  const handleChangePassword = (user) => {
+    setUserToChangePassword(user);
+    setShowChangePasswordModal(true);
   };
 
   return (
@@ -87,6 +242,13 @@ const ManageUsers = () => {
                   >
                     <FaTrashAlt />
                   </button>
+                  <button
+                    title="Change Password"
+                    onClick={() => handleChangePassword(approver)}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    <FaKey />
+                  </button>
                 </div>
               </div>
             </div>
@@ -130,6 +292,13 @@ const ManageUsers = () => {
                     >
                       <FaTrashAlt />
                     </button>
+                    <button
+                      title="Change Password"
+                      onClick={() => handleChangePassword(user)}
+                      className="text-blue-600 hover:text-blue-800"
+                    >
+                      <FaKey />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -139,7 +308,60 @@ const ManageUsers = () => {
       </div>
 
       {/* Add Modal */}
-      <AddUser showAddUser={showAddUser} setShowAddUser={setShowAddUser} />
+      {showAddUser && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-lg w-96">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New User</h2>
+            <input
+              type="text"
+              placeholder="Name"
+              className="w-full p-2 border rounded mb-4 text-black bg-white"
+              value={newUser.name}
+              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+            />
+            <input
+              type="email"
+              placeholder="Email"
+              className="w-full p-2 border text-black rounded mb-4 bg-white"
+              value={newUser.email}
+              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="Mobile No"
+              className="w-full p-2 border text-black rounded mb-4 bg-white"
+              value={newUser.mno}
+              onChange={(e) => setNewUser({ ...newUser, mno: e.target.value })}
+            />
+            <PasswordInput
+              placeholder="Password"
+              value={newUser.password}
+              onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+            />
+            <PasswordInput
+              placeholder="Confirm Password"
+              value={newUser.confirmPassword}
+              onChange={(e) => setNewUser({ ...newUser, confirmPassword: e.target.value })}
+            />
+            <select
+              value={newUser.role}
+              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+              className="w-full p-2 border rounded mb-4 text-black bg-white"
+            >
+              <option value="Approver">Approver</option>
+              <option value="Assistant">Assistant</option>
+            </select>
+            <div className="flex justify-end gap-4">
+              <button className="text-gray-500 hover:text-gray-700" onClick={handleCancelAdd}>
+                Cancel
+              </button>
+              <button className="bg-blue-600 text-white p-2 rounded" onClick={handleAddUser}>
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Edit Modal */}
       {showEditModal && userToEdit && (
@@ -152,7 +374,7 @@ const ManageUsers = () => {
               type="text"
               placeholder="Name"
               className="w-full p-2 border rounded mb-4 text-black bg-white"
-              value={userToEdit.name}
+              value={userToEdit.fullName}
               onChange={(e) =>
                 setUserToEdit({ ...userToEdit, fullName: e.target.value })
               }
@@ -199,6 +421,38 @@ const ManageUsers = () => {
                 onClick={handleEditUser}
               >
                 Update
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change Password Modal */}
+      {showChangePasswordModal && userToChangePassword && (
+        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
+          <div className="bg-white p-8 rounded-lg w-96">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4">Change Password</h2>
+            <PasswordInput
+              placeholder="Current Password"
+              value={passwords.currentPassword}
+              onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
+            />
+            <PasswordInput
+              placeholder="New Password"
+              value={passwords.password}
+              onChange={(e) => setPasswords({ ...passwords, password: e.target.value })}
+            />
+            <PasswordInput
+              placeholder="Confirm New Password"
+              value={passwords.confirmPassword}
+              onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+            />
+            <div className="flex justify-end gap-4">
+              <button className="text-gray-500 hover:text-gray-700" onClick={handleCancelChangePassword}>
+                Cancel
+              </button>
+              <button className="bg-blue-600 text-white p-2 rounded" onClick={handleSavePassword}>
+                Save
               </button>
             </div>
           </div>
