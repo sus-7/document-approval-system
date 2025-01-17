@@ -14,9 +14,11 @@ const Login = () => {
     if (loggedInUser) {
       //todo:role based access
       if (loggedInUser.role === "Approver") {
-        navigate("/dashboard");
+        navigate("/approver/dashboard");
       } else if (loggedInUser.role === "Senior Assistant") {
-        navigate("/page");
+        navigate("/assistant/dashboard");
+      } else if (loggedInUser.role === "Admin") {
+        navigate("/admin/dashboard");
       }
     }
   }, [loggedInUser]);
@@ -40,8 +42,9 @@ const Login = () => {
       });
 
       if (!response.ok) {
-        console.log(await response.json());
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const error = await response.json();
+        console.log(error);
+        throw new Error(error.message);
       }
 
       const result = await response.json();
@@ -55,7 +58,7 @@ const Login = () => {
       });
     } catch (error) {
       console.error("Error during signup:", error);
-      toast.error("Login failed! Please try again.", {
+      toast.error(error.message, {
         position: "top-center",
         duration: 2000,
       });
