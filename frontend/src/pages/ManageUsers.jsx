@@ -1,59 +1,24 @@
 import React, { useState, useContext, useEffect } from "react";
-import { FaUserPlus, FaEdit, FaTrashAlt, FaKey, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FaUserPlus, FaEdit, FaTrashAlt } from "react-icons/fa";
 import { Toaster, toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import AddUser from "../components/AddUser";
 import { UsersContext } from "../contexts/UsersContext";
 import { AuthContext } from "../contexts/AuthContext";
-
-// Reusable Password Input Component
-const PasswordInput = ({ placeholder, value, onChange, error }) => {
-  const [showPassword, setShowPassword] = useState(false);
-
-  return (
-    <div className="relative mb-4">
-      <input
-        type={showPassword ? "text" : "password"}
-        placeholder={placeholder}
-        className="w-full p-2 border rounded text-black bg-white"
-        value={value}
-        onChange={onChange}
-      />
-      <button
-        type="button"
-        onClick={() => setShowPassword(!showPassword)}
-        className="absolute right-3 top-3 text-gray-500"
-      >
-        {showPassword ? <FaEyeSlash /> : <FaEye />}
-      </button>
-      {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
-    </div>
-  );
-};
-
 const ManageUsers = () => {
   const { approver, assistants, refreshUsers } = useContext(UsersContext);
   const navigate = useNavigate();
   const { loggedInUser } = useContext(AuthContext);
-  const [users, setLocalUsers] = useState({ Approver: [], Assistant: [] });
+  const [users, setUsers] = useState({ Approver: [], Assistant: [] });
   const [showAddUser, setShowAddUser] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const [newUser, setNewUser] = useState({
-    name: "",
-    role: "Approver",
-    email: "",
-    mno: "",
-    password: "",
-    confirmPassword: "",
-  });
   const [userToEdit, setUserToEdit] = useState(null);
-  const [userToChangePassword, setUserToChangePassword] = useState(null);
-  const [passwords, setPasswords] = useState({
-    currentPassword: "",
-    password: "",
-    confirmPassword: "",
-  });
+
+  const handleEditUser = () => {
+    if (!validateInputs(userToEdit)) return;
+    setShowEditModal(false);
+  };
 
   useEffect(() => {
     if (!loggedInUser) {
@@ -66,16 +31,6 @@ const ManageUsers = () => {
 
   const handleCancelEdit = () => {
     setShowEditModal(false);
-  };
-
-  const handleCancelChangePassword = () => {
-    setShowChangePasswordModal(false);
-    setPasswords({ currentPassword: "", password: "", confirmPassword: "" });
-  };
-
-  const handleChangePassword = (user) => {
-    setUserToChangePassword(user);
-    setShowChangePasswordModal(true);
   };
 
   return (
@@ -134,13 +89,6 @@ const ManageUsers = () => {
                   >
                     <FaTrashAlt />
                   </button>
-                  <button
-                    title="Change Password"
-                    onClick={() => handleChangePassword(approver)}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    <FaKey />
-                  </button>
                 </div>
               </div>
             </div>
@@ -184,13 +132,6 @@ const ManageUsers = () => {
                     >
                       <FaTrashAlt />
                     </button>
-                    <button
-                      title="Change Password"
-                      onClick={() => handleChangePassword(user)}
-                      className="text-blue-600 hover:text-blue-800"
-                    >
-                      <FaKey />
-                    </button>
                   </div>
                 </div>
               ))}
@@ -200,60 +141,7 @@ const ManageUsers = () => {
       </div>
 
       {/* Add Modal */}
-      {showAddUser && (
-        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded-lg w-96">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Add New User</h2>
-            <input
-              type="text"
-              placeholder="Name"
-              className="w-full p-2 border rounded mb-4 text-black bg-white"
-              value={newUser.name}
-              onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
-            />
-            <input
-              type="email"
-              placeholder="Email"
-              className="w-full p-2 border text-black rounded mb-4 bg-white"
-              value={newUser.email}
-              onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="Mobile No"
-              className="w-full p-2 border text-black rounded mb-4 bg-white"
-              value={newUser.mno}
-              onChange={(e) => setNewUser({ ...newUser, mno: e.target.value })}
-            />
-            <PasswordInput
-              placeholder="Password"
-              value={newUser.password}
-              onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
-            />
-            <PasswordInput
-              placeholder="Confirm Password"
-              value={newUser.confirmPassword}
-              onChange={(e) => setNewUser({ ...newUser, confirmPassword: e.target.value })}
-            />
-            <select
-              value={newUser.role}
-              onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
-              className="w-full p-2 border rounded mb-4 text-black bg-white"
-            >
-              <option value="Approver">Approver</option>
-              <option value="Assistant">Assistant</option>
-            </select>
-            <div className="flex justify-end gap-4">
-              <button className="text-gray-500 hover:text-gray-700" onClick={handleCancelAdd}>
-                Cancel
-              </button>
-              <button className="bg-blue-600 text-white p-2 rounded" onClick={handleAddUser}>
-                Add
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <AddUser showAddUser={showAddUser} setShowAddUser={setShowAddUser} />
 
       {/* Edit Modal */}
       {showEditModal && userToEdit && (
@@ -266,7 +154,7 @@ const ManageUsers = () => {
               type="text"
               placeholder="Name"
               className="w-full p-2 border rounded mb-4 text-black bg-white"
-              value={userToEdit.fullName}
+              value={userToEdit.name}
               onChange={(e) =>
                 setUserToEdit({ ...userToEdit, fullName: e.target.value })
               }
@@ -313,38 +201,6 @@ const ManageUsers = () => {
                 onClick={handleEditUser}
               >
                 Update
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Change Password Modal */}
-      {showChangePasswordModal && userToChangePassword && (
-        <div className="fixed inset-0 flex justify-center items-center bg-black bg-opacity-50">
-          <div className="bg-white p-8 rounded-lg w-96">
-            <h2 className="text-xl font-semibold text-gray-800 mb-4">Change Password</h2>
-            <PasswordInput
-              placeholder="Current Password"
-              value={passwords.currentPassword}
-              onChange={(e) => setPasswords({ ...passwords, currentPassword: e.target.value })}
-            />
-            <PasswordInput
-              placeholder="New Password"
-              value={passwords.password}
-              onChange={(e) => setPasswords({ ...passwords, password: e.target.value })}
-            />
-            <PasswordInput
-              placeholder="Confirm New Password"
-              value={passwords.confirmPassword}
-              onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
-            />
-            <div className="flex justify-end gap-4">
-              <button className="text-gray-500 hover:text-gray-700" onClick={handleCancelChangePassword}>
-                Cancel
-              </button>
-              <button className="bg-blue-600 text-white p-2 rounded" onClick={handleSavePassword}>
-                Save
               </button>
             </div>
           </div>
