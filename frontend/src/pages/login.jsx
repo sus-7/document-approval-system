@@ -14,9 +14,11 @@ const Login = () => {
     if (loggedInUser) {
       //todo:role based access
       if (loggedInUser.role === "Approver") {
-        navigate("/dashboard");
+        navigate("/approver/dashboard");
       } else if (loggedInUser.role === "Senior Assistant") {
-        navigate("/page");
+        navigate("/assistant/dashboard");
+      } else if (loggedInUser.role === "Admin") {
+        navigate("/admin/dashboard");
       }
     }
   }, [loggedInUser, navigate]);
@@ -45,7 +47,9 @@ const Login = () => {
       await new Promise((resolve) => setTimeout(resolve, remainingTime));
 
       if (!response.ok) {
-        throw new Error("Login failed! Please try again.");
+        const error = await response.json();
+        console.log(error);
+        throw new Error(error.message);
       }
 
       const result = await response.json();
@@ -57,7 +61,8 @@ const Login = () => {
         duration: 2000,
       });
     } catch (error) {
-      toast.error(error.message || "Login failed! Please try again.", {
+      console.error("Error during signup:", error);
+      toast.error(error.message, {
         position: "top-center",
         duration: 2000,
       });

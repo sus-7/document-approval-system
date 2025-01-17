@@ -20,8 +20,12 @@ import Support from "./pages/Support";
 import AdminDashboard from "./pages/AdminDashboard";
 import ForgotPassOTP from "./pages/ForgotPassOTP";
 import SetNewPassword from "./pages/SetNewPassword";
-import LoginRestrictedRoute from "./components/LoginRestrictedRoute";
-import SARestrictedRoute from "./components/SARestrictedRoute";
+import {
+  ApproverRestrictedRoute,
+  LoginRestrictedRoute,
+  SARestrictedRoute,
+  AdminRestrictedRoute,
+} from "./components/RestrictedRoutes";
 const App = () => {
   return (
     <AuthProvider>
@@ -34,11 +38,11 @@ const App = () => {
           <Route path="/forgot-password-otp" element={<ForgotPassOTP />} />
           <Route path="/set-new-pass" element={<SetNewPassword />} />
           <Route
-            path="/dashboard"
+            path="/approver/dashboard"
             element={
-              <LoginRestrictedRoute>
+              <ApproverRestrictedRoute>
                 <ApproverDashboard />
-              </LoginRestrictedRoute>
+              </ApproverRestrictedRoute>
             }
           />
           <Route
@@ -49,13 +53,27 @@ const App = () => {
               </SARestrictedRoute>
             }
           />
-          <Route path="/page" element={<ApprovalPage />} />
+          <Route path="/assistant/dashboard" element={<ApprovalPage />} />
           <Route path="/remark-pdf" element={<RemarkUI />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/history" element={<History />} />
           <Route path="/edit/profile" element={<EditProfile />} />
-          <Route path="/profile" element={<ProfileDashboard />} />
-          <Route path="/admin" element={<AdminDashboard />} />
+          <Route
+            path="/profile"
+            element={
+              <LoginRestrictedRoute>
+                <ProfileDashboard />
+              </LoginRestrictedRoute>
+            }
+          />
+          <Route
+            path="/admin/dashboard"
+            element={
+              <AdminRestrictedRoute>
+                <AdminDashboard />
+              </AdminRestrictedRoute>
+            }
+          />
           <Route path="/changepassword" element={<ChangePassword />} />
           <Route path="/correction" element={<Correction />} />
           <Route path="/approval" element={<ApprovalPage />} />
