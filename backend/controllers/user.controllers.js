@@ -154,6 +154,7 @@ const checkAuthStatus = async (req, res, next) => {
                 email: user.email,
                 role: user.role,
                 fullName: user.fullName,
+                mobileNo: user.mobileNo,
             },
         });
     } catch (error) {

@@ -32,7 +32,8 @@ const PasswordInput = ({ placeholder, value, onChange, error }) => {
 };
 
 const ManageUsers = () => {
-  const { approver, assistants, setUsers } = useContext(UsersContext);
+  const { approver, assistants, refreshUsers } = useContext(UsersContext);
+  const navigate = useNavigate();
   const { loggedInUser } = useContext(AuthContext);
   const [users, setLocalUsers] = useState({ Approver: [], Assistant: [] });
   const [showAddUser, setShowAddUser] = useState(false);
@@ -55,122 +56,13 @@ const ManageUsers = () => {
   });
 
   useEffect(() => {
-    // Fetch users on component load
-    const fetchUsers = async () => {
-      try {
-        const response = await axios.get("http://localhost:3000/user");
-        setLocalUsers(response.data);
-        setUsers(response.data);
-      } catch (error) {
-        toast.error("Failed to load users", { position: "top-right", duration: 3000 });
-      }
-    };
-
-    fetchUsers();
-  }, [setUsers]);
-
-  const handleAddUser = async () => {
-    const { name, email, mno, password, confirmPassword, role } = newUser;
-
-    // Validate inputs
-    if (!name || !email || !mno || !password || !confirmPassword) {
-      toast.error("All fields are required", { position: "top-right", duration: 3000 });
-      return;
+    if (!loggedInUser) {
+      navigate("/");
+    } else {
+      refreshUsers();
     }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      toast.error("Invalid email format", { position: "top-right", duration: 3000 });
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters", { position: "top-right", duration: 3000 });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match", { position: "top-right", duration: 3000 });
-      return;
-    }
-
-    try {
-      const response = await axios.post("http://localhost:3000/api/user/signup", newUser);
-      setLocalUsers((prevUsers) => ({
-        ...prevUsers,
-        [role]: [...prevUsers[role], response.data],
-      }));
-      toast.success("User added successfully", { position: "top-right", duration: 3000 });
-      setShowAddUser(false);
-    } catch (error) {
-      console.error("Failed to add user:", error.response || error.message);
-      toast.error("Failed to add user", { position: "top-right", duration: 3000 });
-    }
-  };
-
-  const handleEditUser = async () => {
-    try {
-      await axios.put(`http://localhost:3000/user/${userToEdit.id}`, userToEdit);
-      setLocalUsers((prevUsers) => {
-        const updatedUsers = prevUsers[userToEdit.role].map((user) =>
-          user.id === userToEdit.id ? userToEdit : user
-        );
-        return { ...prevUsers, [userToEdit.role]: updatedUsers };
-      });
-      toast.success("User updated successfully", { position: "top-right", duration: 3000 });
-      setShowEditModal(false);
-    } catch (error) {
-      toast.error("Failed to update user", { position: "top-right", duration: 3000 });
-    }
-  };
-
-  const handleDeleteUser = async (id, role) => {
-    try {
-      await axios.delete(`http://localhost:3000/user/${id}`);
-      setLocalUsers((prevUsers) => ({
-        ...prevUsers,
-        [role]: prevUsers[role].filter((user) => user.id !== id),
-      }));
-      toast.success("User deleted successfully", { position: "top-right", duration: 3000 });
-    } catch (error) {
-      toast.error("Failed to delete user", { position: "top-right", duration: 3000 });
-    }
-  };
-
-  const handleSavePassword = async () => {
-    const { currentPassword, password, confirmPassword } = passwords;
-
-    if (!currentPassword || !password || !confirmPassword) {
-      toast.error("All fields are required", { position: "top-right", duration: 3000 });
-      return;
-    }
-
-    if (password.length < 6) {
-      toast.error("Password must be at least 6 characters", { position: "top-right", duration: 3000 });
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      toast.error("Passwords do not match", { position: "top-right", duration: 3000 });
-      return;
-    }
-
-    try {
-      await axios.patch(`http://localhost:3000/user/${userToChangePassword.id}/password`, {
-        currentPassword,
-        newPassword: password,
-      });
-      toast.success("Password changed successfully", { position: "top-right", duration: 3000 });
-      setShowChangePasswordModal(false);
-    } catch (error) {
-      toast.error("Failed to change password", { position: "top-right", duration: 3000 });
-    }
-  };
-
-  const handleCancelAdd = () => {
-    setShowAddUser(false);
-    setNewUser({ name: "", role: "Approver", email: "", mno: "", password: "", confirmPassword: "" });
-  };
+  }, [loggedInUser]);
+  const handleDeleteUser = (id, role) => {};
 
   const handleCancelEdit = () => {
     setShowEditModal(false);

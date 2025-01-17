@@ -44,7 +44,6 @@ export const AuthProvider = ({ children }) => {
       setLoggedInUser(null);
     } finally {
       setLoading(false);
-      setLoading(true);
     }
   };
   useEffect(() => {
