@@ -26,7 +26,12 @@ const signIn = async (req, res, next) => {
             error.statusCode = 404;
             return next(error);
         }
-
+        if (user.isVerified === false) {
+            const error = new Error("User not verified");
+            await User.deleteMany({ username });
+            error.statusCode = 400;
+            return next(error);
+        }
         const isMatch = await verifyPassword(password, user.password);
 
         if (!isMatch) {

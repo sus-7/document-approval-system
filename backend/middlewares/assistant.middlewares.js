@@ -32,13 +32,14 @@ const verifySeniorAssistant = async (req, res, next) => {
         const user = await User.findOne({
             username: decoded.username,
             isVerified: true,
+            isActive: true,
         });
         if (!user) {
             const error = new Error("Access Denied!");
             error.statusCode = 400;
             return next(error);
         }
-        if (user.role !== "Senior Assistant") {
+        if (user.role !== Role.SENIOR_ASSISTANT) {
             throw new Error("Access Denied!");
         }
         req.user = user;
@@ -61,6 +62,7 @@ const verifyAssistant = async (req, res, next) => {
         const user = await User.findOne({
             username: decoded.username,
             isVerified: true,
+            isActive: true,
         });
         if (!user) {
             const error = new Error("Access Denied!");

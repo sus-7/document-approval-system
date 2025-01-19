@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const { Role } = require("../utils/enums");
 const UserSchema = new mongoose.Schema({
     username: {
         type: String,
@@ -41,8 +41,13 @@ const UserSchema = new mongoose.Schema({
     },
     role: {
         type: String,
-        enum: ["Senior Assistant", "Assistant", "Approver", "Admin"],
-        default: "Senior Assistant",
+        enum: [
+            Role.SENIOR_ASSISTANT,
+            Role.ASSISTANT,
+            Role.APPROVER,
+            Role.ADMIN,
+        ],
+        default: Role.SENIOR_ASSISTANT,
         required: true,
     },
     isActive: {

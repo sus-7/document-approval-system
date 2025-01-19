@@ -16,11 +16,11 @@ const Register = () => {
     e.preventDefault();
     const apiUrl = import.meta.env.VITE_API_URL + "/user/signup";
     // const apiUrl = "http://localhost:4000/user/signup";
-    toast.loading("Signing up...", {
+    const toastId = toast.loading("Signing up...", {
       position: "top-center",
-      duration: 5000,
     });
     if (password !== confirmPassword) {
+      toast.dismiss(toastId);
       toast.error("Passwords do not match", {
         position: "top-center",
         duration: 3000,
@@ -48,15 +48,18 @@ const Register = () => {
       if (!response.ok) {
         const error = await response.json();
         console.log(error.message);
+        toast.dismiss(toastId);
         toast.error(error.message, {
           position: "top-center",
           duration: 2000,
         });
+
         throw new Error(`HTTP error{! status: ${response.status}`);
       }
 
       const result = await response.json();
       console.log("Please verify the account:", result.message);
+      toast.dismiss(toastId);
       toast.success("Signup successful! Please verify the account.", {
         position: "top-center",
         duration: 2000,
@@ -70,6 +73,7 @@ const Register = () => {
       navigate("/otp/verify");
     } catch (error) {
       console.error("Error during signup:", error);
+      toast.dismiss(toastId);
       toast.error(error, {
         position: "top-center",
         duration: 2000,
