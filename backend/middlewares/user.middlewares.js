@@ -103,9 +103,33 @@ const resetPasswordValidator = (req, res, next) => {
     }
     next();
 };
+
+const verifyEmailExists = async (req, res, next) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            const error = new Error("Email is required");
+            error.statusCode = 400;
+            return next(error);
+        }
+        const user = await User.findOne({ email });
+        if (!user) {
+            const error = new Error("User not found");
+            error.statusCode = 404;
+            return next(error);
+        }
+        next();
+    } catch (error) {
+        console.log("user-middleware :: verifyEmailExists :: error : ", error);
+        error.statusCode = 500;
+        return next(error);
+    }
+};
+
 module.exports = {
     signUpDetailsValidator,
     signiInDetailsValidator,
     verifyToken,
     verifySpToken,
+    verifyEmailExists,
 };

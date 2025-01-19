@@ -21,7 +21,9 @@ const ForgotPassword = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to send OTP");
+        const data = await response.json();
+        console.log(data);
+        throw new Error(data.message);
       }
       setTempUser({ ...tempUser, email });
       toast.success("OTP sent successfully!", {
@@ -30,7 +32,6 @@ const ForgotPassword = () => {
       });
       navigate("/forgot-password-otp");
     } catch (error) {
-      alert("Failed to send OTP");
       toast.error(error.message, {
         position: "top-center",
         duration: 2000,
