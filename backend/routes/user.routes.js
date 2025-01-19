@@ -24,7 +24,7 @@ router.post("/signup", signUpDetailsValidator, signUp);
 router.post("/signin", signiInDetailsValidator, signIn);
 router.post("/signout", signOut);
 router.get("/status", verifyToken, checkAuthStatus);
-//TODO: add otp validation middleware
+
 router.post("/verify-otp", verifyOTP);
 router.post("/resend-otp", resendOTPAndVerify);
 
@@ -35,4 +35,5 @@ router.post(
 );
 router.post("/verify-sp-otp", verifySpOTP);
 router.post("/reset-password", verifySpToken, resetPassword);
+router.post("/change-password", verifyToken, resetPassword);
 module.exports = router;

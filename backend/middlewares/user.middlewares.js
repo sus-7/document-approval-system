@@ -50,7 +50,19 @@ const verifyToken = async (req, res, next) => {
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.username = decoded.username;
+        if (!decoded) {
+            const error = new Error("Invalid token");
+            error.statusCode = 401;
+            return next(error);
+        }
+
+        const user = await User.findOne({ username: decoded.username, isActive: true });
+        if (!user) {
+            const error = new Error("User not found");
+            error.statusCode = 404;
+            return next(error);
+        }
+        req.user = user;
         next();
     } catch (error) {
         console.log("Auth middleware :: error : ", error);
@@ -76,8 +88,15 @@ const verifySpToken = async (req, res, next) => {
                 message: "No token found",
             });
         }
-        req.username = decoded.username;
-        req.usage = decoded.usage;
+        const user = await User.findOne({ username: decoded.username });
+        if (!user) {
+            const error = new Error("User not found");
+            error.statusCode = 404;
+            return next(error);
+        }
+        req.user = user;
+        // req.username = decoded.username;
+        // req.usage = decoded.usage;
         next();
     } catch (error) {
         console.log("Auth middleware :: error : ", error);

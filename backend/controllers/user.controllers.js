@@ -142,24 +142,24 @@ const signOut = async (req, res, next) => {
 
 const checkAuthStatus = async (req, res, next) => {
     try {
-        const user = await User.findOne({
-            username: req.username,
-            isVerified: true,
-        });
-        if (!user) {
-            const error = new Error("User not found");
-            error.statusCode = 404;
-            return next(error);
-        }
+        // const user = await User.findOne({
+        //     username: req.user.username,
+        //     isVerified: true,
+        // });
+        // if (!user) {
+        //     const error = new Error("User not found");
+        //     error.statusCode = 404;
+        //     return next(error);
+        // }
 
         return res.status(200).json({
             status: true,
             user: {
-                username: user.username,
-                email: user.email,
-                role: user.role,
-                fullName: user.fullName,
-                mobileNo: user.mobileNo,
+                username: req.user.username,
+                email: req.user.email,
+                role: req.user.role,
+                fullName: req.user.fullName,
+                mobileNo: req.user.mobileNo,
             },
         });
     } catch (error) {
@@ -391,11 +391,12 @@ const resetPassword = async (req, res) => {
         let username;
         const { newPassword } = req.body;
 
-        if (req.usage === "OTP") {
-            username = req.username;
-        } else {
-            username = req.body.username;
-        }
+        // if (req.usage === "OTP") {
+        //     username = req.username;
+        // } else {
+        //     username = req.body.username;
+        // }
+        username = req.user.username;
         if (!newPassword || !username) {
             return res.status(400).json({
                 status: "FAILED",
