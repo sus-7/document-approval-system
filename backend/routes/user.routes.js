@@ -9,6 +9,7 @@ const {
     resetPassword,
     verifySpOTP,
     signOut,
+    updateProfile,
 } = require("../controllers/user.controllers");
 const {
     signUpDetailsValidator,
@@ -37,4 +38,5 @@ router.post(
 router.post("/verify-sp-otp", verifySpOTP);
 router.post("/reset-password", verifySpToken, resetPassword);
 router.post("/change-password", verifyToken, verifyOldPassword, resetPassword);
+router.post("/update-profile", verifyToken, updateProfile);
 module.exports = router;

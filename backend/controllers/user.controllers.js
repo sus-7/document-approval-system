@@ -116,16 +116,6 @@ const signOut = asyncHandler(async (req, res, next) => {
 });
 
 const checkAuthStatus = asyncHandler(async (req, res, next) => {
-    // const user = await User.findOne({
-    //     username: req.user.username,
-    //     isVerified: true,
-    // });
-    // if (!user) {
-    //     const error = new Error("User not found");
-    //     error.statusCode = 404;
-    //     return next(error);
-    // }
-
     return res.status(200).json({
         status: true,
         user: {
@@ -333,14 +323,32 @@ const resetPassword = asyncHandler(async (req, res) => {
     });
 });
 
+const updateProfile = asyncHandler(async (req, res, next) => {
+    const { fullName, mobileNo } = req.body;
+    if (!fullName || !mobileNo) {
+        const error = new Error("Please provide fullName and mobileNo");
+        error.statusCode = 400;
+        return next(error);
+    }
+    await User.updateOne(
+        { username: req.user.username },
+        { fullName, mobileNo }
+    );
+    return res.status(200).json({
+        status: "SUCCESS",
+        message: "Profile updated successfully",
+    });
+});
+
 module.exports = {
     signIn,
     signUp,
+    signOut,
     verifyOTP,
     resendOTPAndVerify,
     checkAuthStatus,
     sendPasswordResetOTP,
     resetPassword,
     verifySpOTP,
-    signOut,
+    updateProfile,
 };
