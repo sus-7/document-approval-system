@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
 import { toast, Toaster } from "react-hot-toast";
 import { useAuth } from "../contexts/AuthContext";
+import axios from "axios";
 const EditProfile = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [address, setAddress] = useState("");
-  const { loggedInUser } = useAuth();
+  const { loggedInUser, checkAuthStatus } = useAuth();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -17,42 +17,45 @@ const EditProfile = () => {
 
   // Mock data fetch
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const userData = {
-          name: loggedInUser.fullName,
-          email: loggedInUser.email,
-          phone: loggedInUser.mobileNo,
-        };
-        setName(userData.name);
-        setEmail(userData.email);
-        setPhone(userData.phone);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-
-    fetchUserData();
-  }, []);
+    if (loggedInUser) {
+      setName(loggedInUser.fullName);
+      setEmail(loggedInUser.email);
+      setPhone(loggedInUser.mobileNo);
+    }
+  }, [loggedInUser]);
 
   // Save Changes logic
   const handleSaveChanges = async (e) => {
+    const toastId = toast.loading("Saving changes...");
     e.preventDefault();
     try {
       // Mock API call to update user data
       const updatedData = {
-        name,
-        phone,
-        address,
+        fullName: name,
+        mobileNo: phone,
       };
-      console.log("Saved Data:", updatedData);
-      toast.success("Profile updated successfully!", {
-        position: "top-center",
-        duration: 3000,
+      const updateProfileUrl =
+        import.meta.env.VITE_API_URL + "/user/update-profile";
+      const response = await axios.post(updateProfileUrl, updatedData, {
+        withCredentials: true,
       });
+      toast.dismiss(toastId);
+      if (response.status === 200) {
+        checkAuthStatus();
+        toast.success("Profile updated successfully!", {
+          position: "top-center",
+          duration: 3000,
+        });
+      } else {
+        toast.error(response.data.message, {
+          position: "top-center",
+          duration: 3000,
+        });
+      }
     } catch (error) {
+      toast.dismiss(toastId);
       console.error("Error saving changes:", error);
-      toast.error("Failed to update profile. Please try again.", {
+      toast.error(error.response.data.message, {
         position: "top-center",
         duration: 3000,
       });
