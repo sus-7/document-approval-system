@@ -1,6 +1,6 @@
 import React from "react";
 import { TfiMenu, TfiUser } from "react-icons/tfi";
-import Navbar from "./Navbar";
+import Navbar from "../components/Navbar";
 
 const PrepareLetter = () => {
   return (

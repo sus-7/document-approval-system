@@ -3,7 +3,7 @@ import { FaSearch, FaBars } from "react-icons/fa";
 import Navbar from "../components/Navbar";
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, IconButton } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
-
+//! Add a new document Route on backend
 const AssistantDashboard = () => {
   const [selectedTab, setSelectedTab] = useState("PENDING");
   const [searchQuery, setSearchQuery] = useState("");
@@ -20,6 +20,8 @@ const AssistantDashboard = () => {
   const [newDocDepartment, setNewDocDepartment] = useState("");
   const [newDocFile, setNewDocFile] = useState(null);
   const [newDocDesc, setNewDocDesc] = useState("");
+  const [viewPdfDialogOpen, setViewPdfDialogOpen] = useState(false);
+  const [currentPdfUrl, setCurrentPdfUrl] = useState("");
 
   const sampleData = [
     { id: 1, name: "Policy Draft", category: "Finance", date: "2025-01-10", status: "PENDING" },
@@ -60,19 +62,57 @@ const AssistantDashboard = () => {
     }
   };
 
-  const handleNewDocSubmit = () => {
-    // Handle new document submission logic here
-    setNewDocDialogOpen(false);
+  const handleDocumentSubmit = async () => {
+    try {
+      const formData = new FormData();
+      formData.append("title", newDocTitle);
+      formData.append("department", newDocDepartment);
+      formData.append("description", newDocDesc);
+      formData.append("file", newDocFile);
+      formData.append("status", "PENDING");
+
+      const response = await fetch("/api/documents", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        setNewDocDialogOpen(false);
+        setNewDocTitle("");
+        setNewDocDepartment("");
+        setNewDocDesc("");
+        setNewDocFile(null);
+        // Refresh document list
+        fetchDocuments();
+      }
+    } catch (error) {
+      console.error("Error submitting document:", error);
+    }
+  };
+
+  const fetchDocuments = async () => {
+    try {
+      const response = await fetch(`/api/documents?status=${selectedTab}`);
+      const data = await response.json();
+      setFilteredData(data);
+    } catch (error) {
+      console.error("Error fetching documents:", error);
+    }
+  };
+
+  const handleTitleClick = (documentUrl) => {
+    setCurrentPdfUrl(documentUrl);
+    setViewPdfDialogOpen(true);
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-gray-800">
-      <Navbar role="Personal Assistant - Approval Dashboard" />
+      <Navbar role="Personal Assistant - Approval Dashboard"/>
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
         className="md:hidden p-2 text-gray-600 rounded-md"
       >
-        <FaBars />
+        <FaBars/>
       </button>
 
       <main className="p-6 flex-grow">
@@ -84,7 +124,7 @@ const AssistantDashboard = () => {
               className={`px-4 py-2 ${selectedTab === tab
                 ? "border-b-2 border-blue-500 text-blue-500"
                 : "text-gray-600 hover:text-blue-500"
-                }`}
+              }`}
             >
               {tab}
             </button>
@@ -92,7 +132,7 @@ const AssistantDashboard = () => {
         </div>
 
         <div className="relative w-full max-w-xs mx-auto mb-6">
-          <FaSearch className="absolute top-3 left-3 text-gray-400" />
+          <FaSearch className="absolute top-3 left-3 text-gray-400"/>
           <input
             type="text"
             placeholder="Search documents..."
@@ -146,8 +186,6 @@ const AssistantDashboard = () => {
           </div>
         </div>
 
-      
-
         <div className="flex flex-col md:flex-row gap-2">
           <div className="bg-white p-4 w-full md:w-2/3 rounded-lg border border-gray-200">
             <h3 className="text-lg font-medium mb-4">Filtered Documents</h3>
@@ -164,7 +202,14 @@ const AssistantDashboard = () => {
                   <tbody>
                     {filteredData.map((item) => (
                       <tr key={item.id} className="hover:bg-gray-50">
-                        <td className="py-2 px-4">{item.name}</td>
+                        <td className="py-2 px-4">
+                          <span
+                            onClick={() => handleTitleClick(item.fileUrl)}
+                            className="text-blue-500 cursor-pointer hover:underline"
+                          >
+                            {item.name}
+                          </span>
+                        </td>
                         <td className="py-2 px-4">{item.category}</td>
                         <td className="py-2 px-4">{item.date}</td>
                       </tr>
@@ -247,14 +292,32 @@ const AssistantDashboard = () => {
           <Button onClick={() => setNewDocDialogOpen(false)} color="primary">
             Cancel
           </Button>
-
-
-          <Button onClick={handleNewDocSubmit} color="primary">
+          <Button onClick={handleDocumentSubmit} color="primary">
             Submit
           </Button>
         </DialogActions>
       </Dialog>
-   
+
+      <div className="fixed bottom-6 right-6">
+        <IconButton
+          color="primary"
+          onClick={() => setNewDocDialogOpen(true)}
+          aria-label="add new document"
+        >
+          <AddIcon fontSize="large"/>
+        </IconButton>
+      </div>
+
+      {/* PDF Preview Dialog */}
+      <Dialog open={viewPdfDialogOpen} onClose={() => setViewPdfDialogOpen(false)} maxWidth="md" fullWidth>
+        <DialogTitle>Document Preview</DialogTitle>
+        <DialogContent>
+          <iframe src={currentPdfUrl} width="100%" height="600px" title="PDF Preview" />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setViewPdfDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
