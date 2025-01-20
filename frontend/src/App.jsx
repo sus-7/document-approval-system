@@ -13,13 +13,16 @@ import ProfileDashboard from "./pages/ProfileDashboard";
 import { AuthProvider } from "../src/contexts/AuthContext";
 import { UsersProvider } from "./contexts/UsersContext";
 import ChangePassword from "./pages/ChangePassword";
-import ApprovalDashboard from "./pages/ApprovalDashboard";
+import ApprovalDashboard from "./pages/AssistantDashboard.jsx";
 import Correction from "./pages/Correction";
 import AdminLogin from "./pages/AdminLogin";
 import Support from "./pages/Support";
 import AdminDashboard from "./pages/AdminDashboard";
 import ForgotPassOTP from "./pages/ForgotPassOTP";
 import SetNewPassword from "./pages/SetNewPassword";
+
+import PrepareLetter from "./pages/PrepareLetter.jsx";
+
 import {
   ApproverRestrictedRoute,
   LoginRestrictedRoute,

@@ -39,7 +39,12 @@ const Navbar = () => {
     handleMenuClose();
   };
   const navigateHome = () => {
-    navigate("/assistant/dashboard");
+    if (loggedInUser.role == "Admin") {
+      navigate("/admin/dashboard");
+    }
+    else
+      navigate("/assistant/dashboard");
+
     handleMenuClose();
   };
   const handleLogout = async (e) => {
@@ -125,7 +130,7 @@ const Navbar = () => {
           >
             <MenuItem onClick={navigateProfile}>View Profile</MenuItem>
             <MenuItem onClick={navigateHistory}>History</MenuItem>
-            {loggedInUser.role == "Senior Assistant" ||"Admin" ? (
+            {loggedInUser.role == "Senior Assistant" || "Admin" ? (
               <MenuItem onClick={navigateManageUsers}>Manage Users</MenuItem>
             ) : null}
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
