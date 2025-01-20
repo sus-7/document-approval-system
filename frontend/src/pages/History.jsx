@@ -20,7 +20,7 @@ const History = () => {
       <div className="w-96 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
         {/* Back Button */}
         <RouterLink
-          to="/dashboard"
+          to="/assistant/dashboard"
           className="text-blue-600 hover:text-blue-800 mb-6 flex items-center transition-colors duration-300"
         >
           <FaArrowLeft size={24} className="mr-2" />

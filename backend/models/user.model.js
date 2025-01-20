@@ -1,9 +1,10 @@
 const mongoose = require("mongoose");
-
+const { Role } = require("../utils/enums");
 const UserSchema = new mongoose.Schema({
     username: {
         type: String,
         required: true,
+        unique: true,
     },
     password: {
         type: String,
@@ -16,12 +17,17 @@ const UserSchema = new mongoose.Schema({
     email: {
         type: String,
         required: true,
+        unique: true,
     },
     mobileNo: {
         type: Number,
         required: true,
+        unique: true,
     },
-    assignedMinister: {
+    privateKey: {
+        type: String,
+    },
+    assignedApprover: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     },
@@ -29,14 +35,20 @@ const UserSchema = new mongoose.Schema({
         type: [mongoose.Schema.Types.ObjectId],
         ref: "User",
     },
+    createdAssistants: {
+        type: [mongoose.Schema.Types.ObjectId],
+        ref: "User",
+    },
     role: {
         type: String,
-        enum: ["Senior Assistant", "Assistant", "Approver", "Admin"],
-        default: "Senior Assistant",
+        enum: [
+            Role.SENIOR_ASSISTANT,
+            Role.ASSISTANT,
+            Role.APPROVER,
+            Role.ADMIN,
+        ],
+        default: Role.SENIOR_ASSISTANT,
         required: true,
-    },
-    privateKey: {
-        type: String,
     },
     isActive: {
         type: Boolean,

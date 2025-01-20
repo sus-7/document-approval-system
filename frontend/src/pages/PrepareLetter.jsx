@@ -1,18 +1,11 @@
 import React from "react";
 import { TfiMenu, TfiUser } from "react-icons/tfi";
+import Navbar from "./Navbar";
 
 const PrepareLetter = () => {
   return (
     <div className="min-h-screen flex flex-col items-center p-4 bg-gradient-to-r from-white to-blue-100">
-      <div className="navbar bg-gradient-to-r from-white to-blue-100 text-black w-full flex justify-between items-center px-4">
-        <button className="text-black text-2xl bg-gradient-to-r">
-          <TfiMenu />
-        </button>
-        <h1 className="text-xl font-semibold">Prepare New Letter</h1>
-        <button className="text-black text-2xl">
-          <TfiUser />
-        </button>
-      </div>
+   <Navbar role="Approver" />
 
       <div className="mt-6 bg-white p-6 shadow-xl rounded-md w-full max-w-md h-[85vh]">
         <form>

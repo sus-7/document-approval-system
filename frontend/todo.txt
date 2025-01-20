@@ -1,0 +1,4 @@
+- loggedInUser validation for all pages [to be done] specially for ManageUsers and AddUser
+- login/register fields validation
+- move Toaster to App.jsx
+- Add a loading spinner for all pages
