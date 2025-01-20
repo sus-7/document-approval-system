@@ -16,6 +16,7 @@ const {
     verifyToken,
     verifySpToken,
     verifyEmailExists,
+    verifyOldPassword,
 } = require("../middlewares/user.middlewares");
 
 const router = express.Router();
@@ -35,5 +36,5 @@ router.post(
 );
 router.post("/verify-sp-otp", verifySpOTP);
 router.post("/reset-password", verifySpToken, resetPassword);
-router.post("/change-password", verifyToken, resetPassword);
+router.post("/change-password", verifyToken, verifyOldPassword, resetPassword);
 module.exports = router;

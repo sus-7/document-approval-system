@@ -89,15 +89,6 @@ const ProfileDashboard = () => {
                 <p className="text-gray-900">{userData.phone}</p>
               </div>
             </div>
-
-            {/* Address */}
-            <div className="flex items-center bg-gray-50 border border-gray-200 rounded-lg p-4 sm:col-span-2">
-              <FaMapMarkerAlt className="text-blue-500 text-lg mr-4" />
-              <div>
-                <h3 className="text-sm font-medium text-gray-700">Address</h3>
-                <p className="text-gray-900">{userData.address}</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>

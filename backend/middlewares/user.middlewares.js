@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const User = require("../models/user.model");
 const UserOTPVerification = require("../models/userotp.model");
+const { verifyPassword } = require("../utils/hashPassword");
 const signUpDetailsSchema = Joi.object({
     // TODO: change after
     username: Joi.string().min(2),
@@ -56,7 +57,10 @@ const verifyToken = async (req, res, next) => {
             return next(error);
         }
 
-        const user = await User.findOne({ username: decoded.username, isActive: true });
+        const user = await User.findOne({
+            username: decoded.username,
+            isActive: true,
+        });
         if (!user) {
             const error = new Error("User not found");
             error.statusCode = 404;
@@ -145,10 +149,37 @@ const verifyEmailExists = async (req, res, next) => {
     }
 };
 
+const verifyOldPassword = async (req, res, next) => {
+    try {
+        const { currentPassword } = req.body;
+        if (!currentPassword) {
+            const error = new Error("Current password is required");
+            error.statusCode = 400;
+            return next(error);
+        }
+
+        const isMatch = await verifyPassword(
+            currentPassword,
+            req.user.password
+        );
+        if (!isMatch) {
+            const error = new Error("Invalid Current Password");
+            error.statusCode = 400;
+            return next(error);
+        }
+        next();
+    } catch (error) {
+        console.log("user-middleware :: verifyOldPassword :: error : ", error);
+        error.statusCode = 500;
+        return next(error);
+    }
+};
+
 module.exports = {
     signUpDetailsValidator,
     signiInDetailsValidator,
     verifyToken,
     verifySpToken,
     verifyEmailExists,
+    verifyOldPassword,
 };

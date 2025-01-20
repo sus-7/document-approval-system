@@ -1,72 +1,89 @@
 import React, { useState } from "react";
-import {toast,Toaster} from "react-hot-toast";
+import { toast, Toaster } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { IoArrowBack } from "react-icons/io5";
-
+import { useAuth } from "../contexts/AuthContext";
+import axios from "axios";
 const ChangePassword = () => {
   const [currentPassword, setCurrentPassword] = useState("");
-  const [newPassword, setNewPassword] = useState("1234");
+  const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const { loggedInUser } = useAuth();
   const navigate = useNavigate();
 
-  const handleChangePassword = (e) => {
+  const handleChangePassword = async (e) => {
     e.preventDefault();
 
-    // Clear previous messages
-    setError("");
-    setSuccess("");
-
-    // Validation checks
     if (newPassword !== confirmPassword) {
-      setError("New password and confirm password do not match.");
+      toast.error("New password and confirm password do not match.", {
+        position: "top-center",
+        duration: 3000,
+      });
       return;
     }
     if (newPassword.length < 8) {
-      setError("New password must be at least 8 characters long.");
+      toast.error("New password must be at least 8 characters long.", {
+        position: "top-center",
+        duration: 3000,
+      });
       return;
     }
 
-    // Mock password change logic (replace with API call)
-    const isPasswordCorrect = currentPassword === "1234"; // Mock current password validation
-    if (!isPasswordCorrect) {
-      setError("Current password is incorrect.");
-      return;
-    }
+    const passChangeUrl =
+      import.meta.env.VITE_API_URL + "/user/change-password";
 
-    // Simulate successful password change
-    toast.success("Password changed successfully!", {
-      position: "top-center",
-      duration: 3000,
-    });
-    setCurrentPassword("");
-    setNewPassword("");
-    setConfirmPassword("");
+    const passwordData = {
+      username: loggedInUser.username,
+      currentPassword,
+      newPassword,
+    };
+    try {
+      const response = await axios.post(passChangeUrl, passwordData, {
+        withCredentials: true,
+      });
+      if (response.status === 200) {
+        toast.success(response.data.message, {
+          position: "top-center",
+          duration: 3000,
+        });
+        setCurrentPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+      }
+    } catch (error) {
+      console.log(
+        "ChangePassword service :: handleChangePassword :: error : ",
+        error
+      );
+      toast.error(error.response.data.message, {
+        position: "top-center",
+        duration: 3000,
+      });
+    }
   };
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
-      <Toaster/>
+      <Toaster />
       <div className="w-full max-w-md bg-white shadow-lg border border-gray-200 rounded-lg p-8 space-y-6">
         <div className="flex justify-start items-center mb-6">
-        <IoArrowBack size={25} className="text-black mt-1 mr-3" onClick={() => navigate("/profile")} />
-        
-        <h2 className="text-xl font-semibold mt text-gray-800 ">
-            Change Password</h2>
-            
-        </div>       
+          <IoArrowBack
+            size={25}
+            className="text-black mt-1 mr-3"
+            onClick={() => navigate("/profile")}
+          />
 
+          <h2 className="text-xl font-semibold mt text-gray-800 ">
+            Change Password
+          </h2>
+        </div>
 
         <form onSubmit={handleChangePassword}>
-          {error && (
-            <p className="text-red-600 text-sm mb-4">{error}</p>
-          )}
-          {success && (
-            <p className="text-green-600 text-sm mb-4">{success}</p>
-          )}
           <div className="mb-4">
-            <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="currentPassword"
+              className="block text-sm font-medium text-gray-700"
+            >
               Current Password
             </label>
             <input
@@ -79,7 +96,10 @@ const ChangePassword = () => {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="newPassword"
+              className="block text-sm font-medium text-gray-700"
+            >
               New Password
             </label>
             <input
@@ -92,7 +112,10 @@ const ChangePassword = () => {
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
+            <label
+              htmlFor="confirmPassword"
+              className="block text-sm font-medium text-gray-700"
+            >
               Confirm Password
             </label>
             <input
