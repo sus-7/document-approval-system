@@ -125,7 +125,7 @@ const Navbar = () => {
           >
             <MenuItem onClick={navigateProfile}>View Profile</MenuItem>
             <MenuItem onClick={navigateHistory}>History</MenuItem>
-            {loggedInUser.role == "Senior Assistant" ? (
+            {loggedInUser.role == "Senior Assistant" ||"Admin" ? (
               <MenuItem onClick={navigateManageUsers}>Manage Users</MenuItem>
             ) : null}
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
