@@ -13,7 +13,7 @@ import ProfileDashboard from "./pages/ProfileDashboard";
 import { AuthProvider } from "../src/contexts/AuthContext";
 import { UsersProvider } from "./contexts/UsersContext";
 import ChangePassword from "./pages/ChangePassword";
-import ApprovalPage from "./pages/ApprovalPage";
+import ApprovalDashboard from "./pages/ApprovalDashboard";
 import Correction from "./pages/Correction";
 import AdminLogin from "./pages/AdminLogin";
 import Support from "./pages/Support";
@@ -53,7 +53,7 @@ const App = () => {
               </SARestrictedRoute>
             }
           />
-          <Route path="/assistant/dashboard" element={<ApprovalPage />} />
+          <Route path="/assistant/dashboard" element={<ApprovalDashboard />} />
           <Route path="/remark-pdf" element={<RemarkUI />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/history" element={<History />} />
@@ -76,7 +76,6 @@ const App = () => {
           />
           <Route path="/changepassword" element={<ChangePassword />} />
           <Route path="/correction" element={<Correction />} />
-          <Route path="/approval" element={<ApprovalPage />} />
           <Route path="/adminLogin" element={<AdminLogin />} />
           <Route path="/support" element={<Support />} />
         </Routes>

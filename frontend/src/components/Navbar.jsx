@@ -39,7 +39,7 @@ const Navbar = () => {
     handleMenuClose();
   };
   const navigateHome = () => {
-    navigate("/dashboard");
+    navigate("/assistant/dashboard");
     handleMenuClose();
   };
   const handleLogout = async (e) => {

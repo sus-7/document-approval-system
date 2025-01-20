@@ -14,7 +14,7 @@ const Notifications = () => {
   const navigate = useNavigate();
 
   const navigateback = () => {
-    navigate("/dashboard");
+    navigate("/assistant/dashboard");
   };
 
   const handleMarkAsRead = (id) => {
