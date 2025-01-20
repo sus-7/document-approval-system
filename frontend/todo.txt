@@ -2,3 +2,4 @@
 - login/register fields validation
 - move Toaster to App.jsx
 - Add a loading spinner for all pages
+- add loading toast when adding a new user by senior assistant
