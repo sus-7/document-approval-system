@@ -15,6 +15,8 @@ const {
     signiInDetailsValidator,
     verifyToken,
     verifySpToken,
+    verifyEmailExists,
+    verifyOldPassword,
 } = require("../middlewares/user.middlewares");
 
 const router = express.Router();
@@ -23,11 +25,16 @@ router.post("/signup", signUpDetailsValidator, signUp);
 router.post("/signin", signiInDetailsValidator, signIn);
 router.post("/signout", signOut);
 router.get("/status", verifyToken, checkAuthStatus);
-//TODO: add otp validation middleware
+
 router.post("/verify-otp", verifyOTP);
 router.post("/resend-otp", resendOTPAndVerify);
 
-router.post("/send-password-reset-otp", sendPasswordResetOTP);
+router.post(
+    "/send-password-reset-otp",
+    verifyEmailExists,
+    sendPasswordResetOTP
+);
 router.post("/verify-sp-otp", verifySpOTP);
 router.post("/reset-password", verifySpToken, resetPassword);
+router.post("/change-password", verifyToken, verifyOldPassword, resetPassword);
 module.exports = router;

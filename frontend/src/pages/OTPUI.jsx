@@ -19,9 +19,8 @@ const OTPUI = () => {
   }, [timer]);
 
   const handleResendOtp = async () => {
-    toast.loading("Resending OTP...", {
+    const toastId = toast.loading("Resending OTP...", {
       position: "top-center",
-      duration: 5000,
     });
     try {
       const otpUrl = import.meta.env.VITE_API_URL + "/user/resend-otp";
@@ -40,6 +39,7 @@ const OTPUI = () => {
       if (!response.ok) {
         const error = await response.json();
         console.log(error.message);
+        toast.dismiss(toastId);
         toast.success("Error sending OTP", {
           position: "top-center",
           duration: 3000,
@@ -49,13 +49,14 @@ const OTPUI = () => {
 
       const result = await response.json();
       console.log("OTP sent:", result.message);
-
+      toast.dismiss(toastId);
       toast.success("OTP sent successfully!", {
         position: "top-center",
         duration: 3000,
       });
     } catch (error) {
       console.log(error);
+      toast.dismiss(toastId);
       toast.error("Error sending OTP", {
         position: "top-center",
       });
@@ -63,9 +64,8 @@ const OTPUI = () => {
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.loading("Verifying OTP...", {
+    const toastId = toast.loading("Verifying OTP...", {
       position: "top-center",
-      duration: 5000,
     });
     try {
       const otpUrl = import.meta.env.VITE_API_URL + "/user/verify-otp";
@@ -84,6 +84,7 @@ const OTPUI = () => {
       const data = await response.json();
 
       if (!response.ok) {
+        toast.dismiss(toastId);
         throw new Error(
           data.message || `HTTP error! status: ${response.status}`
         );
@@ -93,6 +94,7 @@ const OTPUI = () => {
         ...loggedInUser,
         username: tempUser.username,
       });
+      toast.dismiss(toastId);
       toast.success("OTP verified successfully!", {
         position: "top-center",
         duration: 3000,
@@ -100,6 +102,7 @@ const OTPUI = () => {
       navigate("/");
     } catch (error) {
       console.error("OTP verification failed:", error);
+      toast.dismiss(toastId);
       toast.error("Invalid OTP", {
         position: "top-center",
         duration: 3000,
