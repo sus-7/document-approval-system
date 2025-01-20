@@ -35,8 +35,6 @@ app.get("/", (req, res) => {
 
 app.use("/user", userRoutes);
 app.use("/assistant", assistantRoutes);
-// app.use("/approver", approverRoutes);
-// app.use("/admin", adminRoutes);
 
 app.use(errorHandler);
 const PORT = process.env.PORT || 3000;
