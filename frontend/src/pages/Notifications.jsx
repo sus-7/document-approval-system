@@ -3,6 +3,7 @@ import { FaBell, FaArrowLeft, FaUser, FaHistory, FaCheckCircle, FaTimesCircle, F
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
+import { useAuth } from "../contexts/AuthContext.jsx";
 
 const Notifications = () => {
   const [notifications, setNotifications] = useState([
@@ -10,11 +11,11 @@ const Notifications = () => {
     { id: 2, title: "Document Rejected", description: "Your Document was Rejected By CM.", time: "1 hour ago", type: "rejected", read: false },
     { id: 3, title: "Correction Spotted", description: "Document has Correction.", time: "3 hours ago", type: "correction", read: false },
   ]);
-  
+    const { loggedInUser, setLoggedInUser, loading, logout } = useAuth();
   const navigate = useNavigate();
 
   const navigateback = () => {
-    navigate("/assistant/dashboard");
+    {loggedInUser.role === "Admin" ? navigate("/admin/dashboard") : navigate("assistant/dashboard")}
   };
 
   const handleMarkAsRead = (id) => {

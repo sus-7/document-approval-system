@@ -4,9 +4,11 @@ import React from "react";
 import Sidebar from "../components/Sidebar";
 import { Line } from "react-chartjs-2";
 import { Chart as ChartJS, CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend } from "chart.js";
+import { useAuth } from "../contexts/AuthContext";
 
 // Register chart components
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
+
 
 const AdminDashboard = () => {
   const data = {
@@ -21,7 +23,7 @@ const AdminDashboard = () => {
       },
     ],
   };
-
+  const { loggedInUser, setLoggedInUser, loading, logout } = useAuth();
   return (
     <div className="flex">
       <Sidebar />

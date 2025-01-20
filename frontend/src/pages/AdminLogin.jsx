@@ -11,7 +11,7 @@ const AdminLogin = () => {
 
   useEffect(() => {
     if (loggedInUser) {
-      navigate("/dashboard"); // Redirect to dashboard if already logged in
+      navigate("/admin/dashboard"); // Redirect to dashboard if already logged in
     }
   }, [loggedInUser, navigate]);
 
@@ -44,7 +44,7 @@ const AdminLogin = () => {
         toast.success("Sign-in successful!", {
           position: "top-center", // Center the notification
       });
-      navigate("/dashboard");
+      navigate("/admin/dashboard");
     } catch (error) {
       console.error("Error during sign-in:", error);
       toast.error("Sign-in failed! Please try again.", {
