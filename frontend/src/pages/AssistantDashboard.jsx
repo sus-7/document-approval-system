@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, IconButton } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
 
-const ApprovalDashboard = () => {
+const AssistantDashboard = () => {
   const [selectedTab, setSelectedTab] = useState("PENDING");
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -259,4 +259,4 @@ const ApprovalDashboard = () => {
   );
 };
 
-export default ApprovalDashboard;
+export default AssistantDashboard;
