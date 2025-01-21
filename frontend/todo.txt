@@ -3,3 +3,5 @@
 - move Toaster to App.jsx
 - Add a loading spinner for all pages
 - add loading toast when adding a new user by senior assistant
+- trim the values when submitting any form, add validations also
+- learn more about lazy loaders

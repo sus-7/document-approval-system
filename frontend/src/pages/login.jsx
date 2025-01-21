@@ -15,7 +15,10 @@ const Login = () => {
       //todo:role based access
       if (loggedInUser.role === "Approver") {
         navigate("/approver/dashboard");
-      } else if (loggedInUser.role === "Senior Assistant") {
+      } else if (
+        loggedInUser.role === "Senior Assistant" ||
+        loggedInUser.role === "Assistant"
+      ) {
         navigate("/assistant/dashboard");
       } else if (loggedInUser.role === "Admin") {
         navigate("/admin/dashboard");
@@ -83,19 +86,21 @@ const Login = () => {
       <div className="w-96 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
         <div className="flex justify-center gap-4 mb-6">
           <button
-            className={`px-4 py-2 text-sm font-medium rounded-md ${selectedToggle === "Approver"
+            className={`px-4 py-2 text-sm font-medium rounded-md ${
+              selectedToggle === "Approver"
                 ? "bg-blue-500 text-white"
                 : "bg-gray-100 text-gray-700"
-              }`}
+            }`}
             onClick={() => setSelectedToggle("Approver")}
           >
             Approver
           </button>
           <button
-            className={`px-4 py-2 text-sm font-medium rounded-md ${selectedToggle === "Assistant"
+            className={`px-4 py-2 text-sm font-medium rounded-md ${
+              selectedToggle === "Assistant"
                 ? "bg-blue-500 text-white"
                 : "bg-gray-100 text-gray-700"
-              }`}
+            }`}
             onClick={() => setSelectedToggle("Assistant")}
           >
             Assistant
@@ -166,7 +171,6 @@ const Login = () => {
               to="/register"
               className="text-sm text-blue-500 hover:underline"
             >
-
               Register
             </RouterLink>
           </div>
