@@ -8,7 +8,7 @@ const path = require("path");
 
 const userRoutes = require("./routes/user.routes");
 const assistantRoutes = require("./routes/assistant.routes");
-
+const adminRoutes = require("./routes/admin.routes");
 const app = express();
 const corsOptions = {
     origin: ["http://localhost:5174", "http://localhost:5173"],
@@ -39,6 +39,7 @@ app.get("/", (req, res) => {
 
 app.use("/user", userRoutes);
 app.use("/assistant", assistantRoutes);
+app.use("/admin", adminRoutes);
 
 app.use(errorHandler);
 const PORT = process.env.PORT || 3000;
