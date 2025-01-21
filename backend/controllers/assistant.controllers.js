@@ -1,4 +1,5 @@
 const User = require("../models/user.model");
+const File = require("../models/file.model");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
 const { hashPassword, verifyPassword } = require("../utils/hashPassword");
@@ -51,6 +52,9 @@ const createAssistant = asyncHandler(async (req, res, next) => {
         isVerified: true,
     }).save();
 
+    const approver = await User.findById(assignedApprover);
+    approver.assistants.push(newUser._id);
+    await approver.save();
     newUser.save().then(async () => {
         const mailOptions = new MailOptions(
             process.env.AUTH_EMAIL,
@@ -196,8 +200,43 @@ const getApprover = asyncHandler(async (req, res, next) => {
         approver: seniorAssistant.assignedApprover,
     });
 });
+
+const uploadPdf = asyncHandler(async (req, res, next) => {
+    //only take description if available
+    const { assignedTo, department, title, description = null } = req.body;
+    const file = req.file;
+    const fileUniqueName = file.filename;
+    const filePath = file.path;
+    const newFile = await new File({
+        fileUniqueName,
+        filePath,
+        createdBy: req.user._id,
+        assignedTo,
+        department,
+        title,
+        description,
+    }).save();
+
+    const populatedFile = await newFile.populate([
+        { path: "createdBy", select: "fullName" },
+        { path: "assignedTo", select: "fullName" },
+    ]);
+
+    return res.status(200).json({
+        status: true,
+        message: "File uploaded successfully",
+        file: {
+            fileName: populatedFile.fileUniqueName,
+            createdBy: populatedFile.createdBy.fullName,
+            assignedTo: populatedFile.assignedTo.fullName,
+            title: populatedFile.title,
+            description: populatedFile.description,
+        },
+    });
+});
 module.exports = {
     createUser,
     getCreatedAssistants,
     getApprover,
+    uploadPdf,
 };

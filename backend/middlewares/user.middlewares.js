@@ -146,6 +146,13 @@ const verifyOldPassword = asyncHandler(async (req, res, next) => {
     next();
 });
 
+const authorizeRole = (roles) => (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+        return next(new Error("Access Denied!"));
+    }
+    next();
+};
+
 module.exports = {
     signUpDetailsValidator,
     signiInDetailsValidator,
