@@ -114,7 +114,10 @@ const AssistantDashboard = () => {
       formData.append("file", newDocFile);
       formData.append("status", "PENDING");
 
-      const response = await fetch(`${API_BASE_URL}/api/documents`, {
+
+          const apiUrl = import.meta.env.VITE_API_URL + "/file/upload-pdf"
+
+      const response = await axios.post(`${apiUrl}/api/documents`, {
         method: "POST",
         body: formData,
       });
