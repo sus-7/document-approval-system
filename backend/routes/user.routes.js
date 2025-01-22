@@ -10,6 +10,7 @@ const {
     verifySpOTP,
     signOut,
     updateProfile,
+    toggleUserStatus,
 } = require("../controllers/user.controllers");
 const {
     signUpDetailsValidator,
@@ -18,8 +19,9 @@ const {
     verifySpToken,
     verifyEmailExists,
     verifyOldPassword,
+    authorizeRoles,
 } = require("../middlewares/user.middlewares");
-
+const { Role } = require("../utils/enums");
 const router = express.Router();
 
 router.post("/signup", signUpDetailsValidator, signUp);
@@ -39,4 +41,12 @@ router.post("/verify-sp-otp", verifySpOTP);
 router.post("/reset-password", verifySpToken, resetPassword);
 router.post("/change-password", verifyToken, verifyOldPassword, resetPassword);
 router.post("/update-profile", verifyToken, updateProfile);
+
+//route for toggling user status
+router.post(
+    "/toggle-status",
+    verifyToken,
+    authorizeRoles([Role.SENIOR_ASSISTANT, Role.ADMIN]),
+    toggleUserStatus
+);
 module.exports = router;

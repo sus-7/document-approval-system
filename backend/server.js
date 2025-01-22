@@ -1,11 +1,14 @@
 const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
+const bodyparser = require("body-parser");
 require("dotenv").config();
 const errorHandler = require("./utils/errorHandler");
+const path = require("path");
 
 const userRoutes = require("./routes/user.routes");
 const assistantRoutes = require("./routes/assistant.routes");
+const adminRoutes = require("./routes/admin.routes");
 const app = express();
 const corsOptions = {
     origin: ["http://localhost:5174", "http://localhost:5173"],
@@ -16,6 +19,7 @@ app.use(cors(corsOptions));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(express.static(path.join(__dirname, "public")));
 
 const connectDB = require("./db/connection");
 
@@ -35,6 +39,7 @@ app.get("/", (req, res) => {
 
 app.use("/user", userRoutes);
 app.use("/assistant", assistantRoutes);
+app.use("/admin", adminRoutes);
 
 app.use(errorHandler);
 const PORT = process.env.PORT || 3000;

@@ -15,7 +15,10 @@ const Login = () => {
       //todo:role based access
       if (loggedInUser.role === "Approver") {
         navigate("/approver/dashboard");
-      } else if (loggedInUser.role === "Senior Assistant") {
+      } else if (
+        loggedInUser.role === "Senior Assistant" ||
+        loggedInUser.role === "Assistant"
+      ) {
         navigate("/assistant/dashboard");
       } else if (loggedInUser.role === "Admin") {
         navigate("/admin/dashboard");

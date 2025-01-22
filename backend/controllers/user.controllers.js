@@ -340,6 +340,34 @@ const updateProfile = asyncHandler(async (req, res, next) => {
     });
 });
 
+const toggleUserStatus = asyncHandler(async (req, res, next) => {
+    const { username, isActive } = req.body;
+    if (!username || !isActive) {
+        const error = new Error("username and isActive are required");
+        error.statusCode = 400;
+        return next(error);
+    }
+    const user = await User.findOne({ username });
+    if (!user) {
+        const error = new Error("User not found");
+        error.statusCode = 404;
+        return next(error);
+    }
+    if (user._id === req.user._id || user.role === Role.ADMIN) {
+        const error = new Error("Access Denied!");
+        error.statusCode = 400;
+        return next(error);
+    }
+    await User.updateOne(
+        { username },
+        { isActive: isActive === "true" ? true : false }
+    );
+    return res.status(200).json({
+        status: "SUCCESS",
+        message: `${username} is now ${isActive ? "activated" : "deactivated"}`,
+    });
+});
+
 module.exports = {
     signIn,
     signUp,
@@ -351,4 +379,5 @@ module.exports = {
     resetPassword,
     verifySpOTP,
     updateProfile,
+    toggleUserStatus,
 };

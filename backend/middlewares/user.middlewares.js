@@ -60,6 +60,7 @@ const verifyToken = asyncHandler(async (req, res, next) => {
     const user = await User.findOne({
         username: decoded.username,
         isActive: true,
+        isVerified: true,
     });
     if (!user) {
         const error = new Error("User not found");
@@ -146,6 +147,15 @@ const verifyOldPassword = asyncHandler(async (req, res, next) => {
     next();
 });
 
+const authorizeRoles = (roles) => (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+        const error = new Error("Access Denied!");
+        error.statusCode = 401;
+        return next(error);
+    }
+    next();
+};
+
 module.exports = {
     signUpDetailsValidator,
     signiInDetailsValidator,
@@ -153,4 +163,5 @@ module.exports = {
     verifySpToken,
     verifyEmailExists,
     verifyOldPassword,
+    authorizeRoles,
 };
