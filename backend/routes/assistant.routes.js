@@ -6,13 +6,11 @@ const {
     createUserValidator,
     verifySeniorAssistant,
     verifyAssistant,
-    verifyFileAtrributes,
 } = require("../middlewares/assistant.middlewares");
 const {
     createUser,
     getCreatedAssistants,
     getApprover,
-    uploadPdf,
 } = require("../controllers/assistant.controllers");
 const {
     verifyToken,
@@ -41,12 +39,4 @@ router.get(
     getApprover
 );
 
-router.post(
-    "/upload-pdf",
-    upload.single("pdfFile"),
-    verifyToken,
-    authorizeRoles([Role.SENIOR_ASSISTANT, Role.ASSISTANT]),
-    verifyFileAtrributes,
-    uploadPdf
-);
 module.exports = router;
