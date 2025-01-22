@@ -1,10 +1,11 @@
 const multer = require("multer");
 const path = require("path");
-
+const appConfig = require("./appConfig");
 // Configure Multer storage
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        cb(null, path.join(__dirname, "../uploads")); // Uploads directory
+        // Use the absolute path directly from the appConfig
+        cb(null, appConfig.baseUploadDir);
     },
     filename: (req, file, cb) => {
         cb(null, `${Date.now()}-${file.originalname}`);
