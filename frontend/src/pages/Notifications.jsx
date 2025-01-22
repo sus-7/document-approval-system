@@ -15,7 +15,7 @@ const Notifications = () => {
   const navigate = useNavigate();
 
   const navigateback = () => {
-    {loggedInUser.role === "Admin" ? navigate("/admin/dashboard") : navigate("assistant/dashboard")}
+    {loggedInUser.role === "Admin" ? navigate("/admin/dashboard") : navigate("/assistant/dashboard")}
   };
 
   const handleMarkAsRead = (id) => {
