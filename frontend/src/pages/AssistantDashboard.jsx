@@ -3,45 +3,88 @@ import { FaSearch, FaBars } from "react-icons/fa";
 import Navbar from "../components/Navbar";
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, IconButton } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
-//! Add a new document Route on backend
+ 
+import axios from 'axios';
 const AssistantDashboard = () => {
+  // State Management
   const [selectedTab, setSelectedTab] = useState("PENDING");
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
+  const [documents, setDocuments] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Dialog States
   const [openDialog, setOpenDialog] = useState(false);
   const [remarks, setRemarks] = useState("");
   const [currentDocumentId, setCurrentDocumentId] = useState(null);
+  const [newDocDialogOpen, setNewDocDialogOpen] = useState(false);
+  const [viewPdfDialogOpen, setViewPdfDialogOpen] = useState(false);
+  const [currentPdfUrl, setCurrentPdfUrl] = useState("");
+
+  // Filter States
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
-  const [newDocDialogOpen, setNewDocDialogOpen] = useState(false);
+
+  // New Document States
   const [newDocTitle, setNewDocTitle] = useState("");
   const [newDocDepartment, setNewDocDepartment] = useState("");
   const [newDocFile, setNewDocFile] = useState(null);
   const [newDocDesc, setNewDocDesc] = useState("");
-  const [viewPdfDialogOpen, setViewPdfDialogOpen] = useState(false);
-  const [currentPdfUrl, setCurrentPdfUrl] = useState("");
 
-  const sampleData = [
-    { id: 1, name: "Policy Draft", category: "Finance", date: "2025-01-10", status: "PENDING" },
-    { id: 2, name: "Education Proposal", category: "Education", date: "2025-01-08", status: "APPROVED" },
-    { id: 3, name: "Health Policy Update", category: "Health", date: "2025-01-07", status: "REJECTED" },
-    { id: 4, name: "Transport Plan", category: "Transportation", date: "2025-01-09", status: "PENDING" },
-  ];
+  // Fetch Documents
+  const fetchDocuments = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const apiUrl = import.meta.env.VITE_API_URL + "/file/upload-pdf"
+      const response  = await axios.post(apiUrl,)  
+
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response');
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch documents');
+      }
+
+      const data = await response.json();
+      setDocuments(data);
+      setFilteredData(data);
+
+    } catch (err) {
+      setError(err.message);
+      console.error("Error fetching documents:", err);
+      setDocuments([]);
+      setFilteredData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Effects
+  useEffect(() => {
+    fetchDocuments();
+  }, [selectedTab]);
 
   useEffect(() => {
-    const filtered = sampleData.filter(
-      (item) =>
-        (item.status === selectedTab || selectedTab === "ALL") &&
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-        (!selectedCategory || item.category === selectedCategory) &&
-        (!startDate || new Date(item.date) >= new Date(startDate)) &&
-        (!endDate || new Date(item.date) <= new Date(endDate))
+    const filtered = documents.filter(doc => 
+      doc.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      (!selectedCategory || doc.category === selectedCategory) &&
+      (!startDate || new Date(doc.date) >= new Date(startDate)) &&
+      (!endDate || new Date(doc.date) <= new Date(endDate))
     );
     setFilteredData(filtered);
-  }, [selectedTab, searchQuery, selectedCategory, startDate, endDate]);
+  }, [searchQuery, selectedCategory, startDate, endDate, documents]);
 
+  // Event Handlers
   const handleAcceptReject = (id, status) => {
     setFilteredData((prevData) =>
       prevData.map((item) => (item.id === id ? { ...item, status } : item))
@@ -71,7 +114,7 @@ const AssistantDashboard = () => {
       formData.append("file", newDocFile);
       formData.append("status", "PENDING");
 
-      const response = await fetch("/api/documents", {
+      const response = await fetch(`${API_BASE_URL}/api/documents`, {
         method: "POST",
         body: formData,
       });
@@ -82,21 +125,10 @@ const AssistantDashboard = () => {
         setNewDocDepartment("");
         setNewDocDesc("");
         setNewDocFile(null);
-        // Refresh document list
         fetchDocuments();
       }
     } catch (error) {
       console.error("Error submitting document:", error);
-    }
-  };
-
-  const fetchDocuments = async () => {
-    try {
-      const response = await fetch(`/api/documents?status=${selectedTab}`);
-      const data = await response.json();
-      setFilteredData(data);
-    } catch (error) {
-      console.error("Error fetching documents:", error);
     }
   };
 
@@ -108,6 +140,7 @@ const AssistantDashboard = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-gray-800">
       <Navbar role="Personal Assistant - Approval Dashboard"/>
+      
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
         className="md:hidden p-2 text-gray-600 rounded-md"
@@ -116,14 +149,16 @@ const AssistantDashboard = () => {
       </button>
 
       <main className="p-6 flex-grow">
+        {/* Status Tabs */}
         <div className="flex flex-wrap gap-4 mb-6 border-b">
           {["ALL", "PENDING", "APPROVED", "REJECTED", "REMARKS"].map((tab) => (
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
-              className={`px-4 py-2 ${selectedTab === tab
-                ? "border-b-2 border-blue-500 text-blue-500"
-                : "text-gray-600 hover:text-blue-500"
+              className={`px-4 py-2 ${
+                selectedTab === tab
+                  ? "border-b-2 border-blue-500 text-blue-500"
+                  : "text-gray-600 hover:text-blue-500"
               }`}
             >
               {tab}
@@ -131,6 +166,7 @@ const AssistantDashboard = () => {
           ))}
         </div>
 
+        {/* Search Bar */}
         <div className="relative w-full max-w-xs mx-auto mb-6">
           <FaSearch className="absolute top-3 left-3 text-gray-400"/>
           <input
@@ -142,19 +178,16 @@ const AssistantDashboard = () => {
           />
         </div>
 
+        {/* Filters */}
         <div className="mb-4 flex flex-col md:flex-row gap-4">
           <div className="flex-shrink-0">
-            <label
-              htmlFor="category"
-              className="block text-sm font-medium text-gray-700"
-            >
+            <label className="block text-sm font-medium text-gray-700">
               Category
             </label>
             <select
-              id="category"
               value={selectedCategory}
               onChange={(e) => setSelectedCategory(e.target.value)}
-              className="block w-full md:w-auto mt-1 p-2 text-sm border border-gray-300 bg-white rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="block w-full md:w-auto mt-1 p-2 text-sm border border-gray-300 bg-white rounded-md"
             >
               <option value="">All Categories</option>
               <option value="Finance">Finance</option>
@@ -179,17 +212,26 @@ const AssistantDashboard = () => {
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="p-2 border bg-white text-black border-gray-300 rounded-md"
+                className="p-2 border bg-white border-gray-300 rounded-md"
                 min={startDate}
               />
             </div>
           </div>
         </div>
 
+        {/* Document List */}
         <div className="flex flex-col md:flex-row gap-2">
           <div className="bg-white p-4 w-full md:w-2/3 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-medium mb-4">Filtered Documents</h3>
-            {filteredData.length > 0 ? (
+            <h3 className="text-lg font-medium mb-4">Documents</h3>
+            {isLoading ? (
+              <div className="text-center py-4">
+                <p className="text-gray-500">Loading documents...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-4 text-red-500">
+                <p>Error: {error}</p>
+              </div>
+            ) : filteredData.length > 0 ? (
               <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
                   <thead className="text-left border-b">
@@ -218,12 +260,13 @@ const AssistantDashboard = () => {
                 </table>
               </div>
             ) : (
-              <p className="text-gray-500">No documents found for selected filters.</p>
+              <p className="text-gray-500 text-center py-4">No documents found.</p>
             )}
           </div>
         </div>
       </main>
 
+      {/* Remarks Dialog */}
       {openDialog && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-md shadow-lg max-w-md w-full">
@@ -231,7 +274,7 @@ const AssistantDashboard = () => {
             <textarea
               value={remarks}
               onChange={(e) => setRemarks(e.target.value)}
-              className="w-full p-2 border bg-white resize-none border-gray-300 rounded-md mb-4"
+              className="w-full p-2 border resize-none border-gray-300 rounded-md mb-4"
               rows="4"
               placeholder="Enter remarks..."
             />
@@ -253,6 +296,7 @@ const AssistantDashboard = () => {
         </div>
       )}
 
+      {/* New Document Dialog */}
       <Dialog open={newDocDialogOpen} onClose={() => setNewDocDialogOpen(false)}>
         <DialogTitle>Prepare New Document</DialogTitle>
         <DialogContent>
@@ -289,15 +333,12 @@ const AssistantDashboard = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setNewDocDialogOpen(false)} color="primary">
-            Cancel
-          </Button>
-          <Button onClick={handleDocumentSubmit} color="primary">
-            Submit
-          </Button>
+          <Button onClick={() => setNewDocDialogOpen(false)}>Cancel</Button>
+          <Button onClick={handleDocumentSubmit}>Submit</Button>
         </DialogActions>
       </Dialog>
 
+      {/* Add Document Button */}
       <div className="fixed bottom-6 right-6">
         <IconButton
           color="primary"
@@ -309,10 +350,20 @@ const AssistantDashboard = () => {
       </div>
 
       {/* PDF Preview Dialog */}
-      <Dialog open={viewPdfDialogOpen} onClose={() => setViewPdfDialogOpen(false)} maxWidth="md" fullWidth>
+      <Dialog 
+        open={viewPdfDialogOpen} 
+        onClose={() => setViewPdfDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Document Preview</DialogTitle>
         <DialogContent>
-          <iframe src={currentPdfUrl} width="100%" height="600px" title="PDF Preview" />
+          <iframe 
+            src={currentPdfUrl} 
+            width="100%" 
+            height="600px" 
+            title="PDF Preview" 
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setViewPdfDialogOpen(false)}>Close</Button>
