@@ -3,8 +3,10 @@ import { FaSearch, FaBars } from "react-icons/fa";
 import Navbar from "../components/Navbar";
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, IconButton } from "@mui/material";
 import AddIcon from '@mui/icons-material/Add';
- 
+import { toast, Toaster } from 'react-hot-toast';
 import axios from 'axios';
+import CryptoJS from "crypto-js";
+
 const AssistantDashboard = () => {
   // State Management
   const [selectedTab, setSelectedTab] = useState("PENDING");
@@ -33,6 +35,8 @@ const AssistantDashboard = () => {
   const [newDocDepartment, setNewDocDepartment] = useState("");
   const [newDocFile, setNewDocFile] = useState(null);
   const [newDocDesc, setNewDocDesc] = useState("");
+  const [encryptionKey, setEncryptionKey] = useState("");
+  const [serverResponse, setServerResponse] = useState("");
 
   // Fetch Documents
   const fetchDocuments = async () => {
@@ -40,9 +44,13 @@ const AssistantDashboard = () => {
       setIsLoading(true);
       setError(null);
       
-      const apiUrl = import.meta.env.VITE_API_URL + "/file/upload-pdf"
-      const response  = await axios.post(apiUrl,)  
-
+      const apiUrl = import.meta.env.VITE_API_URL + "/api/documents?status=" + selectedTab;
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
 
       // Check if response is JSON
       const contentType = response.headers.get('content-type');
@@ -104,34 +112,50 @@ const AssistantDashboard = () => {
       setOpenDialog(false);
     }
   };
+  const handleEncryptAndUpload = async () => {
+    if (!newDocFile || !encryptionKey || !newDocTitle || !newDocDepartment) {
+      toast.error("Please fill all required fields");
+      return;
+    }
 
-  const handleDocumentSubmit = async () => {
     try {
+      // Read file as ArrayBuffer
+      const arrayBuffer = await newDocFile.arrayBuffer();
+      const wordArray = CryptoJS.lib.WordArray.create(arrayBuffer);
+
+      // Encrypt the WordArray
+      const encrypted = CryptoJS.AES.encrypt(wordArray, encryptionKey);
+      const encryptedContent = encrypted.toString();
+
+      // Create form data
       const formData = new FormData();
-      formData.append("title", newDocTitle);
-      formData.append("department", newDocDepartment);
-      formData.append("description", newDocDesc);
-      formData.append("file", newDocFile);
-      formData.append("status", "PENDING");
+      const blob = new Blob([encryptedContent], { type: 'application/pdf' });
+      formData.append('pdfFile', new File([blob], `${newDocFile.name}.pdf`));
+      formData.append('department', newDocDepartment);
+      formData.append('title', newDocTitle);
+      formData.append('description', newDocDesc || '');
 
-
-          const apiUrl = import.meta.env.VITE_API_URL + "/file/upload-pdf"
-
-      const response = await axios.post(`${apiUrl}/api/documents`, {
-        method: "POST",
-        body: formData,
+      const token = localStorage.getItem('token'); // Get auth token
+      const apiUrl = import.meta.env.VITE_API_URL + "/file/upload-pdf";
+      const response = await axios.post(apiUrl, formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          'Authorization': `Bearer ${token}`
+        }
       });
 
-      if (response.ok) {
-        setNewDocDialogOpen(false);
-        setNewDocTitle("");
-        setNewDocDepartment("");
-        setNewDocDesc("");
-        setNewDocFile(null);
-        fetchDocuments();
-      }
+      toast.success(response.data.message);
+      setNewDocDialogOpen(false);
+      // Reset form
+      setNewDocTitle("");
+      setNewDocDepartment("");
+      setNewDocDesc("");
+      setNewDocFile(null);
+      setEncryptionKey("");
+      
     } catch (error) {
-      console.error("Error submitting document:", error);
+      console.error("Upload error:", error);
+      toast.error(error.response?.data?.message || "Failed to upload document");
     }
   };
 
@@ -334,10 +358,18 @@ const AssistantDashboard = () => {
             value={newDocDesc}
             onChange={(e) => setNewDocDesc(e.target.value)}
           />
+          <TextField
+            margin="dense"
+            label="Encryption Key"
+            type="text"
+            fullWidth
+            value={encryptionKey}
+            onChange={(e) => setEncryptionKey(e.target.value)}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setNewDocDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleDocumentSubmit}>Submit</Button>
+          <Button onClick={handleEncryptAndUpload}>Encrypt & Upload</Button>
         </DialogActions>
       </Dialog>
 

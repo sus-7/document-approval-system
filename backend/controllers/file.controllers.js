@@ -14,8 +14,8 @@ const uploadPdf = asyncHandler(async (req, res, next) => {
         createdBy: req.user._id,
         assignedTo,
         department,
-        title,
-        description,
+           title,
+        description, 
     }).save();
 
     const populatedFile = await newFile.populate([
