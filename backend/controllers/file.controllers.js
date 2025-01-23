@@ -185,6 +185,7 @@ const getDocumentsByQuery = asyncHandler(async (req, res, next) => {
         documents,
     });
 });
+
 const updateFileStatus = asyncHandler(async (req, res, next) => {
     let { fileUniqueName, status, remarks } = req.body;
     if (!fileUniqueName) {
