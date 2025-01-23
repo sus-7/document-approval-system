@@ -43,7 +43,7 @@ const AssistantDashboard = () => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const apiUrl = import.meta.env.VITE_API_URL + "/api/documents?status=" + selectedTab;
       const response = await fetch(apiUrl, {
         headers: {
@@ -79,11 +79,10 @@ const AssistantDashboard = () => {
 
   // Effects
   useEffect(() => {
-    fetchDocuments();
   }, [selectedTab]);
 
   useEffect(() => {
-    const filtered = documents.filter(doc => 
+    const filtered = documents.filter(doc =>
       doc.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (!selectedCategory || doc.category === selectedCategory) &&
       (!startDate || new Date(doc.date) >= new Date(startDate)) &&
@@ -112,53 +111,59 @@ const AssistantDashboard = () => {
       setOpenDialog(false);
     }
   };
-  const handleEncryptAndUpload = async () => {
-    if (!newDocFile || !encryptionKey || !newDocTitle || !newDocDepartment) {
-      toast.error("Please fill all required fields");
+ 
+  const handleDocumentUpload = async () => {
+    if (!newDocFile || !newDocDepartment || !newDocTitle) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+
+    if (!newDocFile.type.includes('pdf')) {
+      toast.error('Please upload only PDF files');
       return;
     }
 
     try {
-      // Read file as ArrayBuffer
       const arrayBuffer = await newDocFile.arrayBuffer();
       const wordArray = CryptoJS.lib.WordArray.create(arrayBuffer);
 
-      // Encrypt the WordArray
       const encrypted = CryptoJS.AES.encrypt(wordArray, encryptionKey);
-      const encryptedContent = encrypted.toString();
+      const encryptedBytes = CryptoJS.enc.Base64.parse(encrypted.toString());
 
-      // Create form data
+      const blob = new Blob([encryptedBytes], { type: 'application/pdf' });
+      const encryptedFile = new File([blob], newDocFile.name, { type: 'application/pdf' });
+
       const formData = new FormData();
-      const blob = new Blob([encryptedContent], { type: 'application/pdf' });
-      formData.append('pdfFile', new File([blob], `${newDocFile.name}.pdf`));
+      formData.append('pdfFile', encryptedFile);
       formData.append('department', newDocDepartment);
       formData.append('title', newDocTitle);
       formData.append('description', newDocDesc || '');
 
-      const token = localStorage.getItem('token'); // Get auth token
-      const apiUrl = import.meta.env.VITE_API_URL + "/file/upload-pdf";
-      const response = await axios.post(apiUrl, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          'Authorization': `Bearer ${token}`
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/file/upload-pdf`,
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
         }
-      });
+      );
 
-      toast.success(response.data.message);
-      setNewDocDialogOpen(false);
-      // Reset form
-      setNewDocTitle("");
-      setNewDocDepartment("");
-      setNewDocDesc("");
-      setNewDocFile(null);
-      setEncryptionKey("");
-      
+      if (response.data) {
+        toast.success('Document uploaded successfully');
+        setNewDocFile(null);
+        setNewDocDepartment('');
+        setNewDocTitle('');
+        setNewDocDesc('');
+        fetchDocuments();
+      }
     } catch (error) {
-      console.error("Upload error:", error);
-      toast.error(error.response?.data?.message || "Failed to upload document");
+      console.error('Upload error:', error);
+      toast.error(error.response?.data?.message || 'Error uploading document');
     }
   };
-
+  
   const handleTitleClick = (documentUrl) => {
     setCurrentPdfUrl(documentUrl);
     setViewPdfDialogOpen(true);
@@ -166,13 +171,22 @@ const AssistantDashboard = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-gray-800">
-      <Navbar role="Personal Assistant - Approval Dashboard"/>
-      
+      <Navbar role="Personal Assistant - Approval Dashboard" />
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#333',
+            color: '#fff',
+          },
+        }}
+      />
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
         className="md:hidden p-2 text-gray-600 rounded-md"
       >
-        <FaBars/>
+        <FaBars />
       </button>
 
       <main className="p-6 flex-grow">
@@ -182,11 +196,10 @@ const AssistantDashboard = () => {
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
-              className={`px-4 py-2 ${
-                selectedTab === tab
+              className={`px-4 py-2 ${selectedTab === tab
                   ? "border-b-2 border-blue-500 text-blue-500"
                   : "text-gray-600 hover:text-blue-500"
-              }`}
+                }`}
             >
               {tab}
             </button>
@@ -195,7 +208,7 @@ const AssistantDashboard = () => {
 
         {/* Search Bar */}
         <div className="relative w-full max-w-xs mx-auto mb-6">
-          <FaSearch className="absolute top-3 left-3 text-gray-400"/>
+          <FaSearch className="absolute top-3 left-3 text-gray-400" />
           <input
             type="text"
             placeholder="Search documents..."
@@ -369,7 +382,7 @@ const AssistantDashboard = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setNewDocDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleEncryptAndUpload}>Encrypt & Upload</Button>
+          <Button onClick={handleDocumentUpload}>Encrypt & Upload</Button>
         </DialogActions>
       </Dialog>
 
@@ -380,24 +393,24 @@ const AssistantDashboard = () => {
           onClick={() => setNewDocDialogOpen(true)}
           aria-label="add new document"
         >
-          <AddIcon fontSize="large"/>
+          <AddIcon fontSize="large" />
         </IconButton>
       </div>
 
       {/* PDF Preview Dialog */}
-      <Dialog 
-        open={viewPdfDialogOpen} 
+      <Dialog
+        open={viewPdfDialogOpen}
         onClose={() => setViewPdfDialogOpen(false)}
         maxWidth="md"
         fullWidth
       >
         <DialogTitle>Document Preview</DialogTitle>
         <DialogContent>
-          <iframe 
-            src={currentPdfUrl} 
-            width="100%" 
-            height="600px" 
-            title="PDF Preview" 
+          <iframe
+            src={currentPdfUrl}
+            width="100%"
+            height="600px"
+            title="PDF Preview"
           />
         </DialogContent>
         <DialogActions>
