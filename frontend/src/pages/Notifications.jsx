@@ -1,21 +1,54 @@
 import React, { useState } from "react";
-import { FaBell, FaArrowLeft, FaUser, FaHistory, FaCheckCircle, FaTimesCircle, FaExclamationCircle } from "react-icons/fa";
+import {
+  FaBell,
+  FaArrowLeft,
+  FaUser,
+  FaHistory,
+  FaCheckCircle,
+  FaTimesCircle,
+  FaExclamationCircle,
+} from "react-icons/fa";
 import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
-
+import { Roles } from "../../utils/enums";
 const Notifications = () => {
   const [notifications, setNotifications] = useState([
-    { id: 1, title: "Document Accepted", description: "Your Document was Accepted By CM.", time: "5 minutes ago", type: "accepted", read: false },
-    { id: 2, title: "Document Rejected", description: "Your Document was Rejected By CM.", time: "1 hour ago", type: "rejected", read: false },
-    { id: 3, title: "Correction Spotted", description: "Document has Correction.", time: "3 hours ago", type: "correction", read: false },
+    {
+      id: 1,
+      title: "Document Accepted",
+      description: "Your Document was Accepted By CM.",
+      time: "5 minutes ago",
+      type: "accepted",
+      read: false,
+    },
+    {
+      id: 2,
+      title: "Document Rejected",
+      description: "Your Document was Rejected By CM.",
+      time: "1 hour ago",
+      type: "rejected",
+      read: false,
+    },
+    {
+      id: 3,
+      title: "Correction Spotted",
+      description: "Document has Correction.",
+      time: "3 hours ago",
+      type: "correction",
+      read: false,
+    },
   ]);
-    const { loggedInUser, setLoggedInUser, loading, logout } = useAuth();
+  const { loggedInUser, setLoggedInUser, loading, logout } = useAuth();
   const navigate = useNavigate();
 
   const navigateback = () => {
-    {loggedInUser.role === "Admin" ? navigate("/admin/dashboard") : navigate("/assistant/dashboard")}
+    {
+      loggedInUser.role === Roles.ADMIN
+        ? navigate("/admin/dashboard")
+        : navigate("/assistant/dashboard");
+    }
   };
 
   const handleMarkAsRead = (id) => {
@@ -59,7 +92,7 @@ const Notifications = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
       {/* Navbar */}
-     <Navbar/>
+      <Navbar />
 
       {/* Main Content */}
       <div className="flex items-center justify-center flex-grow">
@@ -75,18 +108,30 @@ const Notifications = () => {
 
           {/* Notifications List */}
           <div>
-            <h2 className="text-2xl font-semibold text-gray-800 mb-6">Your Notifications</h2>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-6">
+              Your Notifications
+            </h2>
             {notifications.map((notification) => (
               <div
                 key={notification.id}
-                className={`flex justify-between items-center p-4 mb-4 rounded-lg ${getNotificationColor(notification.type)} shadow-md transform transition-all  `}
+                className={`flex justify-between items-center p-4 mb-4 rounded-lg ${getNotificationColor(
+                  notification.type
+                )} shadow-md transform transition-all  `}
               >
                 <div className="flex items-center gap-4">
-                  <div className="p-2 bg-white rounded-full shadow-md">{getNotificationIcon(notification.type)}</div>
+                  <div className="p-2 bg-white rounded-full shadow-md">
+                    {getNotificationIcon(notification.type)}
+                  </div>
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-800">{notification.title}</h3>
-                    <p className="text-sm text-gray-600">{notification.description}</p>
-                    <span className="text-xs font-medium text-gray-500">{notification.time}</span>
+                    <h3 className="text-lg font-semibold text-gray-800">
+                      {notification.title}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {notification.description}
+                    </p>
+                    <span className="text-xs font-medium text-gray-500">
+                      {notification.time}
+                    </span>
                   </div>
                 </div>
                 <button
