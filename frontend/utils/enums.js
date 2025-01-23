@@ -11,7 +11,6 @@ const FileStatus = {
   CORRECTION: "correction",
   PENDING: "pending",
 };
-module.exports = {
-  Role,
-  FileStatus,
-};
+ 
+
+export  { Role, FileStatus };
