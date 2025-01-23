@@ -2,6 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import { toast, Toaster } from "react-hot-toast";
+import { Roles } from "../../utils/enums";
 const Login = () => {
   const [selectedToggle, setSelectedToggle] = useState("Assistant");
   const [username, setUsername] = useState("");
@@ -13,14 +14,14 @@ const Login = () => {
   useEffect(() => {
     if (loggedInUser) {
       //todo:role based access
-      if (loggedInUser.role === "Approver") {
+      if (loggedInUser.role === Roles.APPROVER) {
         navigate("/approver/dashboard");
       } else if (
-        loggedInUser.role === "Senior Assistant" ||
-        loggedInUser.role === "Assistant"
+        loggedInUser.role === Roles.SENIOR_ASSISTANT ||
+        loggedInUser.role === Roles.ASSISTANT
       ) {
         navigate("/assistant/dashboard");
-      } else if (loggedInUser.role === "Admin") {
+      } else if (loggedInUser.role === Roles.ADMIN) {
         navigate("/admin/dashboard");
       }
     }
@@ -76,13 +77,13 @@ const Login = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
       <Toaster />
-      
+
       {loading && (
         <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
           <span className="loading loading-bars loading-lg"></span>
         </div>
       )}
-  
+
       <button
         className="absolute top-4 bg-red-600 text-white p-2 rounded-md right-4"
         onClick={() => navigate("/adminLogin")}
@@ -112,11 +113,11 @@ const Login = () => {
             Assistant
           </button>
         </div>
-  
+
         <h2 className="text-center text-xl font-semibold text-gray-800 mb-6">
           Welcome Back!
         </h2>
-  
+
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -130,7 +131,7 @@ const Login = () => {
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
-  
+
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Password
@@ -143,7 +144,7 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-  
+
           <div className="flex justify-end items-end mb-4">
             <RouterLink
               to="/forgot-password"
@@ -152,7 +153,7 @@ const Login = () => {
               Forgot Password?
             </RouterLink>
           </div>
-  
+
           <button
             type="submit"
             className="w-full px-4 py-2 bg-blue-500 text-white font-medium rounded-md hover:bg-blue-600 transition duration-200"
@@ -160,7 +161,7 @@ const Login = () => {
             Login as {selectedToggle}
           </button>
         </form>
-  
+
         {selectedToggle === "Assistant" && (
           <div className="text-center mt-6">
             <span className="text-sm text-gray-600">
@@ -177,7 +178,6 @@ const Login = () => {
       </div>
     </div>
   );
-  
 };
 
 export default Login;
