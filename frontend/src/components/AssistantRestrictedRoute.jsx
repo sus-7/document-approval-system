@@ -1,11 +1,13 @@
 import { Navigate, NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { Role } from "../../utils/enums";
-const ApproverRestrictedRoute = ({ children }) => {
+const AssistantRestrictedRoute = ({ children }) => {
   const { loggedInUser, loading } = useAuth();
 
   if (loading) return <p>Loading...</p>;
-  return loggedInUser && loggedInUser.role === Role.APPROVER ? (
+  return loggedInUser &&
+    (loggedInUser.role === Role.SENIOR_ASSISTANT ||
+      loggedInUser.role === Role.ASSISTANT) ? (
     children
   ) : (
     <h2>
@@ -18,4 +20,4 @@ const ApproverRestrictedRoute = ({ children }) => {
   );
 };
 
-export default ApproverRestrictedRoute;
+export default AssistantRestrictedRoute;

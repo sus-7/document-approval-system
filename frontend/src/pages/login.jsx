@@ -33,8 +33,8 @@ const Login = () => {
 
     const apiUrl = import.meta.env.VITE_API_URL + "/user/signin";
     const formData = { username, password };
-    const minimumDuration = 500; // Minimum spinner duration in ms
-    const startTime = Date.now();
+    // const minimumDuration = 500; // Minimum spinner duration in ms
+    // const startTime = Date.now();
 
     try {
       const response = await fetch(apiUrl, {
@@ -46,9 +46,9 @@ const Login = () => {
         credentials: "include",
       });
 
-      const elapsedTime = Date.now() - startTime;
-      const remainingTime = Math.max(minimumDuration - elapsedTime, 0);
-      await new Promise((resolve) => setTimeout(resolve, remainingTime));
+      // const elapsedTime = Date.now() - startTime;
+      // const remainingTime = Math.max(minimumDuration - elapsedTime, 0);
+      // await new Promise((resolve) => setTimeout(resolve, remainingTime));
 
       if (!response.ok) {
         const error = await response.json();
@@ -78,18 +78,18 @@ const Login = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
       <Toaster />
 
-      {loading && (
+      {/* {loading && (
         <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
           <span className="loading loading-bars loading-lg"></span>
         </div>
-      )}
+      )} */}
 
-      <button
+      {/* <button
         className="absolute top-4 bg-red-600 text-white p-2 rounded-md right-4"
         onClick={() => navigate("/adminLogin")}
       >
         Admin
-      </button>
+      </button> */}
       <div className="w-96 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
         <div className="flex justify-center gap-4 mb-6">
           <button

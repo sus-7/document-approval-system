@@ -49,9 +49,8 @@ const Navbar = () => {
   };
   const handleLogout = async (e) => {
     e.preventDefault();
-    toast.loading("Logging out...", {
+    const toastId = toast.loading("Logging out...", {
       position: "top-center",
-      duration: 1000,
     });
     try {
       const logoutUrl = import.meta.env.VITE_API_URL + "/user/signout";
@@ -65,6 +64,7 @@ const Navbar = () => {
       if (!response.ok) {
         throw new Error("Failed to logout");
       }
+      toast.dismiss(toastId);
       toast.success("Logged out successfully!", {
         position: "top-center",
         duration: 2000,
@@ -72,6 +72,7 @@ const Navbar = () => {
       logout();
     } catch (error) {
       console.error("Error during logout:", error);
+      toast.dismiss(toastId);
       toast.error(error.message, {
         position: "top-center",
         duration: 2000,

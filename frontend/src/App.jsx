@@ -13,7 +13,7 @@ import ProfileDashboard from "./pages/ProfileDashboard";
 import { AuthProvider } from "../src/contexts/AuthContext";
 import { UsersProvider } from "./contexts/UsersContext";
 import ChangePassword from "./pages/ChangePassword";
-import ApprovalDashboard from "./pages/AssistantDashboard.jsx";
+import AssistantDashboard from "./pages/AssistantDashboard.jsx";
 import Correction from "./pages/Correction";
 import AdminLogin from "./pages/AdminLogin";
 import Support from "./pages/Support";
@@ -28,6 +28,7 @@ import {
   LoginRestrictedRoute,
   SARestrictedRoute,
   AdminRestrictedRoute,
+  AssistantRestrictedRoute,
 } from "./components/RestrictedRoutes";
 const App = () => {
   return (
@@ -56,7 +57,14 @@ const App = () => {
               </SARestrictedRoute>
             }
           />
-          <Route path="/assistant/dashboard" element={<ApprovalDashboard />} />
+          <Route
+            path="/assistant/dashboard"
+            element={
+              <AssistantRestrictedRoute>
+                <AssistantDashboard />
+              </AssistantRestrictedRoute>
+            }
+          />
           <Route path="/remark-pdf" element={<RemarkUI />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/history" element={<History />} />
@@ -77,9 +85,17 @@ const App = () => {
               </AdminRestrictedRoute>
             }
           />
-          <Route path="/changepassword" element={<ChangePassword />} />
+          <Route
+            path="/changepassword"
+            element={
+              <LoginRestrictedRoute>
+                <ChangePassword />
+              </LoginRestrictedRoute>
+            }
+          />
+
           <Route path="/correction" element={<Correction />} />
-          <Route path="/adminLogin" element={<AdminLogin />} />
+          {/* <Route path="/adminLogin" element={<AdminLogin />} /> */}
           <Route path="/support" element={<Support />} />
         </Routes>
       </UsersProvider>
