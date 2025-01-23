@@ -10,7 +10,7 @@ const createUserValidationsSchema = Joi.object({
     mobileNo: Joi.number().min(10).required(),
     email: Joi.string().email().required(),
     password: Joi.string().min(2).required(),
-    role: Joi.string().valid("Assistant", "Approver").required(),
+    role: Joi.string().valid(Role.ASSISTANT, Role.APPROVER).required(),
 });
 const createUserValidator = (req, res, next) => {
     const { error } = createUserValidationsSchema.validate(req.body);

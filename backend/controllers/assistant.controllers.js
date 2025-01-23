@@ -5,10 +5,14 @@ const crypto = require("crypto");
 const { hashPassword, verifyPassword } = require("../utils/hashPassword");
 const { transporter, MailOptions } = require("../utils/sendemail");
 const asyncHandler = require("../utils/asyncHandler");
-
+const { Role } = require("../utils/enums");
 
 const createAssistant = asyncHandler(async (req, res, next) => {
     const { username, password, fullName, email, mobileNo } = req.body;
+    username = username.trim().toLowerCase();
+    email = email.trim().toLowerCase();
+    mobileNo = mobileNo.trim().toLowerCase();
+    fullName = fullName.trim().toLowerCase();
     const existingVerifiedUser = await User.findOne({
         $or: [{ username }, { email }, { mobileNo }],
         isVerified: true,
@@ -47,7 +51,7 @@ const createAssistant = asyncHandler(async (req, res, next) => {
         email,
         mobileNo,
         privateKey,
-        role: "Assistant",
+        role: Role.ASSISTANT,
         assignedApprover,
         isVerified: true,
     }).save();
@@ -72,7 +76,7 @@ const createAssistant = asyncHandler(async (req, res, next) => {
             data: {
                 username,
                 email,
-                role: "Assistant",
+                role: Role.ASSISTANT,
                 fullName,
             },
         });
@@ -90,6 +94,10 @@ const createApprover = asyncHandler(async (req, res, next) => {
         return next(error);
     }
     const { username, password, fullName, email, mobileNo } = req.body;
+    username = username.trim().toLowerCase();
+    email = email.trim().toLowerCase();
+    mobileNo = mobileNo.trim().toLowerCase();
+    fullName = fullName.trim().toLowerCase();
     const existingVerifiedUser = await User.findOne({
         $or: [{ username }, { email }, { mobileNo }],
         isVerified: true,
@@ -119,7 +127,7 @@ const createApprover = asyncHandler(async (req, res, next) => {
         fullName,
         email,
         mobileNo,
-        role: "Approver",
+        role: Role.APPROVER,
         isVerified: true,
     }).save();
 

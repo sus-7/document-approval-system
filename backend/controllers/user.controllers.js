@@ -18,6 +18,7 @@ const transporter = nodemailer.createTransport({
 });
 const signIn = asyncHandler(async (req, res, next) => {
     const { username, password } = req.body;
+    username = username.trim().toLowerCase();
     const user = await User.findOne({ username });
 
     if (!user) {
@@ -69,6 +70,10 @@ const signIn = asyncHandler(async (req, res, next) => {
 });
 const signUp = asyncHandler(async (req, res, next) => {
     const { username, password, fullName, email, mobileNo } = req.body;
+    username = username.trim().toLowerCase();
+    email = email.trim().toLowerCase();
+    mobileNo = mobileNo.trim().toLowerCase();
+    fullName = fullName.trim().toLowerCase();
     const existingVerifiedUser = await User.findOne({
         $or: [{ username }, { email }, { mobileNo }],
         isVerified: true,
@@ -163,6 +168,8 @@ const sendOTPVerificationEmail = asyncHandler(
 
 const verifyOTP = asyncHandler(async (req, res) => {
     const { username, otp } = req.body;
+    username = username.trim().toLowerCase();
+    otp = otp.trim().toLowerCase();
     if (!username || !otp)
         return res.status(400).json({ message: "OTP is required" });
     else {
@@ -202,6 +209,8 @@ const verifyOTP = asyncHandler(async (req, res) => {
 
 const verifySpOTP = asyncHandler(async (req, res) => {
     const { otp, email } = req.body;
+    email = email.trim().toLowerCase();
+    otp = otp.trim().toLowerCase();
     const user = await User.findOne({ email });
     if (!user) {
         return res.status(404).json({
@@ -342,6 +351,8 @@ const updateProfile = asyncHandler(async (req, res, next) => {
 
 const toggleUserStatus = asyncHandler(async (req, res, next) => {
     const { username, isActive } = req.body;
+    username = username.trim().toLowerCase();
+    isActive = isActive.trim().toLowerCase();
     if (!username || !isActive) {
         const error = new Error("username and isActive are required");
         error.statusCode = 400;
