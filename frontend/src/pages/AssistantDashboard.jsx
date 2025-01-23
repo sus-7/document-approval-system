@@ -36,10 +36,30 @@ const AssistantDashboard = () => {
     try {
       setIsLoading(true);
       setError(null);
-      const apiUrl = import.meta.env.VITE_API_URL + "/file/get-all";
-      const response = await axios.get(apiUrl);
-      setDocuments(response.data);
-      setFilteredData(response.data);
+
+      const apiUrl = import.meta.env.VITE_API_URL + "/api/documents?status=" + selectedTab;
+      const response = await fetch(apiUrl, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+
+      // Check if response is JSON
+      const contentType = response.headers.get('content-type');
+      if (!contentType || !contentType.includes('application/json')) {
+        throw new Error('Server returned non-JSON response');
+      }
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to fetch documents');
+      }
+
+      const data = await response.json();
+      setDocuments(data);
+      setFilteredData(data);
+
     } catch (err) {
       setError(err.message || "Failed to fetch documents");
       toast.error("Error fetching documents.");
@@ -49,76 +69,113 @@ const AssistantDashboard = () => {
   };
 
   useEffect(() => {
-    fetchDocuments();
   }, [selectedTab]);
 
-  // Handle File Change
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setNewDocFile(file);
-      toast.info(`Selected file: ${file.name}`);
+  useEffect(() => {
+    const filtered = documents.filter(doc =>
+      doc.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      (!selectedCategory || doc.category === selectedCategory) &&
+      (!startDate || new Date(doc.date) >= new Date(startDate)) &&
+      (!endDate || new Date(doc.date) <= new Date(endDate))
+    );
+    setFilteredData(filtered);
+  }, [searchQuery, selectedCategory, startDate, endDate, documents]);
+
+  // Event Handlers
+  const handleAcceptReject = (id, status) => {
+    setFilteredData((prevData) =>
+      prevData.map((item) => (item.id === id ? { ...item, status } : item))
+    );
+  };
+
+  const handleRemarkSubmit = () => {
+    if (remarks && currentDocumentId !== null) {
+      setFilteredData((prevData) =>
+        prevData.map((item) =>
+          item.id === currentDocumentId
+            ? { ...item, status: "REMARKS", remark: remarks }
+            : item
+        )
+      );
+      setRemarks("");
+      setOpenDialog(false);
     }
   };
+ 
+  const handleDocumentUpload = async () => {
+    if (!newDocFile || !newDocDepartment || !newDocTitle) {
+      toast.error('Please fill all required fields');
+      return;
+    }
 
-  // Encrypt File Function
-  const encryptFile = (file) => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        try {
-          const encryptedData = CryptoJS.AES.encrypt(e.target.result, encryptionKey).toString();
-          const encryptedBlob = new Blob([encryptedData], { type: "text/plain" });
-          resolve(encryptedBlob);
-        } catch (err) {
-          reject(err);
-        }
-      };
-      reader.onerror = (err) => reject(err);
-      reader.readAsDataURL(file);
-    });
-  };
-
-  // Handle Document Upload
-  const handleDocumentSubmit = async () => {
-    if (!newDocTitle || !newDocDepartment || !newDocFile || !newDocDesc) {
-      toast.error("Please fill all fields.");
+    if (!newDocFile.type.includes('pdf')) {
+      toast.error('Please upload only PDF files');
       return;
     }
 
     try {
-      toast.info("Encrypting file, please wait...");
-      const encryptedFile = await encryptFile(newDocFile);
-      toast.success("File encrypted successfully!");
+      const arrayBuffer = await newDocFile.arrayBuffer();
+      const wordArray = CryptoJS.lib.WordArray.create(arrayBuffer);
+
+      const encrypted = CryptoJS.AES.encrypt(wordArray, encryptionKey);
+      const encryptedBytes = CryptoJS.enc.Base64.parse(encrypted.toString());
+
+      const blob = new Blob([encryptedBytes], { type: 'application/pdf' });
+      const encryptedFile = new File([blob], newDocFile.name, { type: 'application/pdf' });
 
       const formData = new FormData();
-      formData.append("title", newDocTitle);
-      formData.append("department", newDocDepartment);
-      formData.append("description", newDocDesc);
-      formData.append("file", encryptedFile, `${newDocFile.name}.enc`);
-      formData.append("status", "PENDING");
+      formData.append('pdfFile', encryptedFile);
+      formData.append('department', newDocDepartment);
+      formData.append('title', newDocTitle);
+      formData.append('description', newDocDesc || '');
 
-      const apiUrl = import.meta.env.VITE_API_URL + "/file/upload-pdf";
-      await axios.post(apiUrl, formData);
+      const response = await axios.post(
+        `${import.meta.env.VITE_API_URL}/file/upload-pdf`,
+        formData,
+        {
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        }
+      );
 
-      toast.success("Document uploaded successfully!");
-      setNewDocDialogOpen(false);
-      setNewDocTitle("");
-      setNewDocDepartment("");
-      setNewDocDesc("");
-      setNewDocFile(null);
-      fetchDocuments();
+      if (response.data) {
+        toast.success('Document uploaded successfully');
+        setNewDocFile(null);
+        setNewDocDepartment('');
+        setNewDocTitle('');
+        setNewDocDesc('');
+        fetchDocuments();
+      }
     } catch (error) {
-      console.error("Error submitting document:", error);
-      toast.error("Error uploading document.");
+      console.error('Upload error:', error);
+      toast.error(error.response?.data?.message || 'Error uploading document');
     }
+  };
+  
+  const handleTitleClick = (documentUrl) => {
+    setCurrentPdfUrl(documentUrl);
+    setViewPdfDialogOpen(true);
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-gray-800">
       <Navbar role="Personal Assistant - Approval Dashboard" />
-
-      <button onClick={() => setSidebarOpen(!sidebarOpen)} className="md:hidden p-2 text-gray-600 rounded-md">
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#333',
+            color: '#fff',
+          },
+        }}
+      />
+      <button
+        onClick={() => setSidebarOpen(!sidebarOpen)}
+        className="md:hidden p-2 text-gray-600 rounded-md"
+      >
         <FaBars />
       </button>
 
@@ -128,7 +185,10 @@ const AssistantDashboard = () => {
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
-              className={`px-4 py-2 ${selectedTab === tab ? "border-b-2 border-blue-500 text-blue-500" : "text-gray-600 hover:text-blue-500"}`}
+              className={`px-4 py-2 ${selectedTab === tab
+                  ? "border-b-2 border-blue-500 text-blue-500"
+                  : "text-gray-600 hover:text-blue-500"
+                }`}
             >
               {tab}
             </button>
@@ -191,7 +251,39 @@ const AssistantDashboard = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setNewDocDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleDocumentSubmit}>Submit</Button>
+          <Button onClick={handleDocumentUpload}>Encrypt & Upload</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Add Document Button */}
+      <div className="fixed bottom-6 right-6">
+        <IconButton
+          color="primary"
+          onClick={() => setNewDocDialogOpen(true)}
+          aria-label="add new document"
+        >
+          <AddIcon fontSize="large" />
+        </IconButton>
+      </div>
+
+      {/* PDF Preview Dialog */}
+      <Dialog
+        open={viewPdfDialogOpen}
+        onClose={() => setViewPdfDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>Document Preview</DialogTitle>
+        <DialogContent>
+          <iframe
+            src={currentPdfUrl}
+            width="100%"
+            height="600px"
+            title="PDF Preview"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setViewPdfDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </div>
