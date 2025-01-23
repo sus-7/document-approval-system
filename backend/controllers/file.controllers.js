@@ -185,9 +185,122 @@ const getDocumentsByQuery = asyncHandler(async (req, res, next) => {
         documents,
     });
 });
+const updateFileStatus = asyncHandler(async (req, res, next) => {
+    let { fileUniqueName, status, remarks } = req.body;
+    if (!fileUniqueName) {
+        const error = new Error("Please provide fileUniqueName");
+        error.status = 400;
+        return next(error);
+    }
+    fileUniqueName = fileUniqueName.trim().toLowerCase();
+    status = status.trim().toLowerCase();
+    remarks = remarks?.trim();
 
+    // Validate status
+    if (!Object.values(FileStatus).includes(status)) {
+        const error = new Error("Invalid status");
+        error.status = 400;
+        return next(error);
+    }
+
+    const file = await File.findOne({ fileUniqueName });
+    if (!file) {
+        const error = new Error("File not found");
+        error.status = 404;
+        return next(error);
+    }
+    if (file.status === FileStatus.REJECTED) {
+        const error = new Error("File has already been rejected");
+        error.status = 400;
+        return next(error);
+    }
+
+    if (file.status === FileStatus.CORRECTION && !remarks) {
+        const error = new Error("Remarks are required for correction");
+        error.status = 400;
+        return next(error);
+    }
+    // Populate and check authorization
+    await file.populate("assignedTo");
+    if (file.assignedTo.username !== req.user.username) {
+        const error = new Error("You are not authorized to update this file");
+        error.status = 403;
+        return next(error);
+    }
+
+    // Update status and corresponding date
+    file.status = status;
+    file.remarks = remarks || "";
+
+    // Update status-specific dates
+    const dateFields = {
+        [FileStatus.APPROVED]: "approvedDate",
+        [FileStatus.REJECTED]: "rejectedDate",
+        [FileStatus.CORRECTION]: "correctionDate",
+    };
+
+    if (dateFields[status]) {
+        file[dateFields[status]] = new Date();
+    }
+
+    await file.save();
+
+    return res.status(200).json({
+        status: true,
+        message: `File ${status.toLowerCase()} successfully`,
+        file: {
+            fileName: file.fileUniqueName,
+            createdBy: file.createdBy.fullName,
+            assignedTo: file.assignedTo.fullName,
+            title: file.title,
+            description: file.description,
+            status: file.status,
+        },
+    });
+});
+
+// Usage examples:
+const approveDocument = asyncHandler((req, res, next) => {
+    req.body.status = FileStatus.APPROVED;
+    return updateFileStatus(req, res, next);
+});
+
+const rejectDocument = asyncHandler((req, res, next) => {
+    req.body.status = FileStatus.REJECTED;
+    return updateFileStatus(req, res, next);
+});
+
+const requestCorrection = asyncHandler((req, res, next) => {
+    req.body.status = FileStatus.CORRECTION;
+    return updateFileStatus(req, res, next);
+});
+// const approveFile = asyncHandler(async (req, res, next) => {
+//     const { fileUniqueName } = req.body;
+//     const file = await Document.findOne({ fileUniqueName });
+//     if (!file) {
+//         const error = new Error("File not found");
+//         error.status = 404;
+//         return next(error);
+//     }
+//     await file.populate("assignedTo").execPopulate();
+//     if (file.assignedTo.username !== req.user.username) {
+//         const error = new Error("You are not authorized to approve this file");
+//         error.status = 403;
+//         return next(error);
+//     }
+//     file.status = FileStatus.APPROVED;
+//     await file.save();
+//     return res.status(200).json({
+//         status: true,
+//         message: "File approved successfully",
+//         file,
+//     });
+// });
 module.exports = {
     uploadPdf,
     downloadPdf,
     getDocumentsByQuery,
+    approveDocument,
+    rejectDocument,
+    requestCorrection,
 };

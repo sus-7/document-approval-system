@@ -34,7 +34,7 @@ router.post(
     verifyToken,
     authorizeRoles([Role.ADMIN, Role.SENIOR_ASSISTANT, Role.ASSISTANT]),
     asyncHandler(async (req, res, next) => {
-        const { departmentName } = req.body;
+        let { departmentName } = req.body;
         departmentName = departmentName.trim().toLowerCase();
         const departmentExists = await Department.findOne({
             departmentName,

@@ -7,6 +7,9 @@ const {
     uploadPdf,
     downloadPdf,
     getDocumentsByQuery,
+    approveDocument,
+    rejectDocument,
+    requestCorrection,
 } = require("../controllers/file.controllers");
 const {
     verifyToken,
@@ -44,5 +47,26 @@ router.get(
         Role.ASSISTANT,
     ]),
     getDocumentsByQuery
+);
+
+router.post(
+    "/approve",
+    verifyToken,
+    authorizeRoles([Role.APPROVER]),
+    approveDocument
+);
+
+router.post(
+    "/reject",
+    verifyToken,
+    authorizeRoles([Role.APPROVER]),
+    rejectDocument
+);
+
+router.post(
+    "/correction",
+    verifyToken,
+    authorizeRoles([Role.APPROVER]),
+    requestCorrection
 );
 module.exports = router;

@@ -8,7 +8,7 @@ const asyncHandler = require("../utils/asyncHandler");
 const { Role } = require("../utils/enums");
 
 const createAssistant = asyncHandler(async (req, res, next) => {
-    const { username, password, fullName, email, mobileNo } = req.body;
+    let { username, password, fullName, email, mobileNo } = req.body;
     username = username.trim().toLowerCase();
     email = email.trim().toLowerCase();
     mobileNo = mobileNo.trim().toLowerCase();
@@ -93,7 +93,7 @@ const createApprover = asyncHandler(async (req, res, next) => {
         error.statusCode = 400;
         return next(error);
     }
-    const { username, password, fullName, email, mobileNo } = req.body;
+    let { username, password, fullName, email, mobileNo } = req.body;
     username = username.trim().toLowerCase();
     email = email.trim().toLowerCase();
     mobileNo = mobileNo.trim().toLowerCase();

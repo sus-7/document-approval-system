@@ -17,7 +17,7 @@ const transporter = nodemailer.createTransport({
     },
 });
 const signIn = asyncHandler(async (req, res, next) => {
-    const { username, password } = req.body;
+    let { username, password } = req.body;
     username = username.trim().toLowerCase();
     const user = await User.findOne({ username });
 
@@ -69,7 +69,7 @@ const signIn = asyncHandler(async (req, res, next) => {
     });
 });
 const signUp = asyncHandler(async (req, res, next) => {
-    const { username, password, fullName, email, mobileNo } = req.body;
+    let { username, password, fullName, email, mobileNo } = req.body;
     username = username.trim().toLowerCase();
     email = email.trim().toLowerCase();
     mobileNo = mobileNo.trim().toLowerCase();
@@ -167,7 +167,7 @@ const sendOTPVerificationEmail = asyncHandler(
 );
 
 const verifyOTP = asyncHandler(async (req, res) => {
-    const { username, otp } = req.body;
+    let { username, otp } = req.body;
     username = username.trim().toLowerCase();
     otp = otp.trim().toLowerCase();
     if (!username || !otp)
@@ -208,7 +208,7 @@ const verifyOTP = asyncHandler(async (req, res) => {
 });
 
 const verifySpOTP = asyncHandler(async (req, res) => {
-    const { otp, email } = req.body;
+    let { otp, email } = req.body;
     email = email.trim().toLowerCase();
     otp = otp.trim().toLowerCase();
     const user = await User.findOne({ email });
@@ -350,7 +350,7 @@ const updateProfile = asyncHandler(async (req, res, next) => {
 });
 
 const toggleUserStatus = asyncHandler(async (req, res, next) => {
-    const { username, isActive } = req.body;
+    let { username, isActive } = req.body;
     username = username.trim().toLowerCase();
     isActive = isActive.trim().toLowerCase();
     if (!username || !isActive) {

@@ -39,7 +39,7 @@ const FileSchema = new mongoose.Schema(
             ref: "Department",
             required: true,
         },
-        remark: {
+        remarks: {
             type: String,
         },
         description: {
