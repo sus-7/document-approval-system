@@ -1,11 +1,11 @@
 import { Navigate, NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
-import { Roles } from "../../utils/enums";
+import { Role } from "../../utils/enums";
 const AdminRestrictedRoute = ({ children }) => {
   const { loggedInUser, loading } = useAuth();
 
   if (loading) return <p>Loading...</p>;
-  return loggedInUser && loggedInUser.role === Roles.ADMIN ? (
+  return loggedInUser && loggedInUser.role === Role.ADMIN ? (
     children
   ) : (
     <h2>

@@ -12,7 +12,7 @@ import { toast } from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../components/Navbar.jsx";
 import { useAuth } from "../contexts/AuthContext.jsx";
-import { Roles } from "../../utils/enums";
+import { Role } from "../../utils/enums";
 const Notifications = () => {
   const [notifications, setNotifications] = useState([
     {
@@ -45,7 +45,7 @@ const Notifications = () => {
 
   const navigateback = () => {
     {
-      loggedInUser.role === Roles.ADMIN
+      loggedInUser.role === Role.ADMIN
         ? navigate("/admin/dashboard")
         : navigate("/assistant/dashboard");
     }

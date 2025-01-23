@@ -7,7 +7,7 @@ import { IconButton, Menu, MenuItem } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import { Tooltip } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
-import { Roles } from "../../utils/enums";
+import { Role } from "../../utils/enums";
 const Navbar = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null); // State to control the dropdown
@@ -40,7 +40,7 @@ const Navbar = () => {
     handleMenuClose();
   };
   const navigateHome = () => {
-    if (loggedInUser.role === Roles.ADMIN) {
+    if (loggedInUser.role === Role.ADMIN) {
       navigate("/admin/dashboard");
     } else navigate("/assistant/dashboard");
 
@@ -129,8 +129,8 @@ const Navbar = () => {
           >
             <MenuItem onClick={navigateProfile}>View Profile</MenuItem>
             <MenuItem onClick={navigateHistory}>History</MenuItem>
-            {(loggedInUser && loggedInUser.role === Roles.SENIOR_ASSISTANT) ||
-            loggedInUser.role === Roles.ADMIN ? (
+            {(loggedInUser && loggedInUser.role === Role.SENIOR_ASSISTANT) ||
+            loggedInUser.role === Role.ADMIN ? (
               <MenuItem onClick={navigateManageUsers}>Manage Users</MenuItem>
             ) : null}
             <MenuItem onClick={handleLogout}>Logout</MenuItem>

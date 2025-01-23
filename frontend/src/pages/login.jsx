@@ -2,7 +2,7 @@ import React, { useState, useContext, useEffect } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import { toast, Toaster } from "react-hot-toast";
-import { Roles } from "../../utils/enums";
+import { Role } from "../../utils/enums";
 const Login = () => {
   const [selectedToggle, setSelectedToggle] = useState("Assistant");
   const [username, setUsername] = useState("");
@@ -14,14 +14,14 @@ const Login = () => {
   useEffect(() => {
     if (loggedInUser) {
       //todo:role based access
-      if (loggedInUser.role === Roles.APPROVER) {
+      if (loggedInUser.role === Role.APPROVER) {
         navigate("/approver/dashboard");
       } else if (
-        loggedInUser.role === Roles.SENIOR_ASSISTANT ||
-        loggedInUser.role === Roles.ASSISTANT
+        loggedInUser.role === Role.SENIOR_ASSISTANT ||
+        loggedInUser.role === Role.ASSISTANT
       ) {
         navigate("/assistant/dashboard");
-      } else if (loggedInUser.role === Roles.ADMIN) {
+      } else if (loggedInUser.role === Role.ADMIN) {
         navigate("/admin/dashboard");
       }
     }
