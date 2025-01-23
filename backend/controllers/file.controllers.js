@@ -17,7 +17,7 @@ const uploadPdf = asyncHandler(async (req, res, next) => {
         assignedTo: req.user.assignedApprover,
         department,
         title,
-        description, 
+        description,
     }).save();
 
     const populatedFile = await newFile.populate([
@@ -177,12 +177,12 @@ const getDocumentsByQuery = asyncHandler(async (req, res, next) => {
         sortOptions = { createdDate: -1 };
     }
     console.log("query", query);
-    const pendingDocuments = await fetchDocuments(query, sortOptions);
+    const documents = await fetchDocuments(query, sortOptions);
 
     return res.status(200).json({
         status: true,
         message: "Pending documents fetched successfully",
-        pendingDocuments,
+        documents,
     });
 });
 

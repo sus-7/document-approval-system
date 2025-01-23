@@ -52,33 +52,27 @@ const AssistantDashboard = () => {
       setIsLoading(true);
       setError(null);
 
-      const apiUrl =
-        import.meta.env.VITE_API_URL +
-        "/file//get-documents?status=" +
-        selectedTab.toLowerCase();
-      const response = await fetch(apiUrl, {
+      const apiUrl = `${
+        import.meta.env.VITE_API_URL
+      }/file/get-documents?status=${selectedTab.toLowerCase()}`;
+
+      const response = await axios.get(apiUrl, {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
         },
+        withCredentials: true,
       });
 
-      // Check if response is JSON
-      const contentType = response.headers.get("content-type");
-      if (!contentType || !contentType.includes("application/json")) {
-        throw new Error("Server returned non-JSON response");
-      }
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to fetch documents");
-      }
-
-      const data = await response.json();
-      setDocuments(data);
-      setFilteredData(data);
+      console.log("fetched data", response.data);
+      setDocuments(response.data.documents);
+      setFilteredData(response.data);
     } catch (err) {
-      setError(err.message);
+      const errorMessage =
+        err.response?.data?.message ||
+        err.message ||
+        "Failed to fetch documents";
+      setError(errorMessage);
       console.error("Error fetching documents:", err);
       setDocuments([]);
       setFilteredData([]);
@@ -93,7 +87,7 @@ const AssistantDashboard = () => {
   useEffect(() => {
     const filtered = documents.filter(
       (doc) =>
-        doc.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+        doc.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
         (!selectedCategory || doc.category === selectedCategory) &&
         (!startDate || new Date(doc.date) >= new Date(startDate)) &&
         (!endDate || new Date(doc.date) <= new Date(endDate))
