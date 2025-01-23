@@ -3,7 +3,11 @@ const router = express.Router();
 const upload = require("../config/multerConfig");
 const { Role } = require("../utils/enums");
 const { verifyFileAtrributes } = require("../middlewares/file.middlewares");
-const { uploadPdf, downloadPdf } = require("../controllers/file.controllers");
+const {
+    uploadPdf,
+    downloadPdf,
+    getDocumentsByQuery,
+} = require("../controllers/file.controllers");
 const {
     verifyToken,
     authorizeRoles,
@@ -28,5 +32,17 @@ router.get(
         Role.ADMIN,
     ]),
     downloadPdf
+);
+
+router.get(
+    "/get-documents",
+    verifyToken,
+    authorizeRoles([
+        Role.ADMIN,
+        Role.APPROVER,
+        Role.SENIOR_ASSISTANT,
+        Role.ASSISTANT,
+    ]),
+    getDocumentsByQuery
 );
 module.exports = router;
