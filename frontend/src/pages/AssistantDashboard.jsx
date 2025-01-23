@@ -2,14 +2,10 @@ import React, { useState, useEffect } from "react";
 import { FaSearch, FaBars } from "react-icons/fa";
 import Navbar from "../components/Navbar";
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, IconButton } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
-import axios from "axios";
+import AddIcon from '@mui/icons-material/Add';
+import { toast, Toaster } from 'react-hot-toast';
+import axios from 'axios';
 import CryptoJS from "crypto-js";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
-// Initialize toast notifications
-toast.configure();
 
 const AssistantDashboard = () => {
   // State Management
@@ -22,14 +18,25 @@ const AssistantDashboard = () => {
   const [error, setError] = useState(null);
 
   // Dialog States
+  const [openDialog, setOpenDialog] = useState(false);
+  const [remarks, setRemarks] = useState("");
+  const [currentDocumentId, setCurrentDocumentId] = useState(null);
   const [newDocDialogOpen, setNewDocDialogOpen] = useState(false);
+  const [viewPdfDialogOpen, setViewPdfDialogOpen] = useState(false);
+  const [currentPdfUrl, setCurrentPdfUrl] = useState("");
+
+  // Filter States
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+
+  // New Document States
   const [newDocTitle, setNewDocTitle] = useState("");
   const [newDocDepartment, setNewDocDepartment] = useState("");
   const [newDocFile, setNewDocFile] = useState(null);
   const [newDocDesc, setNewDocDesc] = useState("");
-
-  // Encryption Key (Ensure security in production)
-  const encryptionKey = "my-secret-key-123";
+  const [encryptionKey, setEncryptionKey] = useState("");
+  const [serverResponse, setServerResponse] = useState("");
 
   // Fetch Documents
   const fetchDocuments = async () => {
@@ -61,13 +68,16 @@ const AssistantDashboard = () => {
       setFilteredData(data);
 
     } catch (err) {
-      setError(err.message || "Failed to fetch documents");
-      toast.error("Error fetching documents.");
+      setError(err.message);
+      console.error("Error fetching documents:", err);
+      setDocuments([]);
+      setFilteredData([]);
     } finally {
       setIsLoading(false);
     }
   };
 
+  // Effects
   useEffect(() => {
   }, [selectedTab]);
 
@@ -180,6 +190,7 @@ const AssistantDashboard = () => {
       </button>
 
       <main className="p-6 flex-grow">
+        {/* Status Tabs */}
         <div className="flex flex-wrap gap-4 mb-6 border-b">
           {["ALL", "PENDING", "APPROVED", "REJECTED", "REMARKS"].map((tab) => (
             <button
@@ -195,6 +206,7 @@ const AssistantDashboard = () => {
           ))}
         </div>
 
+        {/* Search Bar */}
         <div className="relative w-full max-w-xs mx-auto mb-6">
           <FaSearch className="absolute top-3 left-3 text-gray-400" />
           <input
@@ -202,52 +214,171 @@ const AssistantDashboard = () => {
             placeholder="Search documents..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-md border border-gray-300 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+            className="w-full pl-10 pr-4 py-2.5 rounded-md border bg-white border-gray-300 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
         </div>
 
-        {isLoading ? (
-          <p className="text-center py-4 text-gray-500">Loading documents...</p>
-        ) : error ? (
-          <p className="text-center py-4 text-red-500">Error: {error}</p>
-        ) : filteredData.length > 0 ? (
-          <table className="min-w-full border text-sm">
-            <thead className="text-left border-b">
-              <tr>
-                <th className="py-2 px-4">Name</th>
-                <th className="py-2 px-4">Department</th>
-                <th className="py-2 px-4">Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredData.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="py-2 px-4">{item.name}</td>
-                  <td className="py-2 px-4">{item.department}</td>
-                  <td className="py-2 px-4">{item.date}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p className="text-center py-4 text-gray-500">No documents found.</p>
-        )}
+        {/* Filters */}
+        <div className="mb-4 flex flex-col md:flex-row gap-4">
+          <div className="flex-shrink-0">
+            <label className="block text-sm font-medium text-gray-700">
+              Category
+            </label>
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="block w-full md:w-auto mt-1 p-2 text-sm border border-gray-300 bg-white rounded-md"
+            >
+              <option value="">All Categories</option>
+              <option value="Finance">Finance</option>
+              <option value="Education">Education</option>
+              <option value="Health">Health</option>
+              <option value="Transportation">Transportation</option>
+            </select>
+          </div>
+
+          <div className="flex-grow">
+            <label className="block text-sm font-medium text-gray-700">
+              Date Range
+            </label>
+            <div className="flex flex-col md:flex-row gap-4">
+              <input
+                type="date"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="p-2 border bg-white border-gray-300 rounded-md"
+              />
+              <input
+                type="date"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="p-2 border bg-white border-gray-300 rounded-md"
+                min={startDate}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Document List */}
+        <div className="flex flex-col md:flex-row gap-2">
+          <div className="bg-white p-4 w-full md:w-2/3 rounded-lg border border-gray-200">
+            <h3 className="text-lg font-medium mb-4">Documents</h3>
+            {isLoading ? (
+              <div className="text-center py-4">
+                <p className="text-gray-500">Loading documents...</p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-4 text-red-500">
+                <p>Error: {error}</p>
+              </div>
+            ) : filteredData.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="min-w-full text-sm">
+                  <thead className="text-left border-b">
+                    <tr>
+                      <th className="py-2 px-4">Document Name</th>
+                      <th className="py-2 px-4">Category</th>
+                      <th className="py-2 px-4">Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredData.map((item) => (
+                      <tr key={item.id} className="hover:bg-gray-50">
+                        <td className="py-2 px-4">
+                          <span
+                            onClick={() => handleTitleClick(item.fileUrl)}
+                            className="text-blue-500 cursor-pointer hover:underline"
+                          >
+                            {item.name}
+                          </span>
+                        </td>
+                        <td className="py-2 px-4">{item.category}</td>
+                        <td className="py-2 px-4">{item.date}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-gray-500 text-center py-4">No documents found.</p>
+            )}
+          </div>
+        </div>
       </main>
 
-      <div className="fixed bottom-6 right-6">
-        <IconButton color="primary" onClick={() => setNewDocDialogOpen(true)}>
-          <AddIcon fontSize="large" />
-        </IconButton>
-      </div>
+      {/* Remarks Dialog */}
+      {openDialog && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-md shadow-lg max-w-md w-full">
+            <h3 className="text-lg font-medium mb-4">Add Remark</h3>
+            <textarea
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+              className="w-full p-2 border resize-none border-gray-300 rounded-md mb-4"
+              rows="4"
+              placeholder="Enter remarks..."
+            />
+            <div className="flex justify-end space-x-4">
+              <button
+                className="py-2 px-4 bg-gray-300 text-gray-700 rounded-md"
+                onClick={() => setOpenDialog(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="py-2 px-4 bg-blue-500 text-white rounded-md"
+                onClick={handleRemarkSubmit}
+              >
+                Submit
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* New Document Dialog */}
       <Dialog open={newDocDialogOpen} onClose={() => setNewDocDialogOpen(false)}>
-        <DialogTitle>Upload New Document</DialogTitle>
+        <DialogTitle>Prepare New Document</DialogTitle>
         <DialogContent>
-          <TextField margin="dense" label="Title" fullWidth value={newDocTitle} onChange={(e) => setNewDocTitle(e.target.value)} />
-          <TextField margin="dense" label="Department" fullWidth value={newDocDepartment} onChange={(e) => setNewDocDepartment(e.target.value)} />
-          <TextField margin="dense" label="Description" fullWidth value={newDocDesc} onChange={(e) => setNewDocDesc(e.target.value)} />
-          <input type="file" onChange={handleFileChange} className="mt-4" />
+          <TextField
+            margin="dense"
+            label="Document Title"
+            type="text"
+            fullWidth
+            value={newDocTitle}
+            onChange={(e) => setNewDocTitle(e.target.value)}
+          />
+          <TextField
+            margin="dense"
+            label="Department"
+            type="text"
+            fullWidth
+            value={newDocDepartment}
+            onChange={(e) => setNewDocDepartment(e.target.value)}
+          />
+          <input
+            type="file"
+            onChange={(e) => setNewDocFile(e.target.files[0])}
+            className="my-4"
+          />
+          <TextField
+            margin="dense"
+            label="Description"
+            type="text"
+            fullWidth
+            multiline
+            rows={4}
+            value={newDocDesc}
+            onChange={(e) => setNewDocDesc(e.target.value)}
+          />
+          <TextField
+            margin="dense"
+            label="Encryption Key"
+            type="text"
+            fullWidth
+            value={encryptionKey}
+            onChange={(e) => setEncryptionKey(e.target.value)}
+          />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setNewDocDialogOpen(false)}>Cancel</Button>
