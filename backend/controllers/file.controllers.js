@@ -15,7 +15,7 @@ const uploadPdf = asyncHandler(async (req, res, next) => {
         createdBy: req.user._id,
         assignedTo: req.user.assignedApprover,
         department,
-           title,
+        title,
         description, 
     }).save();
 
