@@ -1,8 +1,9 @@
 const path = require("path");
 const File = require("../models/file.model");
+const Department = require("../models/department.model");
 const asyncHandler = require("../utils/asyncHandler");
 const appConfig = require("../config/appConfig");
-const { Role } = require("../utils/enums");
+const { Role, FileStatus } = require("../utils/enums");
 const uploadPdf = asyncHandler(async (req, res, next) => {
     //only take description if available
     const { department, title, description = null } = req.body;
@@ -59,7 +60,134 @@ const downloadPdf = asyncHandler(async (req, res, next) => {
     res.sendFile(filePath);
 });
 
+const sendPendingDocsToAssistant = asyncHandler(async (req, res, next) => {
+    //order by created data desc
+    const pendingDocuments = await File.find({
+        createdBy: req.user._id,
+        status: "pending",
+    }).sort({ createdDate: -1 });
+    return res.status(200).json({
+        status: true,
+        message: "Pending documents fetched successfully",
+        pendingDocuments,
+    });
+});
+const sendPendingDocsToApprover = asyncHandler(async (req, res, next) => {
+    //order by created data ascending
+    const pendingDocuments = await File.find({
+        assignedTo: req.user._id,
+        status: "pending",
+    }).sort({ createdDate: 1 });
+
+    return res.status(200).json({
+        status: true,
+        message: "Pending documents fetched successfully",
+        pendingDocuments,
+    });
+});
+const sendPendingDocsToAdmin = asyncHandler(async (req, res, next) => {
+    const pendingDocuments = await File.find({
+        status: "pending",
+    });
+    return res.status(200).json({
+        status: true,
+        message: "Pending documents fetched successfully",
+        pendingDocuments,
+    });
+});
+// const getPendingDocuments = asyncHandler(async (req, res, next) => {
+//     if (
+//         req.user.role === Role.SENIOR_ASSISTANT ||
+//         req.user.role === Role.ASSISTANT
+//     ) {
+//         sendPendingDocsToAssistant(req, res, next);
+//     } else if (req.user.role === Role.ADMIN) {
+//         sendPendingDocsToAdmin(req, res, next);
+//     } else if (req.user.role === Role.APPROVER) {
+//         sendPendingDocsToApprover(req, res, next);
+//     }
+// });
+
+const fetchDocuments = async (query, sortOptions) => {
+    return await File.find(query)
+        .sort(sortOptions)
+        .populate("department")
+        .populate("createdBy", "fullName username email role")
+        .populate("assignedTo", "fullName username email role");
+};
+
+const getDocumentsByQuery = asyncHandler(async (req, res, next) => {
+    let { department, startDate, endDate, sortBy, status } = req.query;
+    let query = {};
+    let sortOptions = {};
+    const fileStatuses = [
+        FileStatus.APPROVED,
+        FileStatus.PENDING,
+        FileStatus.REJECTED,
+        FileStatus.CORRECTION,
+    ];
+    if (!status) {
+        const error = new Error("please provide status");
+        error.status = 400;
+        return next(error);
+    }
+
+    if (!fileStatuses.includes(status.toLowerCase())) {
+        const error = new Error("Invalid status");
+        error.status = 400;
+        return next(error);
+    }
+    query.status = status.toLowerCase();
+
+    switch (req.user.role) {
+        case Role.SENIOR_ASSISTANT:
+        case Role.ASSISTANT:
+            query.createdBy = req.user._id;
+            break;
+        case Role.APPROVER:
+            query.assignedTo = req.user._id;
+            break;
+        case Role.ADMIN:
+            break;
+        default:
+            const error = new Error("Unauthorized role to fetch documents");
+            error.status = 403;
+            return next(error);
+    }
+
+    // Apply department filter if provided
+    const dept = await Department.findOne({ name: department });
+    if (dept) {
+        query.department = dept._id;
+    }
+
+    // Apply date range filter if provided
+    if (startDate || endDate) {
+        query.createdDate = {};
+        if (startDate) query.createdDate.$gte = new Date(startDate);
+        if (endDate) query.createdDate.$lte = new Date(endDate);
+    }
+
+    // Apply sorting if provided
+    if (sortBy) {
+        const [field, order] = sortBy.split(":");
+        sortOptions[field] = order === "desc" ? -1 : 1;
+    } else {
+        // Default sort by createdDate descending
+        sortOptions = { createdDate: -1 };
+    }
+    console.log("query", query);
+    const pendingDocuments = await fetchDocuments(query, sortOptions);
+
+    return res.status(200).json({
+        status: true,
+        message: "Pending documents fetched successfully",
+        pendingDocuments,
+    });
+});
+
 module.exports = {
     uploadPdf,
     downloadPdf,
+    getDocumentsByQuery,
 };
