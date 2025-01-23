@@ -12,6 +12,7 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null); // State to control the dropdown
   const { loggedInUser, setLoggedInUser, loading, logout } = useAuth();
+  console.log("loggedInUserr", loggedInUser);
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget); // Open the dropdown
   };
@@ -129,8 +130,10 @@ const Navbar = () => {
           >
             <MenuItem onClick={navigateProfile}>View Profile</MenuItem>
             <MenuItem onClick={navigateHistory}>History</MenuItem>
-            {(loggedInUser && loggedInUser.role === Role.SENIOR_ASSISTANT) ||
-            loggedInUser.role === Role.ADMIN ? (
+            {/* do the following using if else */}
+            {loggedInUser &&
+            (loggedInUser.role === Role.SENIOR_ASSISTANT ||
+              loggedInUser.role === Role.ADMIN) ? (
               <MenuItem onClick={navigateManageUsers}>Manage Users</MenuItem>
             ) : null}
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
