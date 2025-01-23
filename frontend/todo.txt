@@ -13,4 +13,12 @@
 - get all the users backend is done (for admin only), try fetching for that
 - tick marks the done tasks
 
+
+
 - fetch the documents list from backend file/get-documents????
+- /file/get-documents    with query params like
+    /file/get-documents?status=pending&department=education
+
+- /download-pdf/:filename for downloading file directly
+
+
