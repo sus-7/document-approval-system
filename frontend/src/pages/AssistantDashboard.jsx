@@ -44,8 +44,10 @@ const AssistantDashboard = () => {
   const [newDocDepartment, setNewDocDepartment] = useState("");
   const [newDocFile, setNewDocFile] = useState(null);
   const [newDocDesc, setNewDocDesc] = useState("");
-  const [encryptionKey, setEncryptionKey] = useState("");
   const [serverResponse, setServerResponse] = useState("");
+
+  // Hardcoded encryption key
+  const encryptionKey = "your-hardcoded-encryption-key";
 
   // Fetch Documents
   const fetchDocuments = async () => {
@@ -53,9 +55,8 @@ const AssistantDashboard = () => {
       setIsLoading(true);
       setError(null);
 
-      const apiUrl = `${
-        import.meta.env.VITE_API_URL
-      }/file/get-documents?status=${selectedTab.toLowerCase()}`;
+      const apiUrl = `${import.meta.env.VITE_API_URL
+        }/file/get-documents?status=${selectedTab.toLowerCase()}`;
 
       const response = await axios.get(apiUrl, {
         headers: {
@@ -83,7 +84,7 @@ const AssistantDashboard = () => {
   };
 
   // Effects
-  useEffect(() => {}, [selectedTab]);
+  useEffect(() => { }, [selectedTab]);
 
   useEffect(() => {
     const filtered = documents.filter(
@@ -146,6 +147,8 @@ const AssistantDashboard = () => {
       formData.append("title", newDocTitle);
       formData.append("description", newDocDesc || "");
 
+      console.log('formData', formData);
+      
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/file/upload-pdf`,
         formData,
@@ -199,15 +202,14 @@ const AssistantDashboard = () => {
       <main className="p-6 flex-grow">
         {/* Status Tabs */}
         <div className="flex flex-wrap gap-4 mb-6 border-b">
-          {["ALL", "PENDING", "APPROVED", "REJECTED", "REMARKS"].map((tab) => (
+          {["PENDING", "APPROVED", "REJECTED", "CORRECTION"].map((tab) => (
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
-              className={`px-4 py-2 ${
-                selectedTab === tab
+              className={`px-4 py-2 ${selectedTab === tab
                   ? "border-b-2 border-blue-500 text-blue-500"
                   : "text-gray-600 hover:text-blue-500"
-              }`}
+                }`}
             >
               {tab}
             </button>
@@ -317,13 +319,23 @@ const AssistantDashboard = () => {
             onChange={(e) => setNewDocTitle(e.target.value)}
           />
           <TextField
+            select
             margin="dense"
-            label="Department"
-            type="text"
             fullWidth
             value={newDocDepartment}
             onChange={(e) => setNewDocDepartment(e.target.value)}
-          />
+            SelectProps={{
+              native: true 
+            }}
+          >
+            <option value="">Select Department</option>
+            <option value="funds">Funds</option>
+            <option value="education">Education</option>
+            <option value="healthcare"> Healthcare</option>
+            <option value="technical">Technical</option>
+            <option value="accounting">Accounting</option>
+          </TextField>
+
           <input
             type="file"
             onChange={(e) => setNewDocFile(e.target.files[0])}
@@ -338,14 +350,6 @@ const AssistantDashboard = () => {
             rows={4}
             value={newDocDesc}
             onChange={(e) => setNewDocDesc(e.target.value)}
-          />
-          <TextField
-            margin="dense"
-            label="Encryption Key"
-            type="text"
-            fullWidth
-            value={encryptionKey}
-            onChange={(e) => setEncryptionKey(e.target.value)}
           />
         </DialogContent>
         <DialogActions>

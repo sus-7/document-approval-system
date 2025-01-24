@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "chacha": "^2.1.0"
+  }
+}
