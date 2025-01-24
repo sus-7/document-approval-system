@@ -14,6 +14,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { toast, Toaster } from "react-hot-toast";
 import axios from "axios";
 import CryptoJS from "crypto-js";
+import DocumentsList from "../components/DocumentsList";
 
 const AssistantDashboard = () => {
   // State Management
@@ -267,52 +268,7 @@ const AssistantDashboard = () => {
         </div>
 
         {/* Document List */}
-        <div className="flex flex-col md:flex-row gap-2">
-          <div className="bg-white p-4 w-full md:w-2/3 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-medium mb-4">Documents</h3>
-            {isLoading ? (
-              <div className="text-center py-4">
-                <p className="text-gray-500">Loading documents...</p>
-              </div>
-            ) : error ? (
-              <div className="text-center py-4 text-red-500">
-                <p>Error: {error}</p>
-              </div>
-            ) : filteredData.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead className="text-left border-b">
-                    <tr>
-                      <th className="py-2 px-4">Document Name</th>
-                      <th className="py-2 px-4">Category</th>
-                      <th className="py-2 px-4">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredData.map((item) => (
-                      <tr key={item.id} className="hover:bg-gray-50">
-                        <td className="py-2 px-4">
-                          <span
-                            onClick={() => handleTitleClick(item.fileUrl)}
-                            className="text-blue-500 cursor-pointer hover:underline"
-                          >
-                            {item.name}
-                          </span>
-                        </td>
-                        <td className="py-2 px-4">{item.category}</td>
-                        <td className="py-2 px-4">{item.date}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="text-gray-500 text-center py-4">
-                No documents found.
-              </p>
-            )}
-          </div>
-        </div>
+        <DocumentsList status={selectedTab.toLowerCase()} department={selectedCategory} />
       </main>
 
       {/* Remarks Dialog */}

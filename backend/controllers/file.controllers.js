@@ -71,7 +71,7 @@ const sendPendingDocsToAssistant = asyncHandler(async (req, res, next) => {
         message: "Pending documents fetched successfully",
         pendingDocuments,
     });
-});
+});  
 const sendPendingDocsToApprover = asyncHandler(async (req, res, next) => {
     //order by created data ascending
     const pendingDocuments = await File.find({

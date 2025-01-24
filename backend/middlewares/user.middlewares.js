@@ -41,7 +41,7 @@ const signiInDetailsValidator = (req, res, next) => {
     }
     next();
 };
-
+ 
 const verifyToken = asyncHandler(async (req, res, next) => {
     const token = req.cookies.token;
     if (!token) {

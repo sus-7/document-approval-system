@@ -12,7 +12,6 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null); // State to control the dropdown
   const { loggedInUser, setLoggedInUser, loading, logout } = useAuth();
-  console.log("loggedInUserr", loggedInUser);
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget); // Open the dropdown
   };
