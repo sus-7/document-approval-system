@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import Cookies from "js-cookie";
 import { toast, Toaster } from "react-hot-toast";
 import { FaBell, FaUserAlt } from "react-icons/fa";
@@ -8,10 +8,18 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import { Tooltip } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
 import { Role } from "../../utils/enums";
+import { useNotifications } from "../contexts/NotificationContext";
+
 const Navbar = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null); // State to control the dropdown
   const { loggedInUser, setLoggedInUser, loading, logout } = useAuth();
+  const { unreadCount, resetCount, fetchNotifications } = useNotifications();
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
   console.log("loggedInUserr", loggedInUser);
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget); // Open the dropdown
@@ -23,6 +31,7 @@ const Navbar = () => {
 
   const navigateNoti = () => {
     navigate("/notifications");
+    resetCount(); // Reset count when viewing notifications
     handleMenuClose();
   };
 
@@ -94,16 +103,23 @@ const Navbar = () => {
         )}
 
         <div className="flex space-x-6">
-          {/* Notifications Button */}
-          <Tooltip title="Notifications" arrow>
-            <button
-              onClick={navigateNoti}
-              className="text-gray-600 text-xl hover:text-blue-500"
-              aria-label="Notifications"
-            >
-              <FaBell />
-            </button>
-          </Tooltip>
+          {/* Notifications Button with Count */}
+          <div className="relative">
+            <Tooltip title="Notifications" arrow>
+              <button
+                onClick={navigateNoti}
+                className="text-gray-600 text-xl hover:text-blue-500"
+                aria-label="Notifications"
+              >
+                <FaBell />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            </Tooltip>
+          </div>
 
           {/* Profile Dropdown Icon */}
 

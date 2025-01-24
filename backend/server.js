@@ -11,6 +11,7 @@ const assistantRoutes = require("./routes/assistant.routes");
 const adminRoutes = require("./routes/admin.routes");
 const fileRoutes = require("./routes/file.routes");
 const departmentRoutes = require("./routes/department.routes");
+const notificationRoutes = require("./routes/notification.routes");
 const app = express();
 const corsOptions = {
     origin: ["http://localhost:5174", "http://localhost:5173"],
@@ -44,6 +45,7 @@ app.use("/assistant", assistantRoutes);
 app.use("/admin", adminRoutes);
 app.use("/file", fileRoutes);
 app.use("/department", departmentRoutes);
+app.use("/notification", notificationRoutes);
 
 app.use(errorHandler);
 const PORT = process.env.PORT || 3000;

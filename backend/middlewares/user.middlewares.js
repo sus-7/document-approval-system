@@ -28,6 +28,7 @@ const signInDetailsSchema = Joi.object({
     //TODO: change after
     username: Joi.string().min(2),
     password: Joi.string().min(2),
+    deviceToken: Joi.string(),
 });
 
 //todo: check if user is verified

@@ -3,14 +3,32 @@ import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import { toast, Toaster } from "react-hot-toast";
 import { Role } from "../../utils/enums";
+import { requestFCMToken } from "../../utils/firebaseUtils";
 const Login = () => {
   const [selectedToggle, setSelectedToggle] = useState("Assistant");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { loggedInUser, setLoggedInUser } = useContext(AuthContext);
+  const [fcmToken, setFcmToken] = useState(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const fetchFCMToken = async () => {
+      try {
+        const deviceToken = await requestFCMToken();
+        setFcmToken(deviceToken);
+        console.log("deviceToken", deviceToken);
+      } catch (error) {
+        console.log(
+          "login.jsx service :: useEffect fetchFCMTOken :: error : ",
+          error
+        );
+      }
+    };
+
+    fetchFCMToken();
+  }, []); // Add empty dependency array to prevent infinite loop
   useEffect(() => {
     if (loggedInUser) {
       //todo:role based access
@@ -32,9 +50,7 @@ const Login = () => {
     setLoading(true);
 
     const apiUrl = import.meta.env.VITE_API_URL + "/user/signin";
-    const formData = { username, password };
-    // const minimumDuration = 500; // Minimum spinner duration in ms
-    // const startTime = Date.now();
+    const formData = { username, password, deviceToken: fcmToken };
 
     try {
       const response = await fetch(apiUrl, {
@@ -45,10 +61,6 @@ const Login = () => {
         body: JSON.stringify(formData),
         credentials: "include",
       });
-
-      // const elapsedTime = Date.now() - startTime;
-      // const remainingTime = Math.max(minimumDuration - elapsedTime, 0);
-      // await new Promise((resolve) => setTimeout(resolve, remainingTime));
 
       if (!response.ok) {
         const error = await response.json();
@@ -77,7 +89,7 @@ const Login = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
       <Toaster />
-
+      <span className="z-40">{fcmToken}</span>
       {/* {loading && (
         <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
           <span className="loading loading-bars loading-lg"></span>

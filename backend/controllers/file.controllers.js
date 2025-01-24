@@ -1,8 +1,10 @@
 const path = require("path");
 const File = require("../models/file.model");
+const Notification = require("../models/notification.model");
 const Department = require("../models/department.model");
 const asyncHandler = require("../utils/asyncHandler");
 const appConfig = require("../config/appConfig");
+const { NotificationService } = require("../utils/NotificationService");
 const { Role, FileStatus } = require("../utils/enums");
 const uploadPdf = asyncHandler(async (req, res, next) => {
     //only take description if available
@@ -24,6 +26,26 @@ const uploadPdf = asyncHandler(async (req, res, next) => {
         { path: "createdBy", select: "fullName" },
         { path: "assignedTo", select: "fullName" },
     ]);
+
+    const notification = new Notification({
+        title: newFile.title,
+        body: `File ${newFile.title} has been uploaded`,
+        to: newFile.assignedTo,
+    });
+    await notification.save();
+    await newFile.populate("assignedTo");
+
+    const deviceTokens = newFile?.assignedTo?.deviceTokens || [];
+
+    for (const token of deviceTokens) {
+        if (token) {
+            await NotificationService.sendNotification(
+                token,
+                notification.title,
+                notification.body
+            );
+        }
+    }
 
     return res.status(200).json({
         status: true,
@@ -59,54 +81,6 @@ const downloadPdf = asyncHandler(async (req, res, next) => {
     res.setHeader("Content-type", "application/pdf");
     res.sendFile(filePath);
 });
-
-const sendPendingDocsToAssistant = asyncHandler(async (req, res, next) => {
-    //order by created data desc
-    const pendingDocuments = await File.find({
-        createdBy: req.user._id,
-        status: "pending",
-    }).sort({ createdDate: -1 });
-    return res.status(200).json({
-        status: true,
-        message: "Pending documents fetched successfully",
-        pendingDocuments,
-    });
-});
-const sendPendingDocsToApprover = asyncHandler(async (req, res, next) => {
-    //order by created data ascending
-    const pendingDocuments = await File.find({
-        assignedTo: req.user._id,
-        status: "pending",
-    }).sort({ createdDate: 1 });
-
-    return res.status(200).json({
-        status: true,
-        message: "Pending documents fetched successfully",
-        pendingDocuments,
-    });
-});
-const sendPendingDocsToAdmin = asyncHandler(async (req, res, next) => {
-    const pendingDocuments = await File.find({
-        status: "pending",
-    });
-    return res.status(200).json({
-        status: true,
-        message: "Pending documents fetched successfully",
-        pendingDocuments,
-    });
-});
-// const getPendingDocuments = asyncHandler(async (req, res, next) => {
-//     if (
-//         req.user.role === Role.SENIOR_ASSISTANT ||
-//         req.user.role === Role.ASSISTANT
-//     ) {
-//         sendPendingDocsToAssistant(req, res, next);
-//     } else if (req.user.role === Role.ADMIN) {
-//         sendPendingDocsToAdmin(req, res, next);
-//     } else if (req.user.role === Role.APPROVER) {
-//         sendPendingDocsToApprover(req, res, next);
-//     }
-// });
 
 const fetchDocuments = async (query, sortOptions) => {
     return await File.find(query)
@@ -245,7 +219,24 @@ const updateFileStatus = asyncHandler(async (req, res, next) => {
     }
 
     await file.save();
+    const notification = new Notification({
+        title: file.title,
+        body: `File ${file.title} has been ${status.toLowerCase()}`,
+        to: file.createdBy,
+    });
+    await notification.save();
+    await file.populate("createdBy");
+    const deviceTokens = file.createdBy?.deviceTokens || [];
 
+    for (const token of deviceTokens) {
+        if (token) {
+            await NotificationService.sendNotification(
+                token,
+                notification.title,
+                notification.body
+            );
+        }
+    }
     return res.status(200).json({
         status: true,
         message: `File ${status.toLowerCase()} successfully`,

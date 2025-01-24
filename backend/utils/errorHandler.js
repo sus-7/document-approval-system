@@ -1,6 +1,6 @@
 const fs = require("fs");
 const errorHandler = (error, req, res, next) => {
-    console.log(error);
+    console.log(error.stack);
     const statusCode = error.statusCode || 500;
     if (req.file && req.file.path) {
         fs.unlink(req.file.path, (err) => {

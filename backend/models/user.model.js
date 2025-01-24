@@ -50,6 +50,10 @@ const UserSchema = new mongoose.Schema({
         default: Role.SENIOR_ASSISTANT,
         required: true,
     },
+    deviceTokens: {
+        type: [String], // Changed from [string] to [String]
+        default: [],
+    },
     isActive: {
         type: Boolean,
         default: true,

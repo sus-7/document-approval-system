@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const { hashPassword, verifyPassword } = require("../utils/hashPassword");
 const crypto = require("crypto");
 const UserOTPVerification = require("../models/userotp.model");
+const { NotificationService } = require("../utils/NotificationService");
 const nodemailer = require("nodemailer");
 const asyncHandler = require("../utils/asyncHandler");
 const transporter = nodemailer.createTransport({
@@ -17,8 +18,14 @@ const transporter = nodemailer.createTransport({
     },
 });
 const signIn = asyncHandler(async (req, res, next) => {
-    let { username, password } = req.body;
+    let { username, password, deviceToken } = req.body;
     username = username.trim().toLowerCase();
+
+    // Detect device type from request
+    const deviceType = req.headers["user-agent"].includes("Mobile")
+        ? "mobile"
+        : "desktop";
+
     const user = await User.findOne({ username });
 
     if (!user) {
@@ -26,18 +33,29 @@ const signIn = asyncHandler(async (req, res, next) => {
         error.statusCode = 404;
         return next(error);
     }
+
     if (user.isVerified === false) {
         const error = new Error("User not verified");
         await User.deleteMany({ username });
         error.statusCode = 400;
         return next(error);
     }
+
     const isMatch = await verifyPassword(password, user.password);
 
     if (!isMatch) {
         const error = new Error("Invalid username or password");
         error.statusCode = 401;
         return next(error);
+    }
+
+    // Manage device tokens
+    const deviceIndex = deviceType === "desktop" ? 0 : 1;
+
+    // Update token for specific device type
+    if (user.deviceTokens[deviceIndex] != deviceToken) {
+        user.deviceTokens[deviceIndex] = deviceToken;
+        await user.save();
     }
 
     const token = jwt.sign(
@@ -55,6 +73,12 @@ const signIn = asyncHandler(async (req, res, next) => {
         sameSite: "strict",
         maxAge: 24 * 60 * 60 * 1000,
     });
+
+    await NotificationService.sendNotification(
+        deviceToken,
+        "Login Successful",
+        `Logged in at: ${new Date().toLocaleString()}`
+    );
 
     return res.status(200).json({
         success: true,
