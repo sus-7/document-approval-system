@@ -387,8 +387,9 @@ module.exports = {
     resendOTPAndVerify,
     checkAuthStatus,
     sendPasswordResetOTP,
-    resetPassword,
+    resetPassword,  
     verifySpOTP,
     updateProfile,
     toggleUserStatus,
 };
+  
