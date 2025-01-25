@@ -5,7 +5,9 @@ const getNotifications = asyncHandler(async (req, res, next) => {
     const notifications = await Notification.find({
         to: req.user._id,
         seen: false,
-    }).populate("to", "fullName username").sort({ date: -1 });
+    })
+        .populate("to", "fullName username")
+        .sort({ date: -1 });
     if (notifications.length === 0) {
         return res.status(200).json({
             status: true,
@@ -23,7 +25,7 @@ const getNotifications = asyncHandler(async (req, res, next) => {
 const markNotificationsAsSeen = asyncHandler(async (req, res, next) => {
     await Notification.updateMany(
         {
-            assignedTo: req.user._id,
+            to: req.user._id,
             seen: false,
         },
         { $set: { seen: true } }

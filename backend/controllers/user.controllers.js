@@ -2,6 +2,7 @@ const User = require("../models/user.model");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const { hashPassword, verifyPassword } = require("../utils/hashPassword");
+const { Role } = require("../utils/enums");
 const crypto = require("crypto");
 const UserOTPVerification = require("../models/userotp.model");
 const { NotificationService } = require("../utils/NotificationService");
@@ -412,6 +413,19 @@ const toggleUserStatus = asyncHandler(async (req, res, next) => {
     });
 });
 
+const getAssistants = asyncHandler(async (req, res, next) => {
+    const user = await User.findById(req.user._id)
+        .populate({
+            path: "assistants",
+            select: "username fullName email mobileNo role isActive",
+        })
+        .select("assistants");
+    return res.status(200).json({
+        status: true,
+        message: "Assistants fetched successfully",
+        assistants: user.assistants || [],
+    });
+});
 module.exports = {
     signIn,
     signUp,
@@ -420,9 +434,9 @@ module.exports = {
     resendOTPAndVerify,
     checkAuthStatus,
     sendPasswordResetOTP,
-    resetPassword,  
+    resetPassword,
     verifySpOTP,
     updateProfile,
     toggleUserStatus,
+    getAssistants,
 };
-  

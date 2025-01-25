@@ -32,6 +32,7 @@ export const NotificationProvider = ({ children }) => {
         { withCredentials: true }
       );
       setNotifications([]);
+      setUnreadCount(0);
     } catch (error) {
       console.error("Error marking notifications as read:", error);
     }

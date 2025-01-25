@@ -11,6 +11,7 @@ const {
     signOut,
     updateProfile,
     toggleUserStatus,
+    getAssistants,
 } = require("../controllers/user.controllers");
 const {
     signUpDetailsValidator,
@@ -48,5 +49,12 @@ router.post(
     verifyToken,
     authorizeRoles([Role.SENIOR_ASSISTANT, Role.ADMIN]),
     toggleUserStatus
+);
+
+router.get(
+    "/get-assistants",
+    verifyToken,
+    authorizeRoles([Role.APPROVER]),
+    getAssistants
 );
 module.exports = router;
