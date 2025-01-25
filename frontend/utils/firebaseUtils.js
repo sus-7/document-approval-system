@@ -2,18 +2,16 @@ import { initializeApp } from "firebase/app";
 import { getMessaging, getToken, onMessage } from "firebase/messaging";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBgRqjTZqbS142v0tQp3W7KgDKnh2I_Z7Q",
-  authDomain: "document-approval-system.firebaseapp.com",
-  projectId: "document-approval-system",
-  storageBucket: "document-approval-system.firebasestorage.app",
-  messagingSenderId: "303203465170",
-  appId: "1:303203465170:web:499cd04e6d2592450fba0b",
-  measurementId: "G-4LCGVGB5S8",
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-const vapidKey =
-  "BJsIwRJOemwtHoiYI7fK1lc0JZCsVkw3QFkoWF0TngphfZ2pfqAbSCWUlR4BepFETGQizBn8q2_ubZKeKTyVtR4";
-
+const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY;
 const app = initializeApp(firebaseConfig);
 const messaging = getMessaging(app);
 
