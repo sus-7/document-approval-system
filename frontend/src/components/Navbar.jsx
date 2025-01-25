@@ -102,7 +102,7 @@ const Navbar = () => {
           </h1>
         ) : (
           <h1 className="text-center text-lg font-semibold tracking-wider">
-            {`${loggedInUser.role}'s Dashboard`}
+            {`${loggedInUser.role}'s Dashboard`.toLocaleUpperCase()}
           </h1>
         )}
 

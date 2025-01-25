@@ -3,7 +3,7 @@ import { FaSearch } from "react-icons/fa";
 
 const SentBackTabContent = () => {
   return (
-    <div className="flex flex-col space-y-6">
+    <div className="flex flex-col -top-6 space-y-6 p-4">
       {/* Search Section */}
       <div className="relative">
         <FaSearch className="absolute top-3 left-3 text-gray-400" />
@@ -15,7 +15,7 @@ const SentBackTabContent = () => {
       </div>
 
       {/* Filters */}
-      <div className="flex space-x-4">
+      <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
         <select className="flex-1 px-4 py-2 rounded-md bg-gray-200 text-gray-700 border border-gray-300">
           <option>Category</option>
           <option>Health</option>
@@ -34,12 +34,13 @@ const SentBackTabContent = () => {
         {[
           { title: "Letter Title 1", date: "01/02/2025", status: "CORRECTION" },
           { title: "Letter Title 2", date: "01/02/2025", status: "REJECTED" },
+           
         ].map((letter, index) => (
           <div
             key={index}
-            className="flex justify-between items-center bg-gray-100 p-4 rounded-md shadow-md border border-gray-300"
+            className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-100 p-4 rounded-md shadow-md border border-gray-300 w-full"
           >
-            <div className="flex items-center space-x-4">
+            <div className="flex items-start sm:items-center space-x-4">
               <div className="w-10 h-10 bg-gray-200 flex items-center justify-center rounded-md">
                 📄
               </div>
@@ -51,7 +52,7 @@ const SentBackTabContent = () => {
               </div>
             </div>
             <span
-              className={`text-sm font-semibold ${
+              className={`text-sm font-semibold mt-2 sm:mt-0 ${
                 letter.status === "REJECTED"
                   ? "text-red-500"
                   : "text-yellow-600"

@@ -14,14 +14,54 @@ const ApproverDashboard = () => {
       navigate("/");
     }
   }, [loggedInUser]);
+
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filteredData, setFilteredData] = useState([]);
+
+  const encryptionKey = "your-hardcoded-encryption-key"; // Replace with secure storage
+
+  const fetchDocuments = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+
+      const queryParams = new URLSearchParams();
+      const validStatus = status && status !== 'all' ? status : 'pending';
+      queryParams.append('status', validStatus);
+
+      if (department) {
+        queryParams.append('department', department);
+      }
+
+      const response = await axios.get(
+        `${import.meta.env.VITE_API_URL}/file/get-documents?${queryParams}`,
+        { withCredentials: true }
+      );
+
+      if (response.data.status && response.data.documents) {
+        setFilteredData(response.data.documents);
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (err) {
+      console.error('Fetch error:', err);
+      setError(err.response?.data?.message || 'Failed to fetch documents');
+      toast.error('Failed to load documents');
+      setFilteredData([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
       {/* Navbar */}
       <Navbar />
 
       {/* Main Content */}
-      <div className="flex items-center mt-3 h-auto justify-center flex-grow">
-        <div className="w-[90%] max-w-[80vh] bg-white shadow-lg border border-gray-200 rounded-lg h-[90vh]">
+      <div className="flex items-center min-h-screen mt-3 h-auto justify-center flex-grow">
+        <div className="w-[90%] max-w-[80vh] bg-white h-full flex flex-col flex-grow-1 shadow-lg border border-gray-200 rounded-lg">
           {/* Tabs */}
           <div className="tabs flex justify-around items-center text-sm text-gray-700 mt-2 border-b border-gray-200">
             <button

@@ -14,6 +14,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { toast, Toaster } from "react-hot-toast";
 import axios from "axios";
 import CryptoJS from "crypto-js";
+import DocumentsList from "../components/DocumentsList";
 
 const AssistantDashboard = () => {
   // State Management
@@ -43,8 +44,10 @@ const AssistantDashboard = () => {
   const [newDocDepartment, setNewDocDepartment] = useState("");
   const [newDocFile, setNewDocFile] = useState(null);
   const [newDocDesc, setNewDocDesc] = useState("");
-  const [encryptionKey, setEncryptionKey] = useState("");
   const [serverResponse, setServerResponse] = useState("");
+
+  // Hardcoded encryption key
+  const encryptionKey = "your-hardcoded-encryption-key";
 
   // Fetch Documents
   const fetchDocuments = async () => {
@@ -52,9 +55,8 @@ const AssistantDashboard = () => {
       setIsLoading(true);
       setError(null);
 
-      const apiUrl = `${
-        import.meta.env.VITE_API_URL
-      }/file/get-documents?status=${selectedTab.toLowerCase()}`;
+      const apiUrl = `${import.meta.env.VITE_API_URL
+        }/file/get-documents?status=${selectedTab.toLowerCase()}`;
 
       const response = await axios.get(apiUrl, {
         headers: {
@@ -82,7 +84,7 @@ const AssistantDashboard = () => {
   };
 
   // Effects
-  useEffect(() => {}, [selectedTab]);
+  useEffect(() => { }, [selectedTab]);
 
   useEffect(() => {
     const filtered = documents.filter(
@@ -145,6 +147,8 @@ const AssistantDashboard = () => {
       formData.append("title", newDocTitle);
       formData.append("description", newDocDesc || "");
 
+      console.log('formData', formData);
+      
       const response = await axios.post(
         `${import.meta.env.VITE_API_URL}/file/upload-pdf`,
         formData,
@@ -198,15 +202,14 @@ const AssistantDashboard = () => {
       <main className="p-6 flex-grow">
         {/* Status Tabs */}
         <div className="flex flex-wrap gap-4 mb-6 border-b">
-          {["ALL", "PENDING", "APPROVED", "REJECTED", "REMARKS"].map((tab) => (
+          {["PENDING", "APPROVED", "REJECTED", "CORRECTION"].map((tab) => (
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
-              className={`px-4 py-2 ${
-                selectedTab === tab
+              className={`px-4 py-2 ${selectedTab === tab
                   ? "border-b-2 border-blue-500 text-blue-500"
                   : "text-gray-600 hover:text-blue-500"
-              }`}
+                }`}
             >
               {tab}
             </button>
@@ -267,52 +270,7 @@ const AssistantDashboard = () => {
         </div>
 
         {/* Document List */}
-        <div className="flex flex-col md:flex-row gap-2">
-          <div className="bg-white p-4 w-full md:w-2/3 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-medium mb-4">Documents</h3>
-            {isLoading ? (
-              <div className="text-center py-4">
-                <p className="text-gray-500">Loading documents...</p>
-              </div>
-            ) : error ? (
-              <div className="text-center py-4 text-red-500">
-                <p>Error: {error}</p>
-              </div>
-            ) : filteredData.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="min-w-full text-sm">
-                  <thead className="text-left border-b">
-                    <tr>
-                      <th className="py-2 px-4">Document Name</th>
-                      <th className="py-2 px-4">Category</th>
-                      <th className="py-2 px-4">Date</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredData.map((item) => (
-                      <tr key={item.id} className="hover:bg-gray-50">
-                        <td className="py-2 px-4">
-                          <span
-                            onClick={() => handleTitleClick(item.fileUrl)}
-                            className="text-blue-500 cursor-pointer hover:underline"
-                          >
-                            {item.name}
-                          </span>
-                        </td>
-                        <td className="py-2 px-4">{item.category}</td>
-                        <td className="py-2 px-4">{item.date}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <p className="text-gray-500 text-center py-4">
-                No documents found.
-              </p>
-            )}
-          </div>
-        </div>
+        <DocumentsList status={selectedTab.toLowerCase()} department={selectedCategory} />
       </main>
 
       {/* Remarks Dialog */}
@@ -361,13 +319,23 @@ const AssistantDashboard = () => {
             onChange={(e) => setNewDocTitle(e.target.value)}
           />
           <TextField
+            select
             margin="dense"
-            label="Department"
-            type="text"
             fullWidth
             value={newDocDepartment}
             onChange={(e) => setNewDocDepartment(e.target.value)}
-          />
+            SelectProps={{
+              native: true 
+            }}
+          >
+            <option value="">Select Department</option>
+            <option value="funds">Funds</option>
+            <option value="education">Education</option>
+            <option value="healthcare"> Healthcare</option>
+            <option value="technical">Technical</option>
+            <option value="accounting">Accounting</option>
+          </TextField>
+
           <input
             type="file"
             onChange={(e) => setNewDocFile(e.target.files[0])}
@@ -382,14 +350,6 @@ const AssistantDashboard = () => {
             rows={4}
             value={newDocDesc}
             onChange={(e) => setNewDocDesc(e.target.value)}
-          />
-          <TextField
-            margin="dense"
-            label="Encryption Key"
-            type="text"
-            fullWidth
-            value={encryptionKey}
-            onChange={(e) => setEncryptionKey(e.target.value)}
           />
         </DialogContent>
         <DialogActions>
