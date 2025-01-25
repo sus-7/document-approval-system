@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import { toast } from 'react-hot-toast';
-import { FaDownload } from 'react-icons/fa';
-import CryptoJS from 'crypto-js';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from "react-hot-toast";
+import { FaDownload } from "react-icons/fa";
+import CryptoJS from "crypto-js";
 
 const DocumentsList = ({ status, department }) => {
   const [isLoading, setIsLoading] = useState(true);
@@ -17,27 +17,23 @@ const DocumentsList = ({ status, department }) => {
       setError(null);
 
       const queryParams = new URLSearchParams();
-      const validStatus = status && status !== 'all' ? status : 'pending';
-      queryParams.append('status', validStatus);
-
-      if (department) {
-        queryParams.append('department', department);
-      }
+      const validStatus = status && status !== "all" ? status : "pending";
+      queryParams.append("status", validStatus);
 
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/file/get-documents?${queryParams}`,
+        `${import.meta.env.VITE_API_URL}/file/get-documents?status=pending`,
         { withCredentials: true }
       );
 
       if (response.data.status && response.data.documents) {
         setFilteredData(response.data.documents);
       } else {
-        throw new Error('Invalid response format');
+        throw new Error("Invalid response format");
       }
     } catch (err) {
-      console.error('Fetch error:', err);
-      setError(err.response?.data?.message || 'Failed to fetch documents');
-      toast.error('Failed to load documents');
+      console.error("Fetch error:", err);
+      setError(err.response?.data?.message || "Failed to fetch documents");
+      toast.error("Failed to load documents");
       setFilteredData([]);
     } finally {
       setIsLoading(false);
@@ -48,55 +44,60 @@ const DocumentsList = ({ status, department }) => {
     fetchDocuments();
   }, [status, department]);
 
-  const decryptFile = (encryptedData) => {
-    try {
-      const decrypted = CryptoJS.AES.decrypt(encryptedData, encryptionKey);
-      const decryptedBytes = decrypted.toString(CryptoJS.enc.Utf8);
-      const utf8Decoder = new TextDecoder('utf-8');
-      const decodedData = utf8Decoder.decode(new TextEncoder().encode(decryptedBytes));
-      const byteArray = new Uint8Array(decodedData.split('').map(char => char.charCodeAt(0)));
-      return byteArray.buffer;
-    } catch (error) {
-      console.error('Decryption failed:', error);
-      toast.error('Error during file decryption');
-      return null;
-    }
-  };
-
   const handleDownload = async (fileName) => {
     try {
-      const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/file/download-pdf/${fileName}`,
-        {
-          responseType: 'arraybuffer',
-          withCredentials: true,
-        }
-      );
+      console.log("fileName", fileName);
+      // Download encrypted file
+      const downloadUrl =
+        import.meta.env.VITE_API_URL + `/file/download-pdf/${fileName}`;
+      const response = await axios.get(downloadUrl, {
+        withCredentials: true,
+        responseType: "text",
+      });
 
-      if (response.status !== 200) {
-        throw new Error('Failed to download file');
-      }
+      // Decrypt the content
+      const decrypted = CryptoJS.AES.decrypt(response.data, "mykey");
 
-      const encryptedData = response.data;
-      const decryptedArrayBuffer = decryptFile(encryptedData);
+      // Convert to Uint8Array
+      const typedArray = convertWordArrayToUint8Array(decrypted);
 
-      if (decryptedArrayBuffer) {
-        const decryptedBlob = new Blob([decryptedArrayBuffer], { type: 'application/pdf' });
-        const pdfUrl = URL.createObjectURL(decryptedBlob);
-        const link = document.createElement('a');
-        link.href = pdfUrl;
-        link.download = fileName.replace('.enc', '.pdf');
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(pdfUrl);
-      }
-    } catch (err) {
-      console.error('Download/Decryption error:', err);
-      toast.error('Failed to decrypt file');
+      // Create blob and download
+      const blob = new Blob([typedArray], {
+        type: "application/pdf" || "application/octet-stream",
+      });
+
+      downloadBlob(blob, fileName.replace(".enc", ""));
+      console.log("File decrypted and downloaded successfully.");
+    } catch (error) {
+      console.error("Decryption error:", error);
     }
   };
+  const convertWordArrayToUint8Array = (wordArray) => {
+    const len = wordArray.sigBytes;
+    const words = wordArray.words;
+    const uint8Array = new Uint8Array(len);
+    let offset = 0;
 
+    for (let i = 0; i < len; i += 4) {
+      const word = words[i >>> 2];
+      for (let j = 0; j < 4 && offset < len; ++j) {
+        uint8Array[offset++] = (word >>> (24 - j * 8)) & 0xff;
+      }
+    }
+
+    return uint8Array;
+  };
+
+  const downloadBlob = (blob, filename) => {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
   return (
     <div className="flex items-start justify-start flex-grow">
       <div className="w-full max-w-4xl bg-white shadow-lg border border-gray-200 rounded-lg p-6">
@@ -117,14 +118,18 @@ const DocumentsList = ({ status, department }) => {
                   >
                     <div className="flex-grow">
                       <h3 className="text-lg font-semibold text-gray-800">
-                        {doc.title || 'Untitled'}
+                        {doc.title || "Untitled"}
                       </h3>
                       <div className="flex flex-wrap gap-4 mt-2">
                         <p className="text-sm text-gray-600">
-                          Department: {doc.department?.departmentName || 'Unassigned'}
+                          Department:{" "}
+                          {doc.department?.departmentName || "Unassigned"}
                         </p>
                         <p className="text-sm text-gray-600">
-                          Created by: {doc.createdBy?.fullName || doc.createdBy?.username || 'Unknown'}
+                          Created by:{" "}
+                          {doc.createdBy?.fullName ||
+                            doc.createdBy?.username ||
+                            "Unknown"}
                         </p>
                         <span className="text-xs text-gray-400">
                           {new Date(doc.createdDate).toLocaleDateString()}
@@ -143,7 +148,9 @@ const DocumentsList = ({ status, department }) => {
                   </div>
                 ))
               ) : (
-                <div className="text-center py-8 text-gray-500">No documents found</div>
+                <div className="text-center py-8 text-gray-500">
+                  No documents found
+                </div>
               )}
             </div>
           </>

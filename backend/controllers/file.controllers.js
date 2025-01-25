@@ -1,4 +1,5 @@
 const path = require("path");
+const fs = require("fs");
 const File = require("../models/file.model");
 const Notification = require("../models/notification.model");
 const Department = require("../models/department.model");
@@ -65,6 +66,7 @@ const uploadPdf = asyncHandler(async (req, res, next) => {
 
 const downloadPdf = asyncHandler(async (req, res, next) => {
     const fileName = req.params.filename;
+    console.log("fileName", fileName);
     const file = await File.findOne({ fileUniqueName: fileName });
     if (!file) {
         const error = new Error("File not found");
@@ -76,13 +78,15 @@ const downloadPdf = asyncHandler(async (req, res, next) => {
         error.status = 403;
         return next(error);
     }
-    res.setHeader(
-        "Content-disposition",
-        `attachment; filename=${file.fileUniqueName}`
-    );
+
     const filePath = path.join(appConfig.baseUploadDir, file.fileUniqueName);
-    res.setHeader("Content-type", "application/pdf");
-    res.sendFile(filePath);
+    if (!fs.existsSync(filePath)) {
+        const error = new Error("File not found");
+        error.status = 404;
+        return next(error);
+    }
+    const fileContent = fs.readFileSync(filePath, "utf8");
+    res.send(fileContent);
 });
 
 const fetchDocuments = async (query, sortOptions) => {
@@ -133,7 +137,7 @@ const getDocumentsByQuery = asyncHandler(async (req, res, next) => {
     }
 
     // Apply department filter if provided
-    const dept = await Department.findOne({ name: department });
+    const dept = await Department.findOne({ departmentName: department });
     if (dept) {
         query.department = dept._id;
     }
@@ -155,10 +159,9 @@ const getDocumentsByQuery = asyncHandler(async (req, res, next) => {
     }
     console.log("query", query);
     const documents = await fetchDocuments(query, sortOptions);
-
     return res.status(200).json({
         status: true,
-        message: "Pending documents fetched successfully",
+        message: "documents fetched successfully",
         documents,
     });
 });

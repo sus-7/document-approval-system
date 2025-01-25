@@ -55,8 +55,9 @@ const AssistantDashboard = () => {
       setIsLoading(true);
       setError(null);
 
-      const apiUrl = `${import.meta.env.VITE_API_URL
-        }/file/get-documents?status=${selectedTab.toLowerCase()}`;
+      const apiUrl = `${
+        import.meta.env.VITE_API_URL
+      }/file/get-documents?status=${selectedTab.toLowerCase()}`;
 
       const response = await axios.get(apiUrl, {
         headers: {
@@ -84,7 +85,7 @@ const AssistantDashboard = () => {
   };
 
   // Effects
-  useEffect(() => { }, [selectedTab]);
+  useEffect(() => {}, [selectedTab]);
 
   useEffect(() => {
     const filtered = documents.filter(
@@ -133,32 +134,34 @@ const AssistantDashboard = () => {
       const arrayBuffer = await newDocFile.arrayBuffer();
       const wordArray = CryptoJS.lib.WordArray.create(arrayBuffer);
 
-      const encrypted = CryptoJS.AES.encrypt(wordArray, encryptionKey);
-      const encryptedBytes = CryptoJS.enc.Base64.parse(encrypted.toString());
-
-      const blob = new Blob([encryptedBytes], { type: "application/pdf" });
-      const encryptedFile = new File([blob], newDocFile.name, {
-        type: "application/pdf",
-      });
+      const encrypted = CryptoJS.AES.encrypt(wordArray, "mykey");
+      const encryptedContent = encrypted.toString();
 
       const formData = new FormData();
-      formData.append("pdfFile", encryptedFile);
+      const blob = new Blob([encryptedContent], { type: "text/plain" });
+      formData.append("pdfFile", new File([blob], `${newDocFile.name}.enc`));
       formData.append("department", newDocDepartment);
       formData.append("title", newDocTitle);
       formData.append("description", newDocDesc || "");
 
-      console.log('formData', formData);
-      
+      console.log("formData", formData);
+      const uploadUrl = import.meta.env.VITE_API_URL + "/file/upload-pdf";
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/file/upload-pdf`,
+        uploadUrl,
         formData,
-        {
-          withCredentials: true,
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
+        { withCredentials: true }
       );
+
+      // const response = await axios.post(
+      //   `${import.meta.env.VITE_API_URL}/file/upload-pdf`,
+      //   formData,
+      //   {
+      //     withCredentials: true,
+      //     headers: {
+      //       "Content-Type": "multipart/form-data",
+      //     },
+      //   }
+      // );
 
       if (response.data) {
         toast.success("Document uploaded successfully");
@@ -206,10 +209,11 @@ const AssistantDashboard = () => {
             <button
               key={tab}
               onClick={() => setSelectedTab(tab)}
-              className={`px-4 py-2 ${selectedTab === tab
+              className={`px-4 py-2 ${
+                selectedTab === tab
                   ? "border-b-2 border-blue-500 text-blue-500"
                   : "text-gray-600 hover:text-blue-500"
-                }`}
+              }`}
             >
               {tab}
             </button>
@@ -270,7 +274,10 @@ const AssistantDashboard = () => {
         </div>
 
         {/* Document List */}
-        <DocumentsList status={selectedTab.toLowerCase()} department={selectedCategory} />
+        <DocumentsList
+          status={selectedTab.toLowerCase()}
+          department={selectedCategory}
+        />
       </main>
 
       {/* Remarks Dialog */}
@@ -325,7 +332,7 @@ const AssistantDashboard = () => {
             value={newDocDepartment}
             onChange={(e) => setNewDocDepartment(e.target.value)}
             SelectProps={{
-              native: true 
+              native: true,
             }}
           >
             <option value="">Select Department</option>
