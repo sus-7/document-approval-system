@@ -4,13 +4,15 @@ import { AuthContext } from "../contexts/AuthContext";
 import { toast, Toaster } from "react-hot-toast";
 import { Role } from "../../utils/enums";
 import { requestFCMToken } from "../../utils/firebaseUtils";
+import { useNotifications } from "../contexts/NotificationContext";
 const Login = () => {
   const [selectedToggle, setSelectedToggle] = useState("Assistant");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { loggedInUser, setLoggedInUser } = useContext(AuthContext);
-  const [fcmToken, setFcmToken] = useState(null);
+  // const [fcmToken, setFcmToken] = useState(null);
+  const { fcmToken, setFcmToken } = useNotifications();
   const navigate = useNavigate();
 
   useEffect(() => {

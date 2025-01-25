@@ -26,7 +26,7 @@ const router = express.Router();
 
 router.post("/signup", signUpDetailsValidator, signUp);
 router.post("/signin", signiInDetailsValidator, signIn);
-router.post("/signout", signOut);
+router.post("/signout", verifyToken, signOut);
 router.get("/status", verifyToken, checkAuthStatus);
 
 router.post("/verify-otp", verifyOTP);

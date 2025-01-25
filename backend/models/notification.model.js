@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const {FileStatus} = require("../utils/enums")
 const NotificationSchema = new mongoose.Schema({
     title: {
         type: String,
@@ -17,6 +17,11 @@ const NotificationSchema = new mongoose.Schema({
     date: {
         type: Date,
         default: Date.now,
+    },
+    type:{
+        type: String,
+        enum: Object.values(FileStatus),
+        default: FileStatus.PENDING,
     },
     seen: {
         type: Boolean,

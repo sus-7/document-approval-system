@@ -74,11 +74,11 @@ const signIn = asyncHandler(async (req, res, next) => {
         maxAge: 24 * 60 * 60 * 1000,
     });
 
-    await NotificationService.sendNotification(
-        deviceToken,
-        "Login Successful",
-        `Logged in at: ${new Date().toLocaleString()}`
-    );
+    // await NotificationService.sendNotification(
+    //     deviceToken,
+    //     "Login Successful",
+    //     `Logged in at: ${new Date().toLocaleString()}`
+    // );
 
     return res.status(200).json({
         success: true,
@@ -140,7 +140,16 @@ const signUp = asyncHandler(async (req, res, next) => {
 });
 const signOut = asyncHandler(async (req, res, next) => {
     res.clearCookie("token");
+    const deviceToken = req.body.deviceToken;
+    //remove device token from user.deviceTokens
+    if (deviceToken) {
+        await User.updateOne(
+            { _id: req.user._id },
+            { $pull: { deviceTokens: deviceToken } }
+        );
+    }
     console.log("cookie removed");
+
     return res.status(200).json({ message: "Logged out successfully" });
 });
 

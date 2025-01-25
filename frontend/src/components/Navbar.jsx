@@ -14,7 +14,8 @@ const Navbar = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null); // State to control the dropdown
   const { loggedInUser, setLoggedInUser, loading, logout } = useAuth();
-  const { unreadCount, resetCount, fetchNotifications } = useNotifications();
+  const { unreadCount, resetCount, fetchNotifications, fcmToken } =
+    useNotifications();
 
   useEffect(() => {
     fetchNotifications();
@@ -68,6 +69,9 @@ const Navbar = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          deviceToken: fcmToken,
+        }),
         credentials: "include",
       });
       if (!response.ok) {

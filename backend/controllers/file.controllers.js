@@ -29,8 +29,9 @@ const uploadPdf = asyncHandler(async (req, res, next) => {
 
     const notification = new Notification({
         title: newFile.title,
-        body: `File ${newFile.title} has been uploaded`,
+        body: `${newFile.title} has been uploaded`,
         to: newFile.assignedTo,
+        type: FileStatus.PENDING,
     });
     await notification.save();
     await newFile.populate("assignedTo");
@@ -44,6 +45,8 @@ const uploadPdf = asyncHandler(async (req, res, next) => {
                 notification.title,
                 notification.body
             );
+            console.log("title", notification.title);
+            console.log("body", notification.body);
         }
     }
 
@@ -223,6 +226,7 @@ const updateFileStatus = asyncHandler(async (req, res, next) => {
         title: file.title,
         body: `File ${file.title} has been ${status.toLowerCase()}`,
         to: file.createdBy,
+        type: status.toLowerCase(),
     });
     await notification.save();
     await file.populate("createdBy");

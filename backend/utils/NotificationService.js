@@ -6,7 +6,7 @@ class NotificationService {
             token: deviceToken,
             notification: {
                 title: title,
-                body: title,
+                body: body,
             },
         };
 

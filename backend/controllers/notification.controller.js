@@ -3,9 +3,9 @@ const asyncHandler = require("../utils/asyncHandler");
 
 const getNotifications = asyncHandler(async (req, res, next) => {
     const notifications = await Notification.find({
-        assignedTo: req.user._id,
+        to: req.user._id,
         seen: false,
-    });
+    }).populate("to", "fullName username").sort({ date: -1 });
     if (notifications.length === 0) {
         return res.status(200).json({
             status: true,
@@ -13,7 +13,6 @@ const getNotifications = asyncHandler(async (req, res, next) => {
             notifications,
         });
     }
-    await notifications.populate("assignedTo");
     return res.status(200).json({
         status: true,
         message: "Notifications fetched successfully",

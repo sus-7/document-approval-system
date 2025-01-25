@@ -24,6 +24,7 @@ import SetNewPassword from "./pages/SetNewPassword";
 import { onMessageListener } from "../utils/firebaseUtils.js";
 import PrepareLetter from "./pages/PrepareLetter.jsx";
 import { toast, Toaster } from "react-hot-toast";
+import { FaBell } from "react-icons/fa";
 
 import {
   ApproverRestrictedRoute,
@@ -42,15 +43,27 @@ const App = () => {
   useEffect(() => {
     onMessageListener((payload) => {
       toast(
-        <div>
-          <strong>Received message from {payload.notification.title}</strong>
-          <p>{payload.notification.body}</p>
+        <div className="flex items-start space-x-3">
+          <div className="flex-shrink-0 mt-0.5">
+            <FaBell className="h-5 w-5 text-blue-500" />
+          </div>
+          <div className="flex-1">
+            <p className="font-semibold text-gray-900">
+              {payload.notification.title}
+            </p>
+            <p className="mt-1 text-sm text-gray-600">
+              {payload.notification.body}
+            </p>
+          </div>
         </div>,
-        { position: "top-center", duration: 5000 }
+        {
+          position: "top-center",
+          duration: 2000,
+          className: "bg-white shadow-lg rounded-lg p-4",
+        }
       );
       // Call fetchNotifications from the stored reference
       fetchNotifications();
-      setUnreadCount();
     });
   }, [fetchNotifications]);
 
