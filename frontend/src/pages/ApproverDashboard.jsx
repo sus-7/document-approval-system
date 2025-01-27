@@ -6,7 +6,7 @@ import Navbar from "../components/Navbar.jsx";
 import { AuthContext } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 const ApproverDashboard = () => {
-  const [selectedTab, setSelectedTab] = useState("SENT BACK");
+  const [selectedTab, setSelectedTab] = useState("NEW");
   const { loggedInUser } = useContext(AuthContext);
   const navigate = useNavigate();
   useEffect(() => {
@@ -87,7 +87,7 @@ const ApproverDashboard = () => {
           </div>
 
           {/* Content */}
-          <div className="content p-4">
+          <div className="content  p-4">
             {selectedTab === "NEW" ? <NewCm /> : <SentBackTabContent />}
           </div>
         </div>

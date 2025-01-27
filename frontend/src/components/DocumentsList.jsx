@@ -9,7 +9,8 @@ const DocumentsList = ({ status, department }) => {
   const [error, setError] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
 
-  const encryptionKey = "your-hardcoded-encryption-key"; // Replace with secure storage
+  // TODO: Replace with secure key management
+  const encryptionKey =  "your-hardcoded-encryption-key";
 
   const fetchDocuments = async () => {
     try {
@@ -48,23 +49,14 @@ const DocumentsList = ({ status, department }) => {
     fetchDocuments();
   }, [status, department]);
 
-  const decryptFile = (encryptedData) => {
-    try {
-      const decrypted = CryptoJS.AES.decrypt(encryptedData, encryptionKey);
-      const decryptedBytes = decrypted.toString(CryptoJS.enc.Utf8);
-      const utf8Decoder = new TextDecoder('utf-8');
-      const decodedData = utf8Decoder.decode(new TextEncoder().encode(decryptedBytes));
-      const byteArray = new Uint8Array(decodedData.split('').map(char => char.charCodeAt(0)));
-      return byteArray.buffer;
-    } catch (error) {
-      console.error('Decryption failed:', error);
-      toast.error('Error during file decryption');
-      return null;
-    }
-  };
-
   const handleDownload = async (fileName) => {
+    if (!fileName || !encryptionKey) {
+      toast.error('Please provide filename and encryption key');
+      return;
+    }
+  
     try {
+      // Download encrypted file
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/file/download-pdf/${fileName}`,
         {
@@ -72,31 +64,66 @@ const DocumentsList = ({ status, department }) => {
           withCredentials: true,
         }
       );
-
+  
       if (response.status !== 200) {
         throw new Error('Failed to download file');
       }
-
-      const encryptedData = response.data;
-      const decryptedArrayBuffer = decryptFile(encryptedData);
-
-      if (decryptedArrayBuffer) {
-        const decryptedBlob = new Blob([decryptedArrayBuffer], { type: 'application/pdf' });
-        const pdfUrl = URL.createObjectURL(decryptedBlob);
-        const link = document.createElement('a');
-        link.href = pdfUrl;
-        link.download = fileName.replace('.enc', '.pdf');
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-        URL.revokeObjectURL(pdfUrl);
+  
+      // Convert ArrayBuffer to Base64 with a different approach
+      const base64 = btoa(
+        new Uint8Array(response.data)
+          .reduce((data, byte) => data + String.fromCharCode(byte), '')
+      );
+  
+      // Decrypt the entire Base64 string
+      const decrypted = CryptoJS.AES.decrypt(base64, encryptionKey);
+  
+      // Verify decryption
+      if (!decrypted.sigBytes) {
+        throw new Error('Decryption failed. Check your encryption key.');
       }
+  
+      // Convert decrypted words to Uint8Array
+      const decryptedUint8Array = convertWordArrayToUint8Array(decrypted);
+  
+      // Create blob and download
+      const decryptedBlob = new Blob([decryptedUint8Array], { type: 'application/pdf' });
+      
+      const pdfUrl = URL.createObjectURL(decryptedBlob);
+      const link = document.createElement('a');
+      link.href = pdfUrl;
+      link.download = fileName.replace('.enc', '.pdf');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(pdfUrl);
+  
+      toast.success('File decrypted and downloaded successfully');
     } catch (err) {
       console.error('Download/Decryption error:', err);
-      toast.error('Failed to decrypt file');
+      toast.error(err.message || 'Failed to decrypt file');
     }
   };
+  
+  // Helper function to convert WordArray to Uint8Array
+  const convertWordArrayToUint8Array = (wordArray) => {
+    const len = wordArray.sigBytes;
+    const words = wordArray.words;
+    const uint8Array = new Uint8Array(len);
+    let offset = 0;
+    
+    for (let i = 0; i < len; i += 4) {
+      const word = words[i >>> 2];
+      for (let j = 0; j < 4 && offset < len; ++j) {
+        uint8Array[offset++] = (word >>> (24 - j * 8)) & 0xff;
+      }
+    }
+    
+    return uint8Array;
+  };
 
+  
+   
   return (
     <div className="flex items-start justify-start flex-grow">
       <div className="w-full max-w-4xl bg-white shadow-lg border border-gray-200 rounded-lg p-6">
