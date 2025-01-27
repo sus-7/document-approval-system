@@ -173,7 +173,7 @@ const updateFileStatus = asyncHandler(async (req, res, next) => {
         error.status = 400;
         return next(error);
     }
-    fileUniqueName = fileUniqueName.trim().toLowerCase();
+    fileUniqueName = fileUniqueName.trim();
     status = status.trim().toLowerCase();
     remarks = remarks?.trim();
 

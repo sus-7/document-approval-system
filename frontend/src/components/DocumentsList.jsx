@@ -9,7 +9,8 @@ const DocumentsList = ({ status, department }) => {
   const [error, setError] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
 
-  const encryptionKey = "your-hardcoded-encryption-key"; // Replace with secure storage
+  // TODO: Replace with secure key management
+  const encryptionKey =  "your-hardcoded-encryption-key";
 
   const fetchDocuments = async () => {
     try {
