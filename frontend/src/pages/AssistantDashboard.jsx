@@ -179,6 +179,7 @@
 
   const handleTitleClick = (documentUrl) => {
     setCurrentPdfUrl(documentUrl);
+    console.log("documentUrl", documentUrl);
     setViewPdfDialogOpen(true);
   };
 
@@ -277,6 +278,7 @@
         <DocumentsList
           status={selectedTab.toLowerCase()}
           department={selectedCategory}
+          handleTitleClick={handleTitleClick}
         />
       </main>
 
@@ -378,24 +380,31 @@
 
         {/* PDF Preview Dialog */}
         <Dialog
-          open={viewPdfDialogOpen}
-          onClose={() => setViewPdfDialogOpen(false)}
-          maxWidth="md"
-          fullWidth
-        >
-          <DialogTitle>Document Preview</DialogTitle>
-          <DialogContent>
-            <iframe
-              src={currentPdfUrl}
-              width="100%"
-              height="600px"
-              title="PDF Preview"
-            />
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={() => setViewPdfDialogOpen(false)}>Close</Button>
-          </DialogActions>
-        </Dialog>
+  open={viewPdfDialogOpen}
+  onClose={() => setViewPdfDialogOpen(false)}
+  maxWidth="xl"
+  fullWidth
+>
+  <DialogTitle>Document Preview</DialogTitle>
+  <DialogContent>
+    <div style={{ width: '100%', height: '80vh' }}>
+      <object data={currentPdfUrl} type="application/pdf" width="100%" height="100%">
+        <p>Your browser does not support PDFs. <a href={currentPdfUrl}>Download the PDF</a>.</p>
+      </object>
+    </div>
+  </DialogContent>
+  <DialogActions>
+    <Button onClick={() => setViewPdfDialogOpen(false)}>Close</Button>
+  </DialogActions>
+</Dialog>
+
+<style jsx>{`
+  @media (max-width: 600px) {
+    div {
+      height: 60vh;
+    }
+  }
+`}</style>
       </div>
     );
   };

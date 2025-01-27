@@ -4,11 +4,11 @@ import { toast } from "react-hot-toast";
 import { FaDownload } from "react-icons/fa";
 import CryptoJS from "crypto-js";
 
-const DocumentsList = ({ status, department }) => {
+const DocumentsList = ({ status, department,handleTitleClick }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
-
+  const [currentPdfUrl, setCurrentPdfUrl] = useState("");
   // TODO: Replace with secure key management
   const encryptionKey =  "your-hardcoded-encryption-key";
 
@@ -91,6 +91,9 @@ const DocumentsList = ({ status, department }) => {
 
   const downloadBlob = (blob, filename) => {
     const url = URL.createObjectURL(blob);
+    setCurrentPdfUrl(url);
+    console.log('url', url);
+    
     const link = document.createElement("a");
     link.href = url;
     link.download = filename;
@@ -98,6 +101,37 @@ const DocumentsList = ({ status, department }) => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
+  };
+
+  const handlePreview = async (fileName) => {
+    try {
+      console.log("fileName", fileName);
+      // Download encrypted file
+      const downloadUrl =
+        import.meta.env.VITE_API_URL + `/file/download-pdf/${fileName}`;
+      const response = await axios.get(downloadUrl, {
+        withCredentials: true,
+        responseType: "text",
+      });
+
+      // Decrypt the content
+      const decrypted = CryptoJS.AES.decrypt(response.data, "mykey");
+
+      // Convert to Uint8Array
+      const typedArray = convertWordArrayToUint8Array(decrypted);
+
+      // Create blob and download
+      const blob = new Blob([typedArray], {
+        type: "application/pdf" || "application/octet-stream",
+      });
+
+      const url = URL.createObjectURL(blob);
+      console.log("file url generated for preview : ", url);
+      return url;
+      
+    } catch (error) {
+      console.error("Decryption error:", error);
+    }
   };
   return (
     <div className="flex items-start justify-start flex-grow">
@@ -118,7 +152,10 @@ const DocumentsList = ({ status, department }) => {
                     className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all"
                   >
                     <div className="flex-grow">
-                      <h3 className="text-lg font-semibold text-gray-800">
+                      <h3 className="text-lg font-semibold w-fit text-gray-800" onClick={async()=>{
+                        const url = await handlePreview(doc.fileUniqueName);
+                        handleTitleClick(url)
+                      }} >
                         {doc.title || "Untitled"}
                       </h3>
                       <div className="flex flex-wrap gap-4 mt-2">
