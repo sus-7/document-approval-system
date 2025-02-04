@@ -35,7 +35,6 @@ const AssistantDashboard = () => {
   const [viewPdfDialogOpen, setViewPdfDialogOpen] = useState(false);
   const [currentPdfUrl, setCurrentPdfUrl] = useState("");
   const [departments, setDepartments] = useState([]);
-  const [departments, setDepartments] = useState([]);
   // Filter States  
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -249,7 +248,7 @@ const AssistantDashboard = () => {
             >
               <option value="">All</option>
               {departments?.map((department, idx) => (
-                <option key={idx} value={department}>{department}</option>
+                <option key={idx} value={department}>{department.toUpperCase()}</option>
               ))}
             </select>
           </div>
