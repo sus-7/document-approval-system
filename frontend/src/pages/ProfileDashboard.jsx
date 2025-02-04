@@ -17,7 +17,6 @@ const ProfileDashboard = () => {
     name: loggedInUser.fullName,
     email: loggedInUser.email,
     phone: loggedInUser.mobileNo,
-    address: "123 Main Street, Cityville",
   };
 
   const navigateToEditProfile = (e) => {

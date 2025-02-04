@@ -1,12 +1,11 @@
 import { Navigate, NavLink } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import { Role } from "../../utils/enums";
 const ApproverRestrictedRoute = ({ children }) => {
   const { loggedInUser, loading } = useAuth();
 
   if (loading) return <p>Loading...</p>;
-  return loggedInUser &&
-    (loggedInUser.role === "Approver" ||
-      loggedInUser.role === "Senior Assistant") ? (
+  return loggedInUser && loggedInUser.role === Role.APPROVER ? (
     children
   ) : (
     <h2>

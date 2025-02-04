@@ -5,3 +5,8 @@
 -   specify role in email body
 -   turn on validations
 -   isActive isVerified validation middlewares
+-   make all the attributes/values lowercase when saving to DB
+-   make sure to not send password/private key in response
+-   add timestamps to all the models
+-   promoting assistant to senior assistant
+-   delete notifications from database or not

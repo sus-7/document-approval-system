@@ -1,85 +1,122 @@
-import React from "react";
-import { FiBell } from "react-icons/fi"; // Notification Icon
-import { AiOutlineHistory } from "react-icons/ai"; // History Icon
-import { BsPersonCircle } from "react-icons/bs"; // Profile Icon
+import React, { useState, useEffect } from "react";
+import { FaSearch, FaBars } from "react-icons/fa";
+import Navbar from "../components/Navbar";
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, IconButton } from "@mui/material";
+import AddIcon from '@mui/icons-material/Add';
 
-const Correction = () => {
+const AssistantDashboard = () => {
+  const [selectedTab, setSelectedTab] = useState("PENDING");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [filteredData, setFilteredData] = useState([]);
+  const [openDialog, setOpenDialog] = useState(false);
+  const [remarks, setRemarks] = useState("");
+  const [currentDocumentId, setCurrentDocumentId] = useState(null);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("");
+  const [newDocDialogOpen, setNewDocDialogOpen] = useState(false);
+  const [newDocTitle, setNewDocTitle] = useState("");
+  const [newDocDepartment, setNewDocDepartment] = useState("");
+  const [newDocFile, setNewDocFile] = useState(null);
+  const [newDocDesc, setNewDocDesc] = useState("");
+  const [docDetailsDialogOpen, setDocDetailsDialogOpen] = useState(false);
+  const [selectedDoc, setSelectedDoc] = useState(null);
+
+  const sampleData = [
+    { id: 1, name: "Policy Draft", category: "Finance", date: "2025-01-10", status: "PENDING", file: "sample.pdf", description: "Policy draft for finance department." },
+    { id: 2, name: "Education Proposal", category: "Education", date: "2025-01-08", status: "APPROVED", file: "education.pdf", description: "Proposal for education reform." },
+    { id: 3, name: "Health Policy Update", category: "Health", date: "2025-01-07", status: "REJECTED", file: "health.pdf", description: "Health policy update document." },
+    { id: 4, name: "Transport Plan", category: "Transportation", date: "2025-01-09", status: "PENDING", file: "transport.pdf", description: "Transportation plan overview." },
+  ];
+
+  useEffect(() => {
+    const filtered = sampleData.filter(
+        (item) =>
+            (item.status === selectedTab || selectedTab === "ALL") &&
+            item.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
+            (!selectedCategory || item.category === selectedCategory) &&
+            (!startDate || new Date(item.date) >= new Date(startDate)) &&
+            (!endDate || new Date(item.date) <= new Date(endDate))
+    );
+    setFilteredData(filtered);
+  }, [selectedTab, searchQuery, selectedCategory, startDate, endDate]);
+
+  const handleNewDocSubmit = () => {
+    const newDoc = {
+      id: filteredData.length + 1,
+      name: newDocTitle,
+      category: newDocDepartment,
+      date: new Date().toISOString().split('T')[0],
+      status: "PENDING",
+      file: newDocFile ? newDocFile.name : "newdoc.pdf",
+      description: newDocDesc,
+    };
+    setFilteredData((prevData) => [...prevData, newDoc]);
+    setNewDocDialogOpen(false);
+    setNewDocTitle("");
+    setNewDocDepartment("");
+    setNewDocFile(null);
+    setNewDocDesc("");
+  };
+
+  const handleOpenDocDetails = (doc) => {
+    setSelectedDoc(doc);
+    setDocDetailsDialogOpen(true);
+  };
+
   return (
-    <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 bg-gray-300 text-white">
-        {/* History Icon on the Left */}
-        <button className="text-gray-800 text-xl hover:text-gray-200 transition duration-200 p-0">
-          <AiOutlineHistory />
+      <div className="flex flex-col min-h-screen bg-gray-100 text-gray-800">
+        <Navbar role="Personal Assistant - Approval Dashboard"/>
+        <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="md:hidden p-2 text-gray-600 rounded-md"
+        >
+          <FaBars/>
         </button>
 
-        {/* Title */}
-        <h1 className="text-gray-900 text-xl font-bold">Correction</h1>
-
-        {/* Profile and Notification Icons */}
-        <div className="flex gap-4">
-          <button className="text-gray-800 text-xl hover:text-gray-200 transition duration-200 p-0">
-            <FiBell />
-          </button>
-          <button className="text-gray-800 text-xl hover:text-gray-200 transition duration-200 p-0">
-            <BsPersonCircle />
-          </button>
-        </div>
-      </div>
-
-      {/* Document Info */}
-      <div className="px-6 py-4 border-b border-gray-200">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-base text-lg font-semibold text-gray-800">Letter Title 1</h2>
-          <p className="text-sm text-gray-500">01/02/2025</p>
-        </div>
-        <p className="text-right text-blue-600 font-medium">Remark</p>
-      </div>
-
-      {/* PDF Placeholder */}
-      <div className="flex justify-center items-center h-40 bg-gray-100">
-        <div className="text-center">
-          <div className="w-15 h-15 flex items-center justify-center rounded-lg">
-            <span className="text-gray-600 text-4xl">PDF</span>
+        <main className="p-6 flex-grow">
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="text-left border-b">
+              <tr>
+                <th className="py-2 px-4">Document Name</th>
+                <th className="py-2 px-4">Category</th>
+                <th className="py-2 px-4">Date</th>
+              </tr>
+              </thead>
+              <tbody>
+              {filteredData.map((item) => (
+                  <tr key={item.id} className="hover:bg-gray-50">
+                    <td className="py-2 px-4 text-blue-500 cursor-pointer" onClick={() => handleOpenDocDetails(item)}>{item.name}</td>
+                    <td className="py-2 px-4">{item.category}</td>
+                    <td className="py-2 px-4">{item.date}</td>
+                  </tr>
+              ))}
+              </tbody>
+            </table>
           </div>
-          <p className="text-sm text-gray-500 mt-2">Document Preview</p>
-        </div>
-      </div>
+        </main>
 
-      {/* Remark and Description */}
-      <div className="px-6 py-4 space-y-6">
-        <div>
-          <label htmlFor="remark" className="text-sm font-medium">
-            Remark:
-          </label>
-          <textarea
-            id="remark"
-            className="w-full mt-2 p-3 rounded-md bg-gray-50 text-gray-700 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
-            rows="2"
-            placeholder="Enter remarks here..."
-          ></textarea>
-        </div>
-        <div>
-          <label htmlFor="description" className="text-sm font-medium">
-            Description:
-          </label>
-          <textarea
-            id="description"
-            className="w-full mt-2 p-3 rounded-md bg-gray-50 text-gray-700 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
-            rows="4"
-            placeholder="Enter description here..."
-          ></textarea>
-        </div>
+        <Dialog open={docDetailsDialogOpen} onClose={() => setDocDetailsDialogOpen(false)}>
+          <DialogTitle>Document Details</DialogTitle>
+          <DialogContent>
+            {selectedDoc && (
+                <div>
+                  <p><strong>Title:</strong> {selectedDoc.name}</p>
+                  <p><strong>Category:</strong> {selectedDoc.category}</p>
+                  <p><strong>Date:</strong> {selectedDoc.date}</p>
+                  <p><strong>Description:</strong> {selectedDoc.description}</p>
+                  <iframe src={selectedDoc.file} width="100%" height="400px"></iframe>
+                </div>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDocDetailsDialogOpen(false)} color="primary">Close</Button>
+          </DialogActions>
+        </Dialog>
       </div>
-
-      {/* Submit Button */}
-      <div className="px-6 py-4">
-        <button className="w-full px-4 py-3 bg-blue-500 text-white font-semibold rounded-md hover:bg-blue-600 transition duration-200">
-          Submit
-        </button>
-      </div>
-    </div>
   );
 };
 
-export default Correction;
+export default AssistantDashboard;

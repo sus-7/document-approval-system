@@ -2,22 +2,46 @@ import React, { useState, useContext, useEffect } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { AuthContext } from "../contexts/AuthContext";
 import { toast, Toaster } from "react-hot-toast";
+import { Role } from "../../utils/enums";
+import { requestFCMToken } from "../../utils/firebaseUtils";
+import { useNotifications } from "../contexts/NotificationContext";
 const Login = () => {
   const [selectedToggle, setSelectedToggle] = useState("Assistant");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const { loggedInUser, setLoggedInUser } = useContext(AuthContext);
+  // const [fcmToken, setFcmToken] = useState(null);
+  const { fcmToken, setFcmToken } = useNotifications();
   const navigate = useNavigate();
 
   useEffect(() => {
+    const fetchFCMToken = async () => {
+      try {
+        const deviceToken = await requestFCMToken();
+        setFcmToken(deviceToken);
+        console.log("deviceToken", deviceToken);
+      } catch (error) {
+        console.log(
+          "login.jsx service :: useEffect fetchFCMTOken :: error : ",
+          error
+        );
+      }
+    };
+
+    fetchFCMToken();
+  }, []); // Add empty dependency array to prevent infinite loop
+  useEffect(() => {
     if (loggedInUser) {
       //todo:role based access
-      if (loggedInUser.role === "Approver") {
+      if (loggedInUser.role === Role.APPROVER) {
         navigate("/approver/dashboard");
-      } else if (loggedInUser.role === "Senior Assistant") {
+      } else if (
+        loggedInUser.role === Role.SENIOR_ASSISTANT ||
+        loggedInUser.role === Role.ASSISTANT
+      ) {
         navigate("/assistant/dashboard");
-      } else if (loggedInUser.role === "Admin") {
+      } else if (loggedInUser.role === Role.ADMIN) {
         navigate("/admin/dashboard");
       }
     }
@@ -28,9 +52,7 @@ const Login = () => {
     setLoading(true);
 
     const apiUrl = import.meta.env.VITE_API_URL + "/user/signin";
-    const formData = { username, password };
-    const minimumDuration = 500; // Minimum spinner duration in ms
-    const startTime = Date.now();
+    const formData = { username, password, deviceToken: fcmToken };
 
     try {
       const response = await fetch(apiUrl, {
@@ -41,10 +63,6 @@ const Login = () => {
         body: JSON.stringify(formData),
         credentials: "include",
       });
-
-      const elapsedTime = Date.now() - startTime;
-      const remainingTime = Math.max(minimumDuration - elapsedTime, 0);
-      await new Promise((resolve) => setTimeout(resolve, remainingTime));
 
       if (!response.ok) {
         const error = await response.json();
@@ -70,32 +88,40 @@ const Login = () => {
       setLoading(false);
     }
   };
-
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
       <Toaster />
-      <button
-        className="absolute top-4 bg-red-600 text-white p-2 rounded-md  right-4"
+      <span className="z-40">{fcmToken}</span>
+      {/* {loading && (
+        <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
+          <span className="loading loading-bars loading-lg"></span>
+        </div>
+      )} */}
+
+      {/* <button
+        className="absolute top-4 bg-red-600 text-white p-2 rounded-md right-4"
         onClick={() => navigate("/adminLogin")}
       >
         Admin
-      </button>
+      </button> */}
       <div className="w-96 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
         <div className="flex justify-center gap-4 mb-6">
           <button
-            className={`px-4 py-2 text-sm font-medium rounded-md ${selectedToggle === "Approver"
+            className={`px-4 py-2 text-sm font-medium rounded-md ${
+              selectedToggle === "Approver"
                 ? "bg-blue-500 text-white"
                 : "bg-gray-100 text-gray-700"
-              }`}
+            }`}
             onClick={() => setSelectedToggle("Approver")}
           >
             Approver
           </button>
           <button
-            className={`px-4 py-2 text-sm font-medium rounded-md ${selectedToggle === "Assistant"
+            className={`px-4 py-2 text-sm font-medium rounded-md ${
+              selectedToggle === "Assistant"
                 ? "bg-blue-500 text-white"
                 : "bg-gray-100 text-gray-700"
-              }`}
+            }`}
             onClick={() => setSelectedToggle("Assistant")}
           >
             Assistant
@@ -133,14 +159,7 @@ const Login = () => {
             />
           </div>
 
-          <div className="flex justify-between items-center mb-4">
-            <label className="flex items-center text-sm text-gray-600">
-              <input
-                type="checkbox"
-                className="text-blue-500 focus:ring-blue-500 rounded"
-              />
-              <span className="ml-2">Remember Me</span>
-            </label>
+          <div className="flex justify-end items-end mb-4">
             <RouterLink
               to="/forgot-password"
               className="text-sm text-blue-500 hover:underline"
@@ -166,7 +185,6 @@ const Login = () => {
               to="/register"
               className="text-sm text-blue-500 hover:underline"
             >
-
               Register
             </RouterLink>
           </div>

@@ -6,6 +6,7 @@ import axios from "axios";
 import AddUser from "../components/AddUser";
 import { UsersContext } from "../contexts/UsersContext";
 import { AuthContext } from "../contexts/AuthContext";
+import Navbar from "../components/Navbar";
 const ManageUsers = () => {
   const { approver, assistants, refreshUsers } = useContext(UsersContext);
   const navigate = useNavigate();
@@ -36,10 +37,7 @@ const ManageUsers = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
       <Toaster />
-      <div className="flex justify-between items-center bg-white shadow-md px-6 py-4 border-b border-gray-200">
-        <h1 className="text-2xl font-bold text-gray-800">Manage Users</h1>
-      </div>
-
+      <Navbar/>
       <div className="flex items-center justify-center flex-grow p-4">
         <div className="w-full max-w-3xl bg-white shadow-lg border border-gray-200 rounded-lg p-8">
           <div className="flex gap-4 mb-6 justify-end">

@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import Cookies from "js-cookie";
 import { toast, Toaster } from "react-hot-toast";
 import { FaBell, FaUserAlt } from "react-icons/fa";
@@ -7,10 +7,21 @@ import { IconButton, Menu, MenuItem } from "@mui/material";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import { Tooltip } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
+import { Role } from "../../utils/enums";
+import { useNotifications } from "../contexts/NotificationContext";
+
 const Navbar = () => {
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState(null); // State to control the dropdown
   const { loggedInUser, setLoggedInUser, loading, logout } = useAuth();
+  const { unreadCount, resetCount, fetchNotifications, fcmToken } =
+    useNotifications();
+
+  useEffect(() => {
+    fetchNotifications();
+  }, []);
+
+  console.log("loggedInUserr", loggedInUser);
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget); // Open the dropdown
   };
@@ -21,6 +32,7 @@ const Navbar = () => {
 
   const navigateNoti = () => {
     navigate("/notifications");
+    resetCount(); // Reset count when viewing notifications
     handleMenuClose();
   };
 
@@ -39,14 +51,16 @@ const Navbar = () => {
     handleMenuClose();
   };
   const navigateHome = () => {
-    navigate("/dashboard");
+    if (loggedInUser.role === Role.ADMIN) {
+      navigate("/admin/dashboard");
+    } else navigate("/assistant/dashboard");
+
     handleMenuClose();
   };
   const handleLogout = async (e) => {
     e.preventDefault();
-    toast.loading("Logging out...", {
+    const toastId = toast.loading("Logging out...", {
       position: "top-center",
-      duration: 1000,
     });
     try {
       const logoutUrl = import.meta.env.VITE_API_URL + "/user/signout";
@@ -55,11 +69,15 @@ const Navbar = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          deviceToken: fcmToken,
+        }),
         credentials: "include",
       });
       if (!response.ok) {
         throw new Error("Failed to logout");
       }
+      toast.dismiss(toastId);
       toast.success("Logged out successfully!", {
         position: "top-center",
         duration: 2000,
@@ -67,6 +85,7 @@ const Navbar = () => {
       logout();
     } catch (error) {
       console.error("Error during logout:", error);
+      toast.dismiss(toastId);
       toast.error(error.message, {
         position: "top-center",
         duration: 2000,
@@ -83,21 +102,28 @@ const Navbar = () => {
           </h1>
         ) : (
           <h1 className="text-center text-lg font-semibold tracking-wider">
-            {`${loggedInUser.role}'s Dashboard`}
+            {`${loggedInUser.role}'s Dashboard`.toLocaleUpperCase()}
           </h1>
         )}
 
         <div className="flex space-x-6">
-          {/* Notifications Button */}
-          <Tooltip title="Notifications" arrow>
-            <button
-              onClick={navigateNoti}
-              className="text-gray-600 text-xl hover:text-blue-500"
-              aria-label="Notifications"
-            >
-              <FaBell />
-            </button>
-          </Tooltip>
+          {/* Notifications Button with Count */}
+          <div className="relative">
+            <Tooltip title="Notifications" arrow>
+              <button
+                onClick={navigateNoti}
+                className="text-gray-600 text-xl hover:text-blue-500"
+                aria-label="Notifications"
+              >
+                <FaBell />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {unreadCount}
+                  </span>
+                )}
+              </button>
+            </Tooltip>
+          </div>
 
           {/* Profile Dropdown Icon */}
 
@@ -125,7 +151,10 @@ const Navbar = () => {
           >
             <MenuItem onClick={navigateProfile}>View Profile</MenuItem>
             <MenuItem onClick={navigateHistory}>History</MenuItem>
-            {loggedInUser.role == "Senior Assistant" ? (
+            {/* do the following using if else */}
+            {loggedInUser &&
+            (loggedInUser.role === Role.SENIOR_ASSISTANT ||
+              loggedInUser.role === Role.ADMIN) ? (
               <MenuItem onClick={navigateManageUsers}>Manage Users</MenuItem>
             ) : null}
             <MenuItem onClick={handleLogout}>Logout</MenuItem>

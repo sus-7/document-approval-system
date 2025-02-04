@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const upload = require("../config/multerConfig");
+const { Role } = require("../utils/enums");
 const {
     createUserValidator,
     verifySeniorAssistant,
@@ -10,20 +12,31 @@ const {
     getCreatedAssistants,
     getApprover,
 } = require("../controllers/assistant.controllers");
+const {
+    verifyToken,
+    authorizeRoles,
+} = require("../middlewares/user.middlewares");
 
 router.post(
     "/create-user",
-    verifySeniorAssistant,
+    verifyToken,
+    authorizeRoles([Role.SENIOR_ASSISTANT]),
     createUserValidator,
     createUser
 );
 
 router.get(
     "/get-created-assistants",
-    verifySeniorAssistant,
+    verifyToken,
+    authorizeRoles([Role.SENIOR_ASSISTANT]),
     getCreatedAssistants
 );
 
-router.get("/get-approver", verifyAssistant, getApprover);
+router.get(
+    "/get-approver",
+    verifyToken,
+    authorizeRoles([Role.SENIOR_ASSISTANT, Role.ASSISTANT]),
+    getApprover
+);
 
 module.exports = router;

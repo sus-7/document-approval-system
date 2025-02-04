@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FaArrowLeft, FaSearch } from "react-icons/fa";
 import { Link as RouterLink } from "react-router-dom";
+import { useAuth } from "../contexts/AuthContext";
 
 const History = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -14,13 +15,14 @@ const History = () => {
   const filteredItems = historyItems.filter((item) =>
     item.title.toLowerCase().includes(searchTerm.toLowerCase())
   );
+  const { loggedInUser, setLoggedInUser, loading, logout } = useAuth();
 
   return (
     <div className="flex items-center justify-center font-roboto min-h-screen bg-gradient-to-r from-white to-blue-100">
       <div className="w-96 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
         {/* Back Button */}
         <RouterLink
-          to="/assistant/dashboard"
+          to= {loggedInUser.role=='Admin'? "/admin/dashboard":"/assistant/dashboard"}
           className="text-blue-600 hover:text-blue-800 mb-6 flex items-center transition-colors duration-300"
         >
           <FaArrowLeft size={24} className="mr-2" />

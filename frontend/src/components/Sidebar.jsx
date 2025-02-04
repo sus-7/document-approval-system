@@ -26,7 +26,7 @@ const Sidebar = () => {
           History
         </button>
         <button
-          onClick={() => navigate("/manage-users")}
+          onClick={() => navigate("/users/manage")}
           className="flex items-center gap-2 p-3 hover:bg-gray-700 rounded-md w-full"
         >
           <FaUsers />
@@ -38,6 +38,13 @@ const Sidebar = () => {
         >
           <FaBell />
           Notifications
+        </button>
+        <button
+          onClick={() => navigate("/")}
+          className="flex items-center gap-2 p-3 hover:bg-gray-700 rounded-md w-full"
+        >
+          <FaBell />
+         Log Out
         </button>
       </div>
     </div>
