@@ -41,6 +41,7 @@ const uploadPdf = asyncHandler(async (req, res, next) => {
 
     for (const token of deviceTokens) {
         if (token) {
+            console.log("token", token);
             await NotificationService.sendNotification(
                 token,
                 notification.title,

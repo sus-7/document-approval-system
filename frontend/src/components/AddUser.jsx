@@ -11,7 +11,7 @@ const AddUser = ({ showAddUser, setShowAddUser }) => {
   const { loggedInUser } = useContext(AuthContext);
   const [newUser, setNewUser] = useState({
     fullName: "",
-    role: "Approver",
+    role: "approver",
     email: "",
     mobileNo: "",
     password: "",
@@ -19,7 +19,7 @@ const AddUser = ({ showAddUser, setShowAddUser }) => {
   });
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState("Assistant");
+  const [role, setRole] = useState("assistant");
   const [email, setEmail] = useState("");
   const [mobileNo, setMobileNo] = useState("");
   const [password, setPassword] = useState("");
@@ -120,7 +120,7 @@ const AddUser = ({ showAddUser, setShowAddUser }) => {
       }
     } catch (error) {
       console.log("AddUser service :: handleAddUser :: error : ", error);
-      toast.error(error.response.data.message, {
+      toast.error(error.response?.data?.message, {
         position: "top-right",
         duration: 3000,
       });

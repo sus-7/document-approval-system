@@ -168,6 +168,7 @@ const createApprover = asyncHandler(async (req, res, next) => {
 
 const createUser = asyncHandler(async (req, res, next) => {
     const { role } = req.body;
+    console.log("role", role);
     if (role === "Assistant") {
         await createAssistant(req, res, next);
     } else if (role === "Approver") {
