@@ -98,6 +98,10 @@ const createApprover = asyncHandler(async (req, res, next) => {
     email = email.trim().toLowerCase();
     mobileNo = mobileNo.trim().toLowerCase();
     fullName = fullName.trim().toLowerCase();
+    console.log("username", username);
+    console.log("email", email);
+    console.log("mobileNo", mobileNo);
+    console.log("fullName", fullName);
     const existingVerifiedUser = await User.findOne({
         $or: [{ username }, { email }, { mobileNo }],
         isVerified: true,
@@ -168,9 +172,9 @@ const createApprover = asyncHandler(async (req, res, next) => {
 
 const createUser = asyncHandler(async (req, res, next) => {
     const { role } = req.body;
-    if (role === "Assistant") {
+    if (role === Role.ASSISTANT) {
         await createAssistant(req, res, next);
-    } else if (role === "Approver") {
+    } else if (role === Role.APPROVER) {
         await createApprover(req, res, next);
     }
 });
