@@ -261,7 +261,7 @@ const AssistantDashboard = () => {
             >
               <option value="">All</option>
               {departments?.map((department, idx) => (
-                <option key={idx} value={department}>{department}</option>
+                <option key={idx} value={department}>{department.toUpperCase()}</option>
               ))}
             </select>
           </div>
