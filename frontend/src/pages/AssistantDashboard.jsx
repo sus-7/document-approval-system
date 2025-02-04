@@ -34,8 +34,9 @@ const AssistantDashboard = () => {
   const [newDocDialogOpen, setNewDocDialogOpen] = useState(false);
   const [viewPdfDialogOpen, setViewPdfDialogOpen] = useState(false);
   const [currentPdfUrl, setCurrentPdfUrl] = useState("");
-  const [departments, setDepartments] = useState([])
-  // Filter States
+  const [departments, setDepartments] = useState([]);
+  const [departments, setDepartments] = useState([]);
+  // Filter States  
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -55,11 +56,11 @@ const AssistantDashboard = () => {
     try {
       setIsLoading(true);
       setError(null);
-
+      setDocuments([]);
       const apiUrl = `${import.meta.env.VITE_API_URL
         }/file/get-documents?status=${selectedTab.toLowerCase()}`;
-        console.log('apiUrl', apiUrl);
-        
+      console.log('apiUrl', apiUrl);
+
       const response = await axios.get(apiUrl, {
         headers: {
           Accept: "application/json",
@@ -70,7 +71,7 @@ const AssistantDashboard = () => {
 
       console.log("fetched data", response.data);
       setDocuments(response.data.documents);
-      setFilteredData(response.data);
+      setFilteredData(response.data.documents); // Corrected line
     } catch (err) {
       const errorMessage =
         err.response?.data?.message ||
@@ -85,10 +86,9 @@ const AssistantDashboard = () => {
     }
   };
 
-useEffect(() => {
-  fetchDocuments();
-}, [selectedTab]);
-
+  useEffect(() => {
+    fetchDocuments();
+  }, [selectedTab]);
 
   // Effects
   useEffect(() => {
@@ -100,8 +100,6 @@ useEffect(() => {
         console.log("departments : ", response.data.data);
         setDepartments(response.data.data);
         console.log('departments : ', departments);
-
-
       } catch (error) {
         console.error("Error fetching departments:", error);
       }
@@ -174,17 +172,6 @@ useEffect(() => {
         formData,
         { withCredentials: true }
       );
-
-      // const response = await axios.post(
-      //   `${import.meta.env.VITE_API_URL}/file/upload-pdf`,
-      //   formData,
-      //   {
-      //     withCredentials: true,
-      //     headers: {
-      //       "Content-Type": "multipart/form-data",
-      //     },
-      //   }
-      // );
 
       if (response.data) {
         toast.dismiss(toastId);
@@ -260,10 +247,10 @@ useEffect(() => {
               onChange={(e) => setSelectedCategory(e.target.value)}
               className="block w-full md:w-auto mt-1 p-2 text-sm border border-gray-300 bg-white rounded-md"
             >
+              <option value="">All</option>
               {departments?.map((department, idx) => (
                 <option key={idx} value={department}>{department}</option>
               ))}
-
             </select>
           </div>
 
@@ -291,14 +278,13 @@ useEffect(() => {
               >
                 <IoMdRefresh className="h-5 w-5" />
               </button>
-
-
             </div>
           </div>
         </div>
 
         {/* Document List */}
         <DocumentsList
+          documents={filteredData} // Pass filteredData to DocumentsList
           status={selectedTab.toLowerCase()}
           department={selectedCategory}
           handleTitleClick={handleTitleClick}
@@ -360,6 +346,7 @@ useEffect(() => {
               native: true,
             }}
           >
+            <option value="">Select Department</option>
             {departments?.map((department, idx) => (
               <option key={idx} value={department}>{department}</option>
             ))}
@@ -418,15 +405,15 @@ useEffect(() => {
         </DialogActions>
       </Dialog>
 
-      <style jsx>{`
-  @media (max-width: 600px) {
-    div {
-      height: 60vh;
-    }
-  }
-`}</style>
+      <style>{`
+        @media (max-width: 600px) {
+          div {
+            height: 60vh;
+          }
+        }
+      `}</style>
     </div>
   );
 };
 
-export default AssistantDashboard;
+export default AssistantDashboard;  
