@@ -35,7 +35,6 @@ const AssistantDashboard = () => {
   const [viewPdfDialogOpen, setViewPdfDialogOpen] = useState(false);
   const [currentPdfUrl, setCurrentPdfUrl] = useState("");
   const [departments, setDepartments] = useState([]);
-  const [departments, setDepartments] = useState([]);
   // Filter States  
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
