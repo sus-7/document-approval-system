@@ -16,6 +16,8 @@ import axios from "axios";
 import CryptoJS from "crypto-js";
 import DocumentsList from "../components/DocumentsList";
 import { IoMdRefresh } from "react-icons/io";
+import Loader from "react-loaders";
+import "loaders.css/loaders.min.css";
 
 const AssistantDashboard = () => {
   // State Management
@@ -35,6 +37,7 @@ const AssistantDashboard = () => {
   const [viewPdfDialogOpen, setViewPdfDialogOpen] = useState(false);
   const [currentPdfUrl, setCurrentPdfUrl] = useState("");
   const [departments, setDepartments] = useState([]);
+  
   // Filter States  
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -46,6 +49,7 @@ const AssistantDashboard = () => {
   const [newDocFile, setNewDocFile] = useState(null);
   const [newDocDesc, setNewDocDesc] = useState("");
   const [serverResponse, setServerResponse] = useState("");
+  const [loading, setLoading] = useState(false);
 
   // Hardcoded encryption key
   const encryptionKey = "your-hardcoded-encryption-key";
@@ -56,8 +60,7 @@ const AssistantDashboard = () => {
       setIsLoading(true);
       setError(null);
       setDocuments([]);
-      const apiUrl = `${import.meta.env.VITE_API_URL
-        }/file/get-documents?status=${selectedTab.toLowerCase()}`;
+      const apiUrl = `${import.meta.env.VITE_API_URL}/file/get-documents?status=${selectedTab.toLowerCase()}`;
       console.log('apiUrl', apiUrl);
 
       const response = await axios.get(apiUrl, {
@@ -70,8 +73,12 @@ const AssistantDashboard = () => {
 
       console.log("fetched data", response.data);
       setDocuments(response.data.documents);
-      setFilteredData(response.data.documents); // Corrected line
-    } catch (err) {
+      setFilteredData(response.data.documents);// Corrected line
+        console.log('documents : ', documents);
+        
+   
+    }
+     catch (err) {
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
@@ -83,6 +90,12 @@ const AssistantDashboard = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    setLoading(true);
+    await fetchDocuments();
+    setLoading(false);
   };
 
   useEffect(() => {
@@ -272,7 +285,7 @@ const AssistantDashboard = () => {
                 min={startDate}
               />
               <button
-                onClick={fetchDocuments}
+                onClick={handleRefresh}
                 className="flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition"
               >
                 <IoMdRefresh className="h-5 w-5" />
@@ -282,12 +295,18 @@ const AssistantDashboard = () => {
         </div>
 
         {/* Document List */}
-        <DocumentsList
-          documents={filteredData} // Pass filteredData to DocumentsList
-          status={selectedTab.toLowerCase()}
-          department={selectedCategory}
-          handleTitleClick={handleTitleClick}
-        />
+        {isLoading || loading ? (
+          <div className="flex justify-center items-center">
+            <Loader type="ball-pulse" active />
+          </div>
+        ) : (
+          <DocumentsList
+            documents={filteredData} // Pass filteredData to DocumentsList
+            status={selectedTab.toLowerCase()}
+            department={selectedCategory}
+            handleTitleClick={handleTitleClick}
+          />
+        )}
       </main>
 
       {/* Remarks Dialog */}
@@ -403,16 +422,8 @@ const AssistantDashboard = () => {
           <Button onClick={() => setViewPdfDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
-
-      <style>{`
-        @media (max-width: 600px) {
-          div {
-            height: 60vh;
-          }
-        }
-      `}</style>
     </div>
   );
 };
 
-export default AssistantDashboard;  
+export default AssistantDashboard;
