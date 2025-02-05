@@ -10,6 +10,12 @@ const { Role, FileStatus } = require("../utils/enums");
 const User = require("../models/user.model");
 const uploadPdf = asyncHandler(async (req, res, next) => {
     //only take description if available
+    console.log("req.user", req.user)
+    if(!req.user.assignedApprover) {
+        const error = new Error("No approver assigned");
+        error.statusCode = 403;
+        return next(error);
+    }
     const { department, title, description = null } = req.body;
     const file = req.file;
     const fileUniqueName = file.filename;
