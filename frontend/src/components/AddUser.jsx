@@ -121,7 +121,7 @@ const AddUser = ({ showAddUser, setShowAddUser }) => {
       }
     } catch (error) {
       console.log("AddUser service :: handleAddUser :: error : ", error);
-      toast.error(error.response.data.message, {
+      toast.error(error.response?.data?.message, {
         position: "top-right",
         duration: 3000,
       });

@@ -32,7 +32,7 @@ const ProfileDashboard = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
       {/* Navbar */}
-      <Navbar />
+      {/* <Navbar /> */}
       {/* Main Content */}
       <div className="flex flex-col items-center justify-center flex-grow p-4">
         <div className="w-full max-w-3xl bg-white shadow-lg border border-gray-200 rounded-lg p-6 sm:p-8 space-y-8">

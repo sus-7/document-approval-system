@@ -11,21 +11,20 @@ const DocumentsList = ({ status, department, handleTitleClick, encKey }) => {
   const [currentPdfUrl, setCurrentPdfUrl] = useState("");
   // TODO: Replace with secure key management
   const encryptionKey = "your-hardcoded-encryption-key";
-
   const fetchDocuments = async () => {
     try {
       setIsLoading(true);
       setError(null);
-
+  
       const queryParams = new URLSearchParams();
       const validStatus = status && status !== "all" ? status : "pending";
       queryParams.append("status", validStatus);
-
+  
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/file/get-documents?status=pending`,
+        `${import.meta.env.VITE_API_URL}/file/get-documents?${queryParams.toString()}`,
         { withCredentials: true }
       );
-
+  
       if (response.data.status && response.data.documents) {
         setFilteredData(response.data.documents);
       } else {

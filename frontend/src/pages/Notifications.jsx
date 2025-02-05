@@ -73,7 +73,6 @@ const Notifications = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
       {/* Navbar */}
-      <Navbar />
 
       {/* Main Content */}
       <div className="flex items-center justify-center flex-grow">
