@@ -87,23 +87,23 @@ const Login = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-gray-100 to-blue-200">
       <Toaster />
 
       {tokenLoading && (
-        <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-gray-50 flex items-center justify-center z-50">
           <span className="loading loading-bars loading-lg"></span>
           <p className="ml-4">Generating token. Please wait...</p>
         </div>
       )}
 
       {!tokenLoading && (
-        <form onSubmit={handleSubmit} className={tokenError ? "opacity-50" : ""}>
+        <form onSubmit={handleSubmit} className={tokenError ? "opacity-50" : "bg-white p-6 shadow-lg rounded-lg"}>
           <div className="flex justify-center gap-4 mb-6">
             <button
               type="button"
               className={`px-4 py-2 text-sm font-medium rounded-md ${
-                selectedToggle === "Approver" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700"
+                selectedToggle === "Approver" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"
               }`}
               onClick={() => setSelectedToggle("Approver")}
             >
@@ -112,7 +112,7 @@ const Login = () => {
             <button
               type="button"
               className={`px-4 py-2 text-sm font-medium rounded-md ${
-                selectedToggle === "Assistant" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700"
+                selectedToggle === "Assistant" ? "bg-blue-600 text-white" : "bg-gray-200 text-gray-700"
               }`}
               onClick={() => setSelectedToggle("Assistant")}
             >
@@ -120,37 +120,37 @@ const Login = () => {
             </button>
           </div>
 
-          <h2 className="text-center text-xl font-semibold text-gray-800 mb-6">Welcome Back!</h2>
+          <h2 className="text-center text-xl font-semibold text-gray-900 mb-6">Welcome Back!</h2>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+            <label className="block text-sm font-medium text-gray-800 mb-1">Username</label>
             <input
               type="text"
               placeholder="Enter your username"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
             />
           </div>
 
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+            <label className="block text-sm font-medium text-gray-800 mb-1">Password</label>
             <input
               type="password"
               placeholder="Enter your password"
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-600"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </div>
 
           <div className="flex justify-end mb-4">
-            <RouterLink to="/forgot-password" className="text-sm text-blue-500 hover:underline">
+            <RouterLink to="/forgot-password" className="text-sm text-blue-600 hover:underline">
               Forgot Password?
             </RouterLink>
           </div>
 
-          <button type="submit" className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">
+          <button type="submit" className="w-full px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
             Login as {selectedToggle}
           </button>
         </form>
