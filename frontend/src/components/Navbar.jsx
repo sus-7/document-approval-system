@@ -9,6 +9,7 @@ import { Tooltip } from "@mui/material";
 import { useAuth } from "../contexts/AuthContext";
 import { Role } from "../../utils/enums";
 import { useNotifications } from "../contexts/NotificationContext";
+import { AiFillHome } from "react-icons/ai";
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -21,7 +22,6 @@ const Navbar = () => {
     fetchNotifications();
   }, []);
 
-  console.log("loggedInUserr", loggedInUser);
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget); // Open the dropdown
   };
@@ -50,13 +50,20 @@ const Navbar = () => {
     navigate("/users/manage");
     handleMenuClose();
   };
-  const navigateHome = () => {
-    if (loggedInUser.role === Role.ADMIN) {
-      navigate("/admin/dashboard");
-    } else navigate("/assistant/dashboard");
 
+  const navigateHome = () => {
+    if (loggedInUser?.role === Role.APPROVER) {
+      navigate("/approver/dashboard");
+    }
+    else if (loggedInUser?.role === Role.ADMIN) {
+      navigate("/admin/dashboard");
+    }
+    else {
+      navigate("/assistant/dashboard");
+    }
     handleMenuClose();
   };
+
   const handleLogout = async (e) => {
     e.preventDefault();
     const toastId = toast.loading("Logging out...", {
@@ -83,6 +90,7 @@ const Navbar = () => {
         duration: 2000,
       });
       logout();
+      navigate("/"); // Redirect to login page after logout
     } catch (error) {
       console.error("Error during logout:", error);
       toast.dismiss(toastId);
@@ -92,74 +100,85 @@ const Navbar = () => {
       });
     }
   };
+
+  if (loading) {
+    return <div>Loading...</div>; // Show loading state while checking auth
+  }
+
   return (
-    <div>
-      <div className="navbar w-full h-[8vh] flex items-center justify-between bg-white text-gray-700 px-8 shadow-md">
-        {/* Title based on Role */}
-        {!loggedInUser ? (
-          <h1 className="text-center text-lg font-semibold tracking-wider">
-            Loading...
-          </h1>
-        ) : (
-          <h1 className="text-center text-lg font-semibold tracking-wider">
-            {`${loggedInUser.role}'s Dashboard`.toLocaleUpperCase()}
-          </h1>
-        )}
+    <div className="navbar w-full h-[8vh] flex items-center justify-between bg-white text-gray-700 px-8 shadow-md">
+      {!loggedInUser ? (
+        <h1 className="text-lg font-semibold tracking-wider">
+          Loading...
+        </h1>
+      ) : (
+        <h1 className="text-lg font-semibold tracking-wider">
+          {`${loggedInUser.role}'s Dashboard`.toLocaleUpperCase()}
+        </h1>
+      )}
 
-        <div className="flex space-x-6">
-          {/* Notifications Button with Count */}
-          <div className="relative">
-            <Tooltip title="Notifications" arrow>
-              <button
-                onClick={navigateNoti}
-                className="text-gray-600 text-xl hover:text-blue-500"
-                aria-label="Notifications"
-              >
-                <FaBell />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {unreadCount}
-                  </span>
-                )}
-              </button>
-            </Tooltip>
-          </div>
-
-          {/* Profile Dropdown Icon */}
-
-          <Tooltip title="Profile" arrow>
-            <IconButton
-              className="text-gray-600 hover:text-blue-500"
-              onClick={handleMenuOpen}
-              aria-label="Profile"
-            >
-              <FaUserAlt />
-            </IconButton>
-          </Tooltip>
-
-          {/* Dropdown Menu */}
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-            PaperProps={{
-              style: {
-                maxHeight: 200,
-                width: "20ch",
-              },
-            }}
+      <div className="flex items-center space-x-6">
+        {/* Home Button */}
+        <Tooltip title="Home" arrow>
+          <button
+            onClick={navigateHome}
+            className="text-gray-600 mb-2 text-xl hover:text-blue-500"
+            aria-label="Home"
           >
-            <MenuItem onClick={navigateProfile}>View Profile</MenuItem>
-            <MenuItem onClick={navigateHistory}>History</MenuItem>
-            {/* do the following using if else */}
-            {loggedInUser &&
-            (loggedInUser.role === Role.SENIOR_ASSISTANT ||
-              loggedInUser.role === Role.ADMIN) ? (
-              <MenuItem onClick={navigateManageUsers}>Manage Users</MenuItem>
-            ) : null}
-            <MenuItem onClick={handleLogout}>Logout</MenuItem>
-          </Menu>
+            <AiFillHome />
+          </button>
+        </Tooltip>
+
+        {/* Notifications Button with Count */}
+        <div className="relative">
+          <Tooltip title="Notifications" arrow>
+            <button
+              onClick={navigateNoti}
+              className="text-gray-600 text-xl hover:text-blue-500"
+              aria-label="Notifications"
+            >
+              <FaBell />
+              {unreadCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {unreadCount}
+                </span>
+              )}
+            </button>
+          </Tooltip>
         </div>
+
+        {/* Profile Dropdown Icon */}
+        <Tooltip title="Profile" arrow>
+          <IconButton
+            className="text  hover:text-blue-500"
+            onClick={handleMenuOpen}
+            aria-label="Profile"
+          >
+            <FaUserAlt size={22} className="mb-2" />
+          </IconButton>
+        </Tooltip>
+
+        {/* Dropdown Menu */}
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
+          PaperProps={{
+            style: {
+              maxHeight: 200,
+              width: "20ch",
+            },
+          }}
+        >
+          <MenuItem onClick={navigateProfile}>View Profile</MenuItem>
+          <MenuItem onClick={navigateHistory}>History</MenuItem>
+          {loggedInUser &&
+          (loggedInUser.role === Role.SENIOR_ASSISTANT ||
+            loggedInUser.role === Role.ADMIN) ? (
+            <MenuItem onClick={navigateManageUsers}>Manage Users</MenuItem>
+          ) : null}
+          <MenuItem onClick={handleLogout}>Logout</MenuItem>
+        </Menu>
       </div>
     </div>
   );

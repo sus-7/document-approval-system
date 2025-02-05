@@ -37,7 +37,7 @@ const ManageUsers = () => {
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
       <Toaster />
-      <Navbar/>
+      {/* <Navbar/> */}
       <div className="flex items-center justify-center flex-grow p-4">
         <div className="w-full max-w-3xl bg-white shadow-lg border border-gray-200 rounded-lg p-8">
           <div className="flex gap-4 mb-6 justify-end">
