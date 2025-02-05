@@ -34,13 +34,8 @@ const AssistantDashboard = () => {
   const [newDocDialogOpen, setNewDocDialogOpen] = useState(false);
   const [viewPdfDialogOpen, setViewPdfDialogOpen] = useState(false);
   const [currentPdfUrl, setCurrentPdfUrl] = useState("");
-  const [departments, setDepartments] = useState([]);
-<<<<<<< HEAD
- 
+  const [departments, setDepartments] = useState([]); 
   // Filter States  
-=======
-  // Filter States
->>>>>>> 7ac3e937de44174ae077353aa495b0fb15b058df
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
