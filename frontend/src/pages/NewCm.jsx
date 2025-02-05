@@ -3,12 +3,17 @@ import { FaSearch } from "react-icons/fa";
 import axios from "axios";
 import { toast, Toaster } from "react-hot-toast";
 import { ClipLoader } from "react-spinners";
-import { AiOutlineClose, AiOutlineCheck, AiOutlineCloseCircle } from "react-icons/ai";
+import {
+  AiOutlineClose,
+  AiOutlineCheck,
+  AiOutlineCloseCircle,
+} from "react-icons/ai";
 import { FaCommentDots } from "react-icons/fa";
 import { IoMdRefresh } from "react-icons/io";
-import '../index.css';
+import "../index.css";
+import CryptoJS from "crypto-js";
 
-const NewCm = () => {
+const NewCm = ({ handleTitleClick }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
@@ -20,22 +25,38 @@ const NewCm = () => {
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [remark, setRemark] = useState("");
 
+  const convertWordArrayToUint8Array = (wordArray) => {
+    const len = wordArray.sigBytes;
+    const words = wordArray.words;
+    const uint8Array = new Uint8Array(len);
+    let offset = 0;
+
+    for (let i = 0; i < len; i += 4) {
+      const word = words[i >>> 2];
+      for (let j = 0; j < 4 && offset < len; ++j) {
+        uint8Array[offset++] = (word >>> (24 - j * 8)) & 0xff;
+      }
+    }
+
+    return uint8Array;
+  };
+
   const fetchDocuments = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
       const queryParams = new URLSearchParams();
-      queryParams.append('status', 'pending');
+      queryParams.append("status", "pending");
 
       if (category) {
-        queryParams.append('category', category);
+        queryParams.append("category", category);
       }
       if (startDate) {
-        queryParams.append('startDate', startDate);
+        queryParams.append("startDate", startDate);
       }
       if (endDate) {
-        queryParams.append('endDate', endDate);
+        queryParams.append("endDate", endDate);
       }
 
       const response = await axios.get(
@@ -43,18 +64,18 @@ const NewCm = () => {
         { withCredentials: true }
       );
 
-      console.log('API Response:', response.data);
+      console.log("API Response:", response.data);
 
       if (response.data.status && response.data.documents) {
         setFilteredData(response.data.documents);
-        console.log('Filtered Data:', response.data.documents);
+        console.log("Filtered Data:", response.data.documents);
       } else {
-        throw new Error('Invalid response format');
+        throw new Error("Invalid response format");
       }
     } catch (err) {
-      console.error('Fetch error:', err);
-      setError(err.response?.data?.message || 'Failed to fetch documents');
-      toast.error('Failed to load documents');
+      console.error("Fetch error:", err);
+      setError(err.response?.data?.message || "Failed to fetch documents");
+      toast.error("Failed to load documents");
       setFilteredData([]);
     } finally {
       setIsLoading(false);
@@ -91,8 +112,8 @@ const NewCm = () => {
   };
 
   const handleApprove = async (fileUniqueName) => {
-    console.log('fileUniqueName:', fileUniqueName);
-   
+    console.log("fileUniqueName:", fileUniqueName);
+
     try {
       toast.loading("Approving document...");
       const response = await axios.post(
@@ -101,7 +122,7 @@ const NewCm = () => {
         { withCredentials: true }
       );
       closeModal();
-  
+
       toast.dismiss();
       toast.success(response.data.message || "Document approved successfully!");
       fetchDocuments(); // Refresh list after approval
@@ -113,11 +134,11 @@ const NewCm = () => {
   };
 
   const handleReject = async (fileUniqueName) => {
-    console.log("rejected file", fileUniqueName)
+    console.log("rejected file", fileUniqueName);
     try {
       toast.loading("Rejecting document...");
       const response = await axios.post(
-        `${import.meta.env.VITE_API_URL}/file/reject`,  
+        `${import.meta.env.VITE_API_URL}/file/reject`,
         { fileUniqueName },
         { withCredentials: true }
       );
@@ -132,8 +153,38 @@ const NewCm = () => {
     }
   };
 
+  const handlePreview = async (fileName) => {
+    try {
+      console.log("fileName", fileName);
+      // Download encrypted file
+      const downloadUrl =
+        import.meta.env.VITE_API_URL + `/file/download-pdf/${fileName}`;
+      const response = await axios.get(downloadUrl, {
+        withCredentials: true,
+        responseType: "text",
+      });
+
+      // Decrypt the content
+      const decrypted = CryptoJS.AES.decrypt(response.data, "mykey");
+
+      // Convert to Uint8Array
+      const typedArray = convertWordArrayToUint8Array(decrypted);
+
+      // Create blob and download
+      const blob = new Blob([typedArray], {
+        type: "application/pdf" || "application/octet-stream",
+      });
+
+      const url = URL.createObjectURL(blob);
+      console.log("file url generated for preview : ", url);
+      return url;
+    } catch (error) {
+      console.error("Decryption error:", error);
+    }
+  };
+
   return (
-    <div className="flex  flex-col  font-sans    space-y-6 p-4">
+    <div className="flex flex-col font-sans space-y-6 p-4">
       {/* Search Section */}
       <Toaster />
       <div className="relative">
@@ -187,7 +238,9 @@ const NewCm = () => {
         ) : error ? (
           <p className="text-red-500">{error}</p>
         ) : filteredData.length === 0 ? (
-          <p className="text-gray-500 font-thin text-center text-lg ">No documents found</p>
+          <p className="text-gray-500 font-thin text-center text-lg ">
+            No documents found
+          </p>
         ) : (
           filteredData.map((item) => (
             <div
@@ -199,26 +252,55 @@ const NewCm = () => {
                   📄
                 </div>
                 <div className="flex flex-col">
-                  <h3
-                    className="text-xl font-bold tracking-tight font-open-sans text-gray-800 cursor-pointer"
-                    onClick={() => openModal(item)}
-                  >
-                    {item.title}
-                  </h3>
+                  <div className="relative group">
+                    <h3
+                      className="text-xl font-bold tracking-tight font-open-sans text-gray-800 cursor-pointer"
+                      onClick={async () => {
+                        const url = await handlePreview(item.fileUniqueName);
+                        handleTitleClick(url);
+                      }}
+                    >
+                      {item.title}
+                    </h3>
+                    <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 w-64 p-2 bg-gray-800 text-white text-center text-xs rounded-md opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      {item.description}
+                    </div>
+                  </div>
                   <div className="flex flex-col sm:flex-row sm:space-x-4">
                     <span className="text-[13px] font-light text-gray-800">
-                      <span className="font-semibold">Department:</span> {item.department?.departmentName || 'Unassigned'}
+                      <span className="font-semibold">Department:</span>{" "}
+                      {item.department?.departmentName || "Unassigned"}
                     </span>
                     <span className="text-[13px] font-light text-gray-800">
-                      <span className="font-semibold">Created By:</span> {item.createdBy?.fullName || item.createdBy?.username || 'Unknown'}
+                      <span className="font-semibold">Created By:</span>{" "}
+                      {item.createdBy?.fullName ||
+                        item.createdBy?.username ||
+                        "Unknown"}
                     </span>
                   </div>
                   <p className="text-xs text-gray-500">{item.date}</p>
                 </div>
               </div>
-              <span className="text-sm font-semibold text-blue-500 mt-2 sm:mt-0">
-                {item.status.toUpperCase()}
-              </span>
+              <div className="flex items-center space-x-2 mt-2 sm:mt-0">
+                <button
+                  onClick={() => handleApprove(item.fileUniqueName)}
+                  className="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full shadow-md hover:bg-green-600 transition"
+                >
+                  <AiOutlineCheck className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => handleReject(item.fileUniqueName)}
+                  className="flex items-center justify-center w-8 h-8 bg-red-500 text-white rounded-full shadow-md hover:bg-red-600 transition"
+                >
+                  <AiOutlineCloseCircle className="h-5 w-5" />
+                </button>
+                <button
+                  onClick={() => openRemarkModal(item)}
+                  className="flex items-center justify-center w-8 h-8 bg-yellow-500 text-white rounded-full shadow-md hover:bg-yellow-600 transition"
+                >
+                  <FaCommentDots className="h-5 w-5" />
+                </button>
+              </div>
             </div>
           ))
         )}
@@ -236,7 +318,9 @@ const NewCm = () => {
           >
             {/* Modal Header */}
             <div className="flex justify-between items-center mb-4 border-b pb-2">
-              <h2 className="text-2xl font-semibold text-gray-800">{selectedDocument?.title}</h2>
+              <h2 className="text-2xl font-semibold text-gray-800">
+                {selectedDocument?.title}
+              </h2>
               <button
                 onClick={closeModal}
                 className="text-gray-500 hover:text-gray-700 transition-colors"
@@ -252,12 +336,15 @@ const NewCm = () => {
 
             {/* Action Buttons */}
             <div className="flex flex-wrap justify-end gap-2">
-              <button onClick={() => handleApprove(selectedDocument.fileUniqueName)} className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600 transition">
+              <button
+                onClick={() => handleApprove(selectedDocument.fileUniqueName)}
+                className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white rounded-md shadow-md hover:bg-green-600 transition"
+              >
                 <AiOutlineCheck className="h-5 w-5" />
                 Approve
               </button>
 
-              <button 
+              <button
                 onClick={() => handleReject(selectedDocument.fileUniqueName)}
                 className="flex items-center gap-2 px-4 py-2 bg-red-500 text-white rounded-md shadow-md hover:bg-red-600 transition"
               >
@@ -272,7 +359,6 @@ const NewCm = () => {
                 <FaCommentDots className="h-5 w-5" />
                 Give Remark
               </button>
-
             </div>
           </div>
         </div>
@@ -290,7 +376,9 @@ const NewCm = () => {
           >
             {/* Modal Header */}
             <div className="flex justify-between items-center mb-4 border-b pb-2">
-              <h2 className="text-2xl font-semibold text-gray-800">Give Remark</h2>
+              <h2 className="text-2xl font-semibold text-gray-800">
+                Give Remark
+              </h2>
               <button
                 onClick={closeRemarkModal}
                 className="text-gray-500 hover:text-gray-700 transition-colors"

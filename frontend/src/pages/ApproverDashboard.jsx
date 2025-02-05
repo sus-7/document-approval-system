@@ -5,54 +5,52 @@ import SentBackTabContent from "./SentBackTabContent";
 import Navbar from "../components/Navbar.jsx";
 import { AuthContext } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button } from "@mui/material";
+import axios from "axios";
+import toast from "react-hot-toast";
+
 const ApproverDashboard = () => {
   const [selectedTab, setSelectedTab] = useState("NEW");
   const { loggedInUser } = useContext(AuthContext);
+  const [currentPdfUrl, setCurrentPdfUrl] = useState("");
+  const [viewPdfDialogOpen, setViewPdfDialogOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [filteredData, setFilteredData] = useState([]);
   const navigate = useNavigate();
+
   useEffect(() => {
     if (!loggedInUser) {
       navigate("/");
     }
   }, [loggedInUser]);
 
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [filteredData, setFilteredData] = useState([]);
-
-  const encryptionKey = "your-hardcoded-encryption-key"; // Replace with secure storage
-
   const fetchDocuments = async () => {
     try {
       setIsLoading(true);
       setError(null);
-
-      const queryParams = new URLSearchParams();
-      const validStatus = status && status !== 'all' ? status : 'pending';
-      queryParams.append('status', validStatus);
-
-      if (department) {
-        queryParams.append('department', department);
-      }
-
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/file/get-documents?${queryParams}`,
+        `${import.meta.env.VITE_API_URL}/file/get-documents?status=pending`,
         { withCredentials: true }
       );
-
       if (response.data.status && response.data.documents) {
         setFilteredData(response.data.documents);
       } else {
-        throw new Error('Invalid response format');
+        throw new Error("Invalid response format");
       }
     } catch (err) {
-      console.error('Fetch error:', err);
-      setError(err.response?.data?.message || 'Failed to fetch documents');
-      toast.error('Failed to load documents');
+      console.error("Fetch error:", err);
+      setError(err.response?.data?.message || "Failed to fetch documents");
+      toast.error("Failed to load documents");
       setFilteredData([]);
     } finally {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-white to-blue-100">
@@ -66,9 +64,7 @@ const ApproverDashboard = () => {
             <button
               onClick={() => setSelectedTab("NEW")}
               className={`px-4 py-2 font-medium rounded-md ${
-                selectedTab === "NEW"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100 text-gray-700"
+                selectedTab === "NEW" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700"
               }`}
             >
               NEW
@@ -76,9 +72,7 @@ const ApproverDashboard = () => {
             <button
               onClick={() => setSelectedTab("SENT BACK")}
               className={`px-4 py-2 font-medium rounded-md ${
-                selectedTab === "SENT BACK"
-                  ? "bg-blue-500 text-white"
-                  : "bg-gray-100 text-gray-700"
+                selectedTab === "SENT BACK" ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-700"
               }`}
             >
               SENT BACK
@@ -86,11 +80,47 @@ const ApproverDashboard = () => {
           </div>
 
           {/* Content */}
-          <div className="content  p-4">
-            {selectedTab === "NEW" ? <NewCm /> : <SentBackTabContent />}
+          <div className="content p-4">
+            {selectedTab === "NEW" ? (
+              <NewCm
+                handleTitleClick={(url) => {
+                  setCurrentPdfUrl(url);
+                  setViewPdfDialogOpen(true);
+                }}
+              />
+            ) : (
+              <SentBackTabContent />
+            )}
           </div>
         </div>
       </div>
+
+      {/* PDF Preview Dialog */}
+      <Dialog
+        open={viewPdfDialogOpen}
+        onClose={() => setViewPdfDialogOpen(false)}
+        maxWidth="xl"
+        fullWidth
+      >
+        <DialogTitle>Document Preview</DialogTitle>
+        <DialogContent>
+          <div style={{ width: "100%", height: "80vh" }}>
+            <object
+              data={currentPdfUrl}
+              type="application/pdf"
+              width="100%"
+              height="100%"
+            >
+              <p>
+                Your browser does not support PDFs. <a href={currentPdfUrl}>Download the PDF</a>.
+              </p>
+            </object>
+          </div>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setViewPdfDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
