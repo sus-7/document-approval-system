@@ -66,12 +66,6 @@ const SentBackTabContent = () => {
     fetchDocuments();
   }, [category, startDate, endDate]);
 
-  
-
- 
-  
-
-
   const handleApprove = async (fileUniqueName) => {
     try {
       toast.loading("Approving document...");
@@ -110,8 +104,6 @@ const SentBackTabContent = () => {
     }
   };
   
-
-
   return (
     <div className="flex flex-col font-roboto space-y-6 p-4">
       {/* Search Section */}
@@ -122,14 +114,14 @@ const SentBackTabContent = () => {
         <input
           type="text"
           placeholder="Search"
-          className="w-full pl-10 pr-4 py-2 rounded-md bg-gray-100 text-gray-800 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          className="w-full pl-10 pr-4 py-2 rounded-md bg-gray-100 text-gray-800 border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:outline-none h-9"
         />
       </div>
 
       {/* Filters */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
         <select
-          className="flex-1 px-4 py-2 rounded-md bg-gray-200 text-gray-700 border border-gray-300"
+          className="flex-1 px-4 py-2 rounded-md bg-gray-200 text-gray-700 border border-gray-300 h-9"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
@@ -141,13 +133,13 @@ const SentBackTabContent = () => {
         </select>
         <input
           type="date"
-          className="flex-1 px-4 py-2 rounded-md bg-gray-200 text-gray-700 border border-gray-300"
+          className="flex-1 px-4 py-2 rounded-md bg-gray-200 text-gray-700 border border-gray-300 h-9"
           value={startDate}
           onChange={(e) => setStartDate(e.target.value)}
         />
         <input
           type="date"
-          className="flex-1 px-4 py-2 rounded-md bg-gray-200 text-gray-700 border border-gray-300"
+          className="flex-1 px-4 py-2 rounded-md bg-gray-200 text-gray-700 border border-gray-300 h-9"
           value={endDate}
           onChange={(e) => setEndDate(e.target.value)}
         />
