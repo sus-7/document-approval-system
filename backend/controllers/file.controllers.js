@@ -22,6 +22,7 @@ const uploadPdf = asyncHandler(async (req, res, next) => {
         department,
         title,
         description,
+        status: FileStatus.PENDING,
     }).save();
 
     const populatedFile = await newFile.populate([

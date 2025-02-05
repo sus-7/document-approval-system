@@ -5,10 +5,12 @@ import SentBackTabContent from "./SentBackTabContent";
 import Navbar from "../components/Navbar.jsx";
 import { AuthContext } from "../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+
 const ApproverDashboard = () => {
   const [selectedTab, setSelectedTab] = useState("NEW");
   const { loggedInUser } = useContext(AuthContext);
   const navigate = useNavigate();
+
   useEffect(() => {
     if (!loggedInUser) {
       navigate("/");
@@ -60,10 +62,10 @@ const ApproverDashboard = () => {
       <Navbar />
 
       {/* Main Content */}
-      <div className="flex items-center min-h-screen mt-3 h-auto justify-center flex-grow">
-        <div className="w-[90%] max-w-[80vh] bg-white h-full flex flex-col flex-grow-1 shadow-lg border border-gray-200 rounded-lg">
+      <div className="flex items-center min-h-screen h-auto justify-center flex-grow mt-0"> {/* Reduced mt-3 to mt-1 */}
+        <div className="w-[90%] max-w-[100vh] bg-white h-fit flex flex-col flex-grow-1 shadow-lg border border-gray-200 rounded-lg absolute top-20 ">
           {/* Tabs */}
-          <div className="tabs flex justify-around items-center text-sm text-gray-700 mt-2 border-b border-gray-200">
+          <div className="tabs flex justify-around items-center text-sm text-gray-700 mt-1 border-b border-gray-200 h-11 ">
             <button
               onClick={() => setSelectedTab("NEW")}
               className={`px-4 py-2 font-medium rounded-md ${
@@ -87,7 +89,7 @@ const ApproverDashboard = () => {
           </div>
 
           {/* Content */}
-          <div className="content  p-4">
+          <div className="content p-4 items-center">
             {selectedTab === "NEW" ? <NewCm /> : <SentBackTabContent />}
           </div>
         </div>
