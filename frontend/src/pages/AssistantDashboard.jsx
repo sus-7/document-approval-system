@@ -16,12 +16,12 @@ import axios from "axios";
 import CryptoJS from "crypto-js";
 import DocumentsList from "../components/DocumentsList";
 import { IoMdRefresh } from "react-icons/io";
-import Loader from "react-loaders";
+import { FileStatus } from "../../utils/enums";import Loader from "react-loaders";
 import "loaders.css/loaders.min.css";
 
 const AssistantDashboard = () => {
   // State Management
-  const [selectedTab, setSelectedTab] = useState("PENDING");
+  const [selectedTab, setSelectedTab] = useState(FileStatus.PENDING);
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
@@ -36,8 +36,7 @@ const AssistantDashboard = () => {
   const [newDocDialogOpen, setNewDocDialogOpen] = useState(false);
   const [viewPdfDialogOpen, setViewPdfDialogOpen] = useState(false);
   const [currentPdfUrl, setCurrentPdfUrl] = useState("");
-  const [departments, setDepartments] = useState([]);
-  
+  const [departments, setDepartments] = useState([]); 
   // Filter States  
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -60,8 +59,10 @@ const AssistantDashboard = () => {
       setIsLoading(true);
       setError(null);
       setDocuments([]);
-      const apiUrl = `${import.meta.env.VITE_API_URL}/file/get-documents?status=${selectedTab.toLowerCase()}`;
-      console.log('apiUrl', apiUrl);
+      const apiUrl = `${
+        import.meta.env.VITE_API_URL
+      }/file/get-documents?status=${selectedTab.toLowerCase()}`;
+      console.log("apiUrl", apiUrl);
 
       const response = await axios.get(apiUrl, {
         headers: {
@@ -106,12 +107,15 @@ const AssistantDashboard = () => {
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
-        const response = await axios.get(`${import.meta.env.VITE_API_URL}/department/get-all-departments`, {
-          withCredentials: true
-        });
+        const response = await axios.get(
+          `${import.meta.env.VITE_API_URL}/department/get-all-departments`,
+          {
+            withCredentials: true,
+          }
+        );
         console.log("departments : ", response.data.data);
         setDepartments(response.data.data);
-        console.log('departments : ', departments);
+        console.log("departments : ", departments);
       } catch (error) {
         console.error("Error fetching departments:", error);
       }
@@ -179,11 +183,9 @@ const AssistantDashboard = () => {
 
       console.log("formData", formData);
       const uploadUrl = import.meta.env.VITE_API_URL + "/file/upload-pdf";
-      const response = await axios.post(
-        uploadUrl,
-        formData,
-        { withCredentials: true }
-      );
+      const response = await axios.post(uploadUrl, formData, {
+        withCredentials: true,
+      });
 
       if (response.data) {
         toast.dismiss(toastId);
@@ -222,16 +224,22 @@ const AssistantDashboard = () => {
       <main className="p-6 flex-grow">
         {/* Status Tabs */}
         <div className="flex flex-wrap gap-4 mb-6 border-b">
-          {["PENDING", "APPROVED", "REJECTED", "CORRECTION"].map((tab) => (
+          {[
+            FileStatus.PENDING,
+            FileStatus.APPROVED,
+            FileStatus.REJECTED,
+            FileStatus.CORRECTION,
+          ].map((tab) => (
             <button
               key={tab}
-              onClick={() => setSelectedTab(tab)}
-              className={`px-4 py-2 ${selectedTab === tab
-                ? "border-b-2 border-blue-500 text-blue-500"
-                : "text-gray-600 hover:text-blue-500"
-                }`}
+              onClick={() => setSelectedTab(tab.toLowerCase())}
+              className={`px-4 py-2 ${
+                selectedTab === tab
+                  ? "border-b-2 border-blue-500 text-blue-500"
+                  : "text-gray-600 hover:text-blue-500"
+              }`}
             >
-              {tab}
+              {tab.toUpperCase()}
             </button>
           ))}
         </div>
@@ -261,7 +269,9 @@ const AssistantDashboard = () => {
             >
               <option value="">All</option>
               {departments?.map((department, idx) => (
-                <option key={idx} value={department}>{department.toUpperCase()}</option>
+                <option key={idx} value={department}>
+                  {department.toUpperCase()}
+                </option>
               ))}
             </select>
           </div>
@@ -366,7 +376,9 @@ const AssistantDashboard = () => {
           >
             <option value="">Select Department</option>
             {departments?.map((department, idx) => (
-              <option key={idx} value={department}>{department}</option>
+              <option key={idx} value={department}>
+                {department}
+              </option>
             ))}
           </TextField>
 
@@ -412,9 +424,17 @@ const AssistantDashboard = () => {
       >
         <DialogTitle>Document Preview</DialogTitle>
         <DialogContent>
-          <div style={{ width: '100%', height: '80vh' }}>
-            <object data={currentPdfUrl} type="application/pdf" width="100%" height="100%">
-              <p>Your browser does not support PDFs. <a href={currentPdfUrl}>Download the PDF</a>.</p>
+          <div style={{ width: "100%", height: "80vh" }}>
+            <object
+              data={currentPdfUrl}
+              type="application/pdf"
+              width="100%"
+              height="100%"
+            >
+              <p>
+                Your browser does not support PDFs.{" "}
+                <a href={currentPdfUrl}>Download the PDF</a>.
+              </p>
             </object>
           </div>
         </DialogContent>
