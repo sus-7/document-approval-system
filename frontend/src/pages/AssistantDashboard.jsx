@@ -11,6 +11,8 @@ import {
   Button,
   TextField,
 } from "@mui/material";
+import { FaCalendarAlt } from "react-icons/fa";
+import AddIcon from "@mui/icons-material/Add";
 import { toast, Toaster } from "react-hot-toast";
 import axios from "axios";
 import CryptoJS from "crypto-js";
@@ -220,18 +222,19 @@ const AssistantDashboard = () => {
           ))}
         </div>
 
-        {/* Search Bar */}
-        <div className="relative w-full max-w-xs mx-auto mb-6">
-          <FaSearch className="absolute top-3 left-3 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search documents..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 rounded-md border bg-white border-gray-300 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
-            disabled={loading}
-          />
-        </div>
+       {/* Search Bar */}
+<div className="relative w-full max-w-xs mr-auto mb-6">
+  <FaSearch className="absolute mt-1 top-3 left-3 text-gray-400" />
+  <input
+    type="text"
+    placeholder="Search documents..."
+    value={searchQuery}
+    onChange={(e) => setSearchQuery(e.target.value)}
+    className="w-full pl-10 pr-4 py-2.5 rounded-md border bg-white border-gray-300 text-gray-700 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+  />
+</div>
+
+
 
         {/* Filters */}
         <div className="mb-4 flex flex-col md:flex-row gap-4">
@@ -240,18 +243,18 @@ const AssistantDashboard = () => {
               Category
             </label>
             <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="block w-full md:w-auto mt-1 p-2 text-sm border border-gray-300 bg-white rounded-md"
-              disabled={loading}
-            >
-              <option value="">All</option>
-              {departments?.map((department, idx) => (
-                <option key={idx} value={department}>
-                  {department}
-                </option>
-              ))}
-            </select>
+  value={selectedCategory}
+  onChange={(e) => setSelectedCategory(e.target.value)}
+  className="block w-full md:w-auto mt-1 p-2 text-sm border border-gray-300 bg-white rounded-md"
+>
+  <option value="">All</option>
+  {departments?.map((department, idx) => (
+    <option key={idx} value={department}>
+      {department.charAt(0).toUpperCase() + department.slice(1).toLowerCase()}
+    </option>
+  ))}
+</select>
+
           </div>
 
           <div className="flex-grow">
