@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 const PrepareLetter = () => {
   return (
     <div className="min-h-screen flex flex-col items-center p-4 bg-gradient-to-r from-white to-blue-100">
-   <Navbar role="Approver" />
+   {/* <Navbar role="Approver" /> */}
 
       <div className="mt-6 bg-white p-6 shadow-xl rounded-md w-full max-w-md h-[85vh]">
         <form>

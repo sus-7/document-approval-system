@@ -14,7 +14,7 @@ class NotificationService {
             const response = await admin.messaging().send(message);
             return response;
         } catch (error) {
-            console.log(error);
+            console.log(error); 
             throw new Error("Error sending notification");
         }
     }

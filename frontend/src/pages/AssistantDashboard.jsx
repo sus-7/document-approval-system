@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaSearch, FaBars } from "react-icons/fa";
 import Navbar from "../components/Navbar";
+import { HiDocumentPlus } from "react-icons/hi2";
+
 import {
   Dialog,
   DialogActions,
@@ -8,7 +10,6 @@ import {
   DialogTitle,
   Button,
   TextField,
-  IconButton,
 } from "@mui/material";
 import { FaCalendarAlt } from "react-icons/fa";
 import AddIcon from "@mui/icons-material/Add";
@@ -17,10 +18,13 @@ import axios from "axios";
 import CryptoJS from "crypto-js";
 import DocumentsList from "../components/DocumentsList";
 import { IoMdRefresh } from "react-icons/io";
-import { FileStatus } from "../../utils/enums";
+import Loader from "react-loaders";
+import "loaders.css/loaders.min.css";
+import { FaPlus } from "react-icons/fa";
+
 const AssistantDashboard = () => {
   // State Management
-  const [selectedTab, setSelectedTab] = useState(FileStatus.PENDING);
+  const [selectedTab, setSelectedTab] = useState("PENDING");
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
@@ -36,6 +40,7 @@ const AssistantDashboard = () => {
   const [viewPdfDialogOpen, setViewPdfDialogOpen] = useState(false);
   const [currentPdfUrl, setCurrentPdfUrl] = useState("");
   const [departments, setDepartments] = useState([]);
+
   // Filter States
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -46,10 +51,7 @@ const AssistantDashboard = () => {
   const [newDocDepartment, setNewDocDepartment] = useState("");
   const [newDocFile, setNewDocFile] = useState(null);
   const [newDocDesc, setNewDocDesc] = useState("");
-  const [serverResponse, setServerResponse] = useState("");
-
-  // Hardcoded encryption key
-  const encryptionKey = "your-hardcoded-encryption-key";
+  const [loading, setLoading] = useState(false);
 
   // Fetch Documents
   const fetchDocuments = async () => {
@@ -57,9 +59,7 @@ const AssistantDashboard = () => {
       setIsLoading(true);
       setError(null);
       setDocuments([]);
-      const apiUrl = `${
-        import.meta.env.VITE_API_URL
-      }/file/get-documents?status=${selectedTab.toLowerCase()}`;
+      const apiUrl = `${import.meta.env.VITE_API_URL}/file/get-documents?status=${selectedTab.toLowerCase()}`;
       console.log("apiUrl", apiUrl);
 
       const response = await axios.get(apiUrl, {
@@ -72,7 +72,7 @@ const AssistantDashboard = () => {
 
       console.log("fetched data", response.data);
       setDocuments(response.data.documents);
-      setFilteredData(response.data.documents); // Corrected line
+      setFilteredData(response.data.documents);
     } catch (err) {
       const errorMessage =
         err.response?.data?.message ||
@@ -87,23 +87,26 @@ const AssistantDashboard = () => {
     }
   };
 
+  const handleRefresh = async () => {
+    setLoading(true);
+    await fetchDocuments();
+    setLoading(false);
+  };
+
   useEffect(() => {
     fetchDocuments();
   }, [selectedTab]);
 
-  // Effects
+  // Fetch Departments
   useEffect(() => {
     const fetchDepartments = async () => {
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_API_URL}/department/get-all-departments`,
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         );
         console.log("departments : ", response.data.data);
         setDepartments(response.data.data);
-        console.log("departments : ", departments);
       } catch (error) {
         console.error("Error fetching departments:", error);
       }
@@ -111,6 +114,7 @@ const AssistantDashboard = () => {
     fetchDepartments();
   }, []);
 
+  // Filter Documents
   useEffect(() => {
     const filtered = documents.filter(
       (doc) =>
@@ -122,46 +126,33 @@ const AssistantDashboard = () => {
     setFilteredData(filtered);
   }, [searchQuery, selectedCategory, startDate, endDate, documents]);
 
-  // Event Handlers
-  const handleAcceptReject = (id, status) => {
-    setFilteredData((prevData) =>
-      prevData.map((item) => (item.id === id ? { ...item, status } : item))
-    );
-  };
-
-  const handleRemarkSubmit = () => {
-    if (remarks && currentDocumentId !== null) {
-      setFilteredData((prevData) =>
-        prevData.map((item) =>
-          item.id === currentDocumentId
-            ? { ...item, status: "REMARKS", remark: remarks }
-            : item
-        )
-      );
-      setRemarks("");
-      setOpenDialog(false);
-    }
-  };
-
+  // Handle Document Upload
   const handleDocumentUpload = async () => {
     const toastId = toast.loading("Uploading document...");
+    setLoading(true);
+
+    // Validate all fields
     if (!newDocFile || !newDocDepartment || !newDocTitle) {
       toast.error("Please fill all required fields");
+      setLoading(false);
       return;
     }
 
+    // Validate file type
     if (!newDocFile.type.includes("pdf")) {
       toast.error("Please upload only PDF files");
+      setLoading(false);
       return;
     }
 
     try {
+      // Encrypt the file
       const arrayBuffer = await newDocFile.arrayBuffer();
       const wordArray = CryptoJS.lib.WordArray.create(arrayBuffer);
-
       const encrypted = CryptoJS.AES.encrypt(wordArray, "mykey");
       const encryptedContent = encrypted.toString();
 
+      // Prepare form data
       const formData = new FormData();
       const blob = new Blob([encryptedContent], { type: "text/plain" });
       formData.append("pdfFile", new File([blob], `${newDocFile.name}.enc`));
@@ -169,7 +160,7 @@ const AssistantDashboard = () => {
       formData.append("title", newDocTitle);
       formData.append("description", newDocDesc || "");
 
-      console.log("formData", formData);
+      // Upload the file
       const uploadUrl = import.meta.env.VITE_API_URL + "/file/upload-pdf";
       const response = await axios.post(uploadUrl, formData, {
         withCredentials: true,
@@ -178,33 +169,36 @@ const AssistantDashboard = () => {
       if (response.data) {
         toast.dismiss(toastId);
         toast.success("Document uploaded successfully");
+
+        // Reset form fields
         setNewDocFile(null);
         setNewDocDepartment("");
         setNewDocTitle("");
         setNewDocDesc("");
+
+        // Refresh the document list
         fetchDocuments();
+
+        // Close the dialog
         setNewDocDialogOpen(false);
       }
     } catch (error) {
       toast.dismiss(toastId);
       console.error("Upload error:", error);
       toast.error(error.response?.data?.message || "Error uploading document");
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleTitleClick = (documentUrl) => {
-    setCurrentPdfUrl(documentUrl);
-    console.log("documentUrl", documentUrl);
-    setViewPdfDialogOpen(true);
   };
 
   return (
     <div className="flex flex-col min-h-screen bg-gray-100 text-gray-800">
-      <Navbar role="Personal Assistant - Approval Dashboard" />
+      {/*    role="Personal Assistant - Approval Dashboard" /> */}
       <Toaster />
       <button
         onClick={() => setSidebarOpen(!sidebarOpen)}
         className="md:hidden p-2 text-gray-600 rounded-md"
+        disabled={loading}
       >
         <FaBars />
       </button>
@@ -212,22 +206,18 @@ const AssistantDashboard = () => {
       <main className="p-6 flex-grow">
         {/* Status Tabs */}
         <div className="flex flex-wrap gap-4 mb-6 border-b">
-          {[
-            FileStatus.PENDING,
-            FileStatus.APPROVED,
-            FileStatus.REJECTED,
-            FileStatus.CORRECTION,
-          ].map((tab) => (
+          {["PENDING", "APPROVED", "REJECTED", "CORRECTION"].map((tab) => (
             <button
               key={tab}
-              onClick={() => setSelectedTab(tab.toLowerCase())}
+              onClick={() => setSelectedTab(tab)}
               className={`px-4 py-2 ${
                 selectedTab === tab
                   ? "border-b-2 border-blue-500 text-blue-500"
                   : "text-gray-600 hover:text-blue-500"
               }`}
+              disabled={loading}
             >
-              {tab.toUpperCase()}
+              {tab}
             </button>
           ))}
         </div>
@@ -277,6 +267,7 @@ const AssistantDashboard = () => {
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
                 className="p-2 border bg-white border-gray-300 rounded-md"
+                disabled={loading}
               />
               <input
                 type="date"
@@ -284,10 +275,12 @@ const AssistantDashboard = () => {
                 onChange={(e) => setEndDate(e.target.value)}
                 className="p-2 border bg-white border-gray-300 rounded-md"
                 min={startDate}
+                disabled={loading}
               />
               <button
-                onClick={fetchDocuments}
+                onClick={handleRefresh}
                 className="flex items-center justify-center px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition"
+                disabled={loading}
               >
                 <IoMdRefresh className="h-5 w-5" />
               </button>
@@ -296,43 +289,22 @@ const AssistantDashboard = () => {
         </div>
 
         {/* Document List */}
-        <DocumentsList
-          documents={filteredData} // Pass filteredData to DocumentsList
-          status={selectedTab.toLowerCase()}
-          department={selectedCategory}
-          handleTitleClick={handleTitleClick}
-        />
-      </main>
-
-      {/* Remarks Dialog */}
-      {openDialog && (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center">
-          <div className="bg-white p-6 rounded-md shadow-lg max-w-md w-full">
-            <h3 className="text-lg font-medium mb-4">Add Remark</h3>
-            <textarea
-              value={remarks}
-              onChange={(e) => setRemarks(e.target.value)}
-              className="w-full p-2 border resize-none border-gray-300 rounded-md mb-4"
-              rows="4"
-              placeholder="Enter remarks..."
-            />
-            <div className="flex justify-end space-x-4">
-              <button
-                className="py-2 px-4 bg-gray-300 text-gray-700 rounded-md"
-                onClick={() => setOpenDialog(false)}
-              >
-                Cancel
-              </button>
-              <button
-                className="py-2 px-4 bg-blue-500 text-white rounded-md"
-                onClick={handleRemarkSubmit}
-              >
-                Submit
-              </button>
-            </div>
+        {isLoading || loading ? (
+          <div className="flex justify-center items-center">
+            <Loader type="ball-pulse" active />
           </div>
-        </div>
-      )}
+        ) : (
+          <DocumentsList
+            documents={filteredData}
+            status={selectedTab.toLowerCase()}
+            department={selectedCategory}
+            handleTitleClick={(url) => {
+              setCurrentPdfUrl(url);
+              setViewPdfDialogOpen(true);
+            }}
+          />
+        )}
+      </main>
 
       {/* New Document Dialog */}
       <Dialog
@@ -348,6 +320,7 @@ const AssistantDashboard = () => {
             fullWidth
             value={newDocTitle}
             onChange={(e) => setNewDocTitle(e.target.value)}
+            disabled={loading}
           />
           <TextField
             select
@@ -355,9 +328,8 @@ const AssistantDashboard = () => {
             fullWidth
             value={newDocDepartment}
             onChange={(e) => setNewDocDepartment(e.target.value)}
-            SelectProps={{
-              native: true,
-            }}
+            SelectProps={{ native: true }}
+            disabled={loading}
           >
             <option value="">Select Department</option>
             {departments?.map((department, idx) => (
@@ -371,6 +343,7 @@ const AssistantDashboard = () => {
             type="file"
             onChange={(e) => setNewDocFile(e.target.files[0])}
             className="my-4"
+            disabled={loading}
           />
           <TextField
             margin="dense"
@@ -381,23 +354,26 @@ const AssistantDashboard = () => {
             rows={4}
             value={newDocDesc}
             onChange={(e) => setNewDocDesc(e.target.value)}
+            disabled={loading}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setNewDocDialogOpen(false)}>Cancel</Button>
-          <Button onClick={handleDocumentUpload}>Encrypt & Upload</Button>
+          <Button onClick={() => setNewDocDialogOpen(false)} disabled={loading}>
+            Cancel
+          </Button>
+          <Button onClick={handleDocumentUpload} disabled={loading}>
+            Encrypt & Upload
+          </Button>
         </DialogActions>
       </Dialog>
 
       {/* Add Document Button */}
-      <div className="fixed bottom-6 right-6">
-        <IconButton
-          color="primary"
+      <div className="fixed bottom-6 right-7 flex items-center justify-center bg-blue-500 p-2 rounded-full text-white font-bold">
+        <HiDocumentPlus
+          className="text-5xl "
           onClick={() => setNewDocDialogOpen(true)}
-          aria-label="add new document"
-        >
-          <AddIcon fontSize="large" />
-        </IconButton>
+          disabled={loading}
+        />
       </div>
 
       {/* PDF Preview Dialog */}
@@ -424,17 +400,11 @@ const AssistantDashboard = () => {
           </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setViewPdfDialogOpen(false)}>Close</Button>
+          <Button onClick={() => setViewPdfDialogOpen(false)} disabled={loading}>
+            Close
+          </Button>
         </DialogActions>
       </Dialog>
-
-      <style>{`
-        @media (max-width: 600px) {
-          div {
-            height: 60vh;
-          }
-        }
-      `}</style>
     </div>
   );
 };
