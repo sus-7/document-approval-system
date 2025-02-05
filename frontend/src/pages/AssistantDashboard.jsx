@@ -17,9 +17,7 @@ import { IoMdRefresh } from "react-icons/io";
 import Loader from "react-loaders";
 import "loaders.css/loaders.min.css";
 import { FaPlus } from "react-icons/fa";
-import { FileStatus } from "../../utils/enums";import Loader from "react-loaders";
-import "loaders.css/loaders.min.css";
-
+import { FileStatus } from "../../utils/enums"; 
 const AssistantDashboard = () => {
   // State Management
   const [selectedTab, setSelectedTab] = useState(FileStatus.PENDING);
@@ -60,7 +58,7 @@ const AssistantDashboard = () => {
       setIsLoading(true);
       setError(null);
       setDocuments([]);
-      const apiUrl = `${import.meta.env.VITE_API_URL}/file/get-documents?status=${selectedTab.toLowerCase()}`;
+       
       console.log("apiUrl", apiUrl);
       const apiUrl = `${
         import.meta.env.VITE_API_URL
@@ -84,7 +82,7 @@ const AssistantDashboard = () => {
     }
      catch (err) {
       setFilteredData(response.data.documents);
-    } catch (err) {
+ 
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
