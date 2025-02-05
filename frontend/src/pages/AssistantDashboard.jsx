@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { FaSearch, FaBars } from "react-icons/fa";
 import Navbar from "../components/Navbar";
+import { HiDocumentPlus } from "react-icons/hi2";
+
 import {
   Dialog,
   DialogActions,
@@ -17,10 +19,10 @@ import { IoMdRefresh } from "react-icons/io";
 import Loader from "react-loaders";
 import "loaders.css/loaders.min.css";
 import { FaPlus } from "react-icons/fa";
-import { FileStatus } from "../../utils/enums"; 
+
 const AssistantDashboard = () => {
   // State Management
-  const [selectedTab, setSelectedTab] = useState(FileStatus.PENDING);
+  const [selectedTab, setSelectedTab] = useState("PENDING");
   const [searchQuery, setSearchQuery] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [filteredData, setFilteredData] = useState([]);
@@ -35,8 +37,9 @@ const AssistantDashboard = () => {
   const [newDocDialogOpen, setNewDocDialogOpen] = useState(false);
   const [viewPdfDialogOpen, setViewPdfDialogOpen] = useState(false);
   const [currentPdfUrl, setCurrentPdfUrl] = useState("");
- 
-  // Filter States  
+  const [departments, setDepartments] = useState([]);
+
+  // Filter States
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("");
@@ -46,11 +49,7 @@ const AssistantDashboard = () => {
   const [newDocDepartment, setNewDocDepartment] = useState("");
   const [newDocFile, setNewDocFile] = useState(null);
   const [newDocDesc, setNewDocDesc] = useState("");
-  const [serverResponse, setServerResponse] = useState("");
   const [loading, setLoading] = useState(false);
-
-  // Hardcoded encryption key
-  const encryptionKey = "your-hardcoded-encryption-key";
 
   // Fetch Documents
   const fetchDocuments = async () => {
@@ -58,11 +57,7 @@ const AssistantDashboard = () => {
       setIsLoading(true);
       setError(null);
       setDocuments([]);
-       
-      console.log("apiUrl", apiUrl);
-      const apiUrl = `${
-        import.meta.env.VITE_API_URL
-      }/file/get-documents?status=${selectedTab.toLowerCase()}`;
+      const apiUrl = `${import.meta.env.VITE_API_URL}/file/get-documents?status=${selectedTab.toLowerCase()}`;
       console.log("apiUrl", apiUrl);
 
       const response = await axios.get(apiUrl, {
@@ -75,14 +70,8 @@ const AssistantDashboard = () => {
 
       console.log("fetched data", response.data);
       setDocuments(response.data.documents);
-      setFilteredData(response.data.documents);// Corrected line
-        console.log('documents : ', documents);
-        
-   
-    }
-     catch (err) {
       setFilteredData(response.data.documents);
- 
+    } catch (err) {
       const errorMessage =
         err.response?.data?.message ||
         err.message ||
@@ -102,8 +91,6 @@ const AssistantDashboard = () => {
     setLoading(false);
   };
 
-  
-
   useEffect(() => {
     fetchDocuments();
   }, [selectedTab]);
@@ -114,13 +101,10 @@ const AssistantDashboard = () => {
       try {
         const response = await axios.get(
           `${import.meta.env.VITE_API_URL}/department/get-all-departments`,
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         );
         console.log("departments : ", response.data.data);
         setDepartments(response.data.data);
-        console.log("departments : ", departments);
       } catch (error) {
         console.error("Error fetching departments:", error);
       }
@@ -220,22 +204,18 @@ const AssistantDashboard = () => {
       <main className="p-6 flex-grow">
         {/* Status Tabs */}
         <div className="flex flex-wrap gap-4 mb-6 border-b">
-          {[
-            FileStatus.PENDING,
-            FileStatus.APPROVED,
-            FileStatus.REJECTED,
-            FileStatus.CORRECTION,
-          ].map((tab) => (
+          {["PENDING", "APPROVED", "REJECTED", "CORRECTION"].map((tab) => (
             <button
               key={tab}
-              onClick={() => setSelectedTab(tab.toLowerCase())}
+              onClick={() => setSelectedTab(tab)}
               className={`px-4 py-2 ${
                 selectedTab === tab
                   ? "border-b-2 border-blue-500 text-blue-500"
                   : "text-gray-600 hover:text-blue-500"
               }`}
+              disabled={loading}
             >
-              {tab.toUpperCase()}
+              {tab}
             </button>
           ))}
         </div>
@@ -268,7 +248,7 @@ const AssistantDashboard = () => {
               <option value="">All</option>
               {departments?.map((department, idx) => (
                 <option key={idx} value={department}>
-                  {department.toUpperCase()}
+                  {department}
                 </option>
               ))}
             </select>
@@ -385,9 +365,9 @@ const AssistantDashboard = () => {
       </Dialog>
 
       {/* Add Document Button */}
-      <div className="fixed bottom-6 right-4 bg-blue-500 p-2 rounded-full text-white font-bold">
-        <FaPlus
-          className="text-2xl"
+      <div className="fixed bottom-6 right-7 flex items-center justify-center bg-blue-500 p-2 rounded-full text-white font-bold">
+        <HiDocumentPlus
+          className="text-5xl "
           onClick={() => setNewDocDialogOpen(true)}
           disabled={loading}
         />
