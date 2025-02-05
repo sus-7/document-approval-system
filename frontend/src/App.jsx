@@ -25,6 +25,7 @@ import { onMessageListener } from "../utils/firebaseUtils.js";
 import PrepareLetter from "./pages/PrepareLetter.jsx";
 import { toast, Toaster } from "react-hot-toast";
 import { FaBell } from "react-icons/fa";
+import MainLayout from "./components/MainLayout";
 
 import {
   ApproverRestrictedRoute,
@@ -83,7 +84,9 @@ const App = () => {
               path="/approver/dashboard"
               element={
                 <ApproverRestrictedRoute>
-                  <ApproverDashboard />
+                  <MainLayout>
+                    <ApproverDashboard />
+                  </MainLayout>
                 </ApproverRestrictedRoute>
               }
             />
@@ -91,7 +94,9 @@ const App = () => {
               path="/users/manage"
               element={
                 <SARestrictedRoute>
-                  <ManageUsers />
+                  <MainLayout>
+                    <ManageUsers />
+                  </MainLayout>
                 </SARestrictedRoute>
               }
             />
@@ -99,19 +104,51 @@ const App = () => {
               path="/assistant/dashboard"
               element={
                 <AssistantRestrictedRoute>
-                  <AssistantDashboard />
+                  <MainLayout>
+                    <AssistantDashboard />
+                  </MainLayout>
                 </AssistantRestrictedRoute>
               }
             />
-            <Route path="/remark-pdf" element={<RemarkUI />} />
-            <Route path="/notifications" element={<Notifications />} />
-            <Route path="/history" element={<History />} />
-            <Route path="/edit/profile" element={<EditProfile />} />
+            <Route
+              path="/remark-pdf"
+              element={
+                <MainLayout>
+                  <RemarkUI />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/notifications"
+              element={
+                <MainLayout>
+                  <Notifications />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/history"
+              element={
+                <MainLayout>
+                  <History />
+                </MainLayout>
+              }
+            />
+            <Route
+              path="/edit/profile"
+              element={
+                <MainLayout>
+                  <EditProfile />
+                </MainLayout>
+              }
+            />
             <Route
               path="/profile"
               element={
                 <LoginRestrictedRoute>
-                  <ProfileDashboard />
+                  <MainLayout>
+                    <ProfileDashboard />
+                  </MainLayout>
                 </LoginRestrictedRoute>
               }
             />
@@ -119,7 +156,9 @@ const App = () => {
               path="/admin/dashboard"
               element={
                 <AdminRestrictedRoute>
-                  <AdminDashboard />
+                  <MainLayout>
+                    <AdminDashboard />
+                  </MainLayout>
                 </AdminRestrictedRoute>
               }
             />
@@ -127,13 +166,20 @@ const App = () => {
               path="/changepassword"
               element={
                 <LoginRestrictedRoute>
-                  <ChangePassword />
+                  <MainLayout>
+                    <ChangePassword />
+                  </MainLayout>
                 </LoginRestrictedRoute>
               }
             />
-
-            <Route path="/correction" element={<Correction />} />
-            {/* <Route path="/adminLogin" element={<AdminLogin />} /> */}
+            <Route
+              path="/correction"
+              element={
+                <MainLayout>
+                  <Correction />
+                </MainLayout>
+              }
+            />
             <Route path="/support" element={<Support />} />
           </Routes>
         </NotificationProvider>
@@ -142,4 +188,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default App; 

@@ -67,7 +67,7 @@ const AssistantDashboard = () => {
 
   return (
       <div className="flex flex-col min-h-screen bg-gray-100 text-gray-800">
-        <Navbar role="Personal Assistant - Approval Dashboard"/>
+        {/* <Navbar role="Personal Assistant - Approval Dashboard"/> */}
         <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
             className="md:hidden p-2 text-gray-600 rounded-md"

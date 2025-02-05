@@ -54,12 +54,12 @@ const Login = () => {
     }
   }, [loggedInUser, navigate]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setLoading(true);
 
-    const apiUrl = import.meta.env.VITE_API_URL + "/user/signin";
-    const formData = { username, password, deviceToken: fcmToken };
+      const apiUrl = import.meta.env.VITE_API_URL + "/user/signin";
+      const formData = { username, password, deviceToken: fcmToken };
 
     try {
       const response = await fetch(apiUrl, {
@@ -69,11 +69,73 @@ const Login = () => {
         credentials: "include",
       });
 
+        if (!response.ok) {
+          const error = await response.json();
+          console.log(error);
+          throw new Error(error.message);
+        }
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.message || "Login failed");
       }
 
+        const result = await response.json();
+        setLoggedInUser(result.user);
+        setUsername("");
+        setPassword("");
+        toast.success("Login successful!", {
+          position: "top-center",
+          duration: 2000,
+        });
+      } catch (error) {
+        console.error("Error during signup:", error);
+        toast.error(error.message, {
+          position: "top-center",
+          duration: 2000,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-white to-blue-100">
+        <Toaster />
+        <span className="z-40">{fcmToken}</span>
+        {/* {loading && (
+          <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
+            <span className="loading loading-bars loading-lg"></span>
+          </div>
+        )} */}
+
+        {/* <button
+          className="absolute top-4 bg-red-600 text-white p-2 rounded-md right-4"
+          onClick={() => navigate("/adminLogin")}
+        >
+          Admin
+        </button> */}
+        <div className="w-96 bg-white shadow-lg border border-gray-200 rounded-lg p-8">
+          <div className="flex justify-center gap-4 mb-6">
+            <button
+              className={`px-4 py-2 text-sm font-medium rounded-md ${
+                selectedToggle === "Approver"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 text-gray-700"
+              }`}
+              onClick={() => setSelectedToggle("Approver")}
+            >
+              Approver
+            </button>
+            <button
+              className={`px-4 py-2 text-sm font-medium rounded-md ${
+                selectedToggle === "Assistant"
+                  ? "bg-blue-500 text-white"
+                  : "bg-gray-100 text-gray-700"
+              }`}
+              onClick={() => setSelectedToggle("Assistant")}
+            >
+              Assistant
+            </button>
+          </div>
       const result = await response.json();
       setLoggedInUser(result.user);
       setUsername("");
