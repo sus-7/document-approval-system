@@ -16,6 +16,7 @@ import AddIcon from "@mui/icons-material/Add";
 import { toast, Toaster } from "react-hot-toast";
 import axios from "axios";
 import CryptoJS from "crypto-js";
+import forge from "node-forge";
 import DocumentsList from "../components/DocumentsList";
 import { IoMdRefresh } from "react-icons/io";
 import Loader from "react-loaders";
@@ -23,6 +24,10 @@ import "loaders.css/loaders.min.css";
 import { FaPlus } from "react-icons/fa";
 
 const AssistantDashboard = () => {
+  //keys
+  // const [privateKeyPem, setPrivateKeyPem] = useState(null);
+  const [encKey, setEncKey] = useState(null);
+
   // State Management
   const [selectedTab, setSelectedTab] = useState("PENDING");
   const [searchQuery, setSearchQuery] = useState("");
@@ -111,7 +116,37 @@ const AssistantDashboard = () => {
         console.error("Error fetching departments:", error);
       }
     };
+
+    const generateKeysAndRequestEncKey = async () => {
+      // Generate RSA Key Pair
+      const keyPair = forge.pki.rsa.generateKeyPair({ bits: 2048, e: 0x10001 });
+      const publicKeyPem = forge.pki.publicKeyToPem(keyPair.publicKey);
+      const privateKeyPem = forge.pki.privateKeyToPem(keyPair.privateKey);
+      console.log("publicKeyPem", publicKeyPem);
+
+      // Send Public Key to Server
+      const responseUrl = import.meta.env.VITE_API_URL + "/file/get-enc-key";
+      const response = await axios.post(
+        responseUrl,
+        { clientPublicKey: publicKeyPem },
+        { withCredentials: true }
+      );
+
+      const encryptedEncKey = response.data.encryptedEncKey;
+
+      // Decrypt the encKey using Private Key
+      const privateKey = forge.pki.privateKeyFromPem(privateKeyPem);
+      const decryptedKey = privateKey.decrypt(
+        forge.util.decode64(encryptedEncKey),
+        "RSA-OAEP",
+        { md: forge.md.sha256.create() }
+      );
+
+      setEncKey(decryptedKey); // Final decrypted encKey
+      console.log("Decrypted encKey:", decryptedKey);
+    };
     fetchDepartments();
+    generateKeysAndRequestEncKey();
   }, []);
 
   // Filter Documents
@@ -149,7 +184,9 @@ const AssistantDashboard = () => {
       // Encrypt the file
       const arrayBuffer = await newDocFile.arrayBuffer();
       const wordArray = CryptoJS.lib.WordArray.create(arrayBuffer);
-      const encrypted = CryptoJS.AES.encrypt(wordArray, "mykey");
+
+      // const encrypted = CryptoJS.AES.encrypt(wordArray, encKey);
+      const encrypted = CryptoJS.AES.encrypt(wordArray, encKey);
       const encryptedContent = encrypted.toString();
 
       // Prepare form data

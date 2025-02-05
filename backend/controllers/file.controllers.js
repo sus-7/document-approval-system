@@ -7,11 +7,14 @@ const asyncHandler = require("../utils/asyncHandler");
 const appConfig = require("../config/appConfig");
 const { NotificationService } = require("../utils/NotificationService");
 const { Role, FileStatus } = require("../utils/enums");
+const forge = require("node-forge");
+const crypto = require("crypto");
 const User = require("../models/user.model");
+
 const uploadPdf = asyncHandler(async (req, res, next) => {
     //only take description if available
-    console.log("req.user", req.user)
-    if(!req.user.assignedApprover) {
+    console.log("req.user", req.user);
+    if (!req.user.assignedApprover) {
         const error = new Error("No approver assigned");
         error.statusCode = 403;
         return next(error);
@@ -28,6 +31,7 @@ const uploadPdf = asyncHandler(async (req, res, next) => {
         department,
         title,
         description,
+        status: FileStatus.PENDING,
     }).save();
 
     const populatedFile = await newFile.populate([
@@ -351,28 +355,64 @@ const requestCorrection = asyncHandler((req, res, next) => {
     req.body.status = FileStatus.CORRECTION;
     return updateFileStatus(req, res, next);
 });
-// const approveFile = asyncHandler(async (req, res, next) => {
-//     const { fileUniqueName } = req.body;
-//     const file = await Document.findOne({ fileUniqueName });
-//     if (!file) {
-//         const error = new Error("File not found");
-//         error.status = 404;
-//         return next(error);
-//     }
-//     await file.populate("assignedTo").execPopulate();
-//     if (file.assignedTo.username !== req.user.username) {
-//         const error = new Error("You are not authorized to approve this file");
-//         error.status = 403;
-//         return next(error);
-//     }
-//     file.status = FileStatus.APPROVED;
-//     await file.save();
-//     return res.status(200).json({
-//         status: true,
-//         message: "File approved successfully",
-//         file,
-//     });
-// });
+
+const getEncKeyByFileName = asyncHandler(async (req, res, next) => {
+    const { clientPublicKey, fileUniqueName } = req.body;
+    if (!clientPublicKey || !fileUniqueName) {
+        const error = new Error(
+            "Please provide clientPublicKey and fileUniqueName"
+        );
+        error.status = 400;
+        return next(error);
+    }
+    const file = await File.findOne({ fileUniqueName })
+        .populate("createdBy")
+        .select("encKey");
+    if (!file) {
+        const error = new Error("File not found");
+        error.status = 404;
+        return next(error);
+    }
+
+    const { encKey } = file.createdBy;
+    const publicKey = forge.pki.publicKeyFromPem(clientPublicKey);
+    // Encrypt the encKey using RSA-OAEP
+    const encryptedEncKey = publicKey.encrypt(encKey, "RSA-OAEP", {
+        md: forge.md.sha256.create(),
+    });
+    return res.status(200).json({
+        status: true,
+        message: "Encrypted key fetched successfully",
+        encryptedEncKey: forge.util.encode64(encryptedEncKey),
+    });
+});
+
+const getOwnEncKey = asyncHandler(async (req, res, next) => {
+    const { clientPublicKey } = req.body;
+    if (!clientPublicKey) {
+        const error = new Error("Please provide clientPublicKey");
+        error.status = 400;
+        return next(error);
+    }
+    const { encKey } = req.user;
+    const publicKey = forge.pki.publicKeyFromPem(clientPublicKey);
+    // Encrypt the encKey using RSA-OAEP
+    const encryptedEncKey = publicKey.encrypt(encKey, "RSA-OAEP", {
+        md: forge.md.sha256.create(),
+    });
+    return res.status(200).json({
+        status: true,
+        message: "Encrypted key fetched successfully",
+        encryptedEncKey: forge.util.encode64(encryptedEncKey),
+    });
+});
+const getEncKey = asyncHandler(async (req, res, next) => {
+    if (req.user.role === Role.APPROVER || req.user.role === Role.ADMIN) {
+        return getEncKeyByFileName(req, res, next);
+    } else {
+        return getOwnEncKey(req, res, next);
+    }
+});
 module.exports = {
     uploadPdf,
     downloadPdf,
@@ -380,4 +420,5 @@ module.exports = {
     approveDocument,
     rejectDocument,
     requestCorrection,
+    getEncKey,
 };

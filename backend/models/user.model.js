@@ -24,7 +24,7 @@ const UserSchema = new mongoose.Schema({
         required: true,
         unique: true,
     },
-    privateKey: {
+    encKey: {
         type: String,
     },
     assignedApprover: {
