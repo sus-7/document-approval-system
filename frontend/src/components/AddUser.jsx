@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Toaster, toast } from "react-hot-toast";
 import { UsersContext } from "../contexts/UsersContext";
 import { AuthContext } from "../contexts/AuthContext";
+import { Role } from "../../utils/enums";
 import axios from "axios";
 const AddUser = ({ showAddUser, setShowAddUser }) => {
   const navigate = useNavigate();
@@ -11,7 +12,7 @@ const AddUser = ({ showAddUser, setShowAddUser }) => {
   const { loggedInUser } = useContext(AuthContext);
   const [newUser, setNewUser] = useState({
     fullName: "",
-    role: "Approver",
+    role: Role.APPROVER,
     email: "",
     mobileNo: "",
     password: "",
@@ -19,7 +20,7 @@ const AddUser = ({ showAddUser, setShowAddUser }) => {
   });
   const [username, setUsername] = useState("");
   const [fullName, setFullName] = useState("");
-  const [role, setRole] = useState("Assistant");
+  const [role, setRole] = useState(Role.ASSISTANT);
   const [email, setEmail] = useState("");
   const [mobileNo, setMobileNo] = useState("");
   const [password, setPassword] = useState("");
@@ -196,8 +197,8 @@ const AddUser = ({ showAddUser, setShowAddUser }) => {
             onChange={(e) => setRole(e.target.value)}
             className="w-full p-2 border rounded mb-4 text-black bg-white"
           >
-            <option value="Approver">Approver</option>
-            <option value="Assistant">Assistant</option>
+            <option value={Role.APPROVER}>Approver</option>
+            <option value={Role.ASSISTANT}>Assistant</option>
           </select>
           <div className="flex justify-end gap-4">
             <button

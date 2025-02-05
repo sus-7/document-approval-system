@@ -7,8 +7,15 @@ const asyncHandler = require("../utils/asyncHandler");
 const appConfig = require("../config/appConfig");
 const { NotificationService } = require("../utils/NotificationService");
 const { Role, FileStatus } = require("../utils/enums");
+const User = require("../models/user.model");
 const uploadPdf = asyncHandler(async (req, res, next) => {
     //only take description if available
+    console.log("req.user", req.user)
+    if(!req.user.assignedApprover) {
+        const error = new Error("No approver assigned");
+        error.statusCode = 403;
+        return next(error);
+    }
     const { department, title, description = null } = req.body;
     const file = req.file;
     const fileUniqueName = file.filename;
@@ -98,7 +105,15 @@ const fetchDocuments = async (query, sortOptions) => {
 };
 
 const getDocumentsByQuery = asyncHandler(async (req, res, next) => {
-    let { department, startDate, endDate, sortBy, status } = req.query;
+    let {
+        department,
+        startDate,
+        endDate,
+        sortBy,
+        status,
+        createdBy,
+        assignedTo,
+    } = req.query;
     let query = {};
     let sortOptions = {};
     const fileStatuses = [
@@ -123,12 +138,37 @@ const getDocumentsByQuery = asyncHandler(async (req, res, next) => {
     switch (req.user.role) {
         case Role.SENIOR_ASSISTANT:
         case Role.ASSISTANT:
+            if (createdBy || assignedTo) {
+                const error = new Error("Access denied");
+                error.status = 401;
+                return next(error);
+            }
             query.createdBy = req.user._id;
             break;
         case Role.APPROVER:
+            if (createdBy || assignedTo) {
+                const error = new Error("Access denied");
+                error.status = 401;
+                return next(error);
+            }
             query.assignedTo = req.user._id;
             break;
         case Role.ADMIN:
+            if (createdBy && assignedTo) {
+                const error = new Error(
+                    "Please provide either createdBy or assignedTo"
+                );
+                error.status = 400;
+                return next(error);
+            }
+            if (createdBy) {
+                const user = await User.findOne({ username: createdBy });
+                query.createdBy = user._id;
+            }
+            if (assignedTo) {
+                const user = await User.findOne({ username: assignedTo });
+                query.assignedTo = user._id;
+            }
             break;
         default:
             const error = new Error("Unauthorized role to fetch documents");
@@ -137,16 +177,53 @@ const getDocumentsByQuery = asyncHandler(async (req, res, next) => {
     }
 
     // Apply department filter if provided
-    const dept = await Department.findOne({ departmentName: department });
-    if (dept) {
-        query.department = dept._id;
+    if (department) {
+        const dept = await Department.findOne({ departmentName: department });
+        if (dept) {
+            query.department = dept._id;
+        } else {
+            const error = new Error(`Department ${department} not found`);
+            error.status = 403;
+            return next(error);
+        }
     }
 
     // Apply date range filter if provided
     if (startDate || endDate) {
-        query.createdDate = {};
-        if (startDate) query.createdDate.$gte = new Date(startDate);
-        if (endDate) query.createdDate.$lte = new Date(endDate);
+        try {
+            query.createdDate = {};
+
+            if (startDate) {
+                const startDateTime = new Date(startDate);
+                if (isNaN(startDateTime.getTime())) {
+                    throw new Error("Invalid start date");
+                }
+                startDateTime.setUTCHours(0, 0, 0, 0);
+                query.createdDate.$gte = startDateTime;
+            }
+
+            if (endDate) {
+                const endDateTime = new Date(endDate);
+                if (isNaN(endDateTime.getTime())) {
+                    throw new Error("Invalid end date");
+                }
+                endDateTime.setUTCHours(23, 59, 59, 999);
+                query.createdDate.$lte = endDateTime;
+            }
+
+            if (
+                startDate &&
+                endDate &&
+                query.createdDate.$gte > query.createdDate.$lte
+            ) {
+                throw new Error("Start date cannot be after end date");
+            }
+        } catch (error) {
+            return next({
+                status: 400,
+                message: error.message,
+            });
+        }
     }
 
     // Apply sorting if provided
