@@ -4,13 +4,13 @@ import { toast } from "react-hot-toast";
 import { FaDownload } from "react-icons/fa";
 import CryptoJS from "crypto-js";
 
-const DocumentsList = ({ status, department,handleTitleClick }) => {
+const DocumentsList = ({ status, department, handleTitleClick, encKey }) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
   const [currentPdfUrl, setCurrentPdfUrl] = useState("");
   // TODO: Replace with secure key management
-  const encryptionKey =  "your-hardcoded-encryption-key";
+  const encryptionKey = "your-hardcoded-encryption-key";
 
   const fetchDocuments = async () => {
     try {
@@ -57,7 +57,7 @@ const DocumentsList = ({ status, department,handleTitleClick }) => {
       });
 
       // Decrypt the content
-      const decrypted = CryptoJS.AES.decrypt(response.data, "mykey");
+      const decrypted = CryptoJS.AES.decrypt(response.data, encKey);
 
       // Convert to Uint8Array
       const typedArray = convertWordArrayToUint8Array(decrypted);
@@ -92,8 +92,8 @@ const DocumentsList = ({ status, department,handleTitleClick }) => {
   const downloadBlob = (blob, filename) => {
     const url = URL.createObjectURL(blob);
     setCurrentPdfUrl(url);
-    console.log('url', url);
-    
+    console.log("url", url);
+
     const link = document.createElement("a");
     link.href = url;
     link.download = filename;
@@ -115,7 +115,7 @@ const DocumentsList = ({ status, department,handleTitleClick }) => {
       });
 
       // Decrypt the content
-      const decrypted = CryptoJS.AES.decrypt(response.data, "mykey");
+      const decrypted = CryptoJS.AES.decrypt(response.data, encKey);
 
       // Convert to Uint8Array
       const typedArray = convertWordArrayToUint8Array(decrypted);
@@ -128,7 +128,6 @@ const DocumentsList = ({ status, department,handleTitleClick }) => {
       const url = URL.createObjectURL(blob);
       console.log("file url generated for preview : ", url);
       return url;
-      
     } catch (error) {
       console.error("Decryption error:", error);
     }
@@ -152,10 +151,13 @@ const DocumentsList = ({ status, department,handleTitleClick }) => {
                     className="flex justify-between items-center p-4 bg-gray-50 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-all"
                   >
                     <div className="flex-grow">
-                      <h3 className="text-lg font-semibold w-fit text-gray-800" onClick={async()=>{
-                        const url = await handlePreview(doc.fileUniqueName);
-                        handleTitleClick(url)
-                      }} >
+                      <h3
+                        className="text-lg font-semibold w-fit text-gray-800"
+                        onClick={async () => {
+                          const url = await handlePreview(doc.fileUniqueName);
+                          handleTitleClick(url);
+                        }}
+                      >
                         {doc.title || "Untitled"}
                       </h3>
                       <div className="flex flex-wrap gap-4 mt-2">

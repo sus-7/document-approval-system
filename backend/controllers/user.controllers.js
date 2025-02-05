@@ -121,19 +121,21 @@ const signUp = asyncHandler(async (req, res, next) => {
         isVerified: false,
     });
 
-    const privateKey = crypto
-        .randomBytes(32)
-        .toString("base64")
-        .replace(/[+/]/g, (m) => (m === "+" ? "-" : "_"));
+    // const privateKey = crypto
+    //     .randomBytes(32)
+    //     .toString("base64")
+    //     .replace(/[+/]/g, (m) => (m === "+" ? "-" : "_"));
+    const encKey = crypto.randomBytes(32).toString("hex");
 
     const hash = await hashPassword(password);
+
     const newUser = await User.create({
         username,
         password: hash,
         fullName,
         email,
         mobileNo,
-        privateKey,
+        encKey,
     });
 
     await newUser.save();
