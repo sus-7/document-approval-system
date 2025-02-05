@@ -13,8 +13,8 @@ const User = require("../models/user.model");
 
 const uploadPdf = asyncHandler(async (req, res, next) => {
     //only take description if available
-    console.log("req.user", req.user)
-    if(!req.user.assignedApprover) {
+    console.log("req.user", req.user);
+    if (!req.user.assignedApprover) {
         const error = new Error("No approver assigned");
         error.statusCode = 403;
         return next(error);
@@ -375,19 +375,15 @@ const getEncKeyByFileName = asyncHandler(async (req, res, next) => {
     }
 
     const { encKey } = file.createdBy;
-    const encryptedKey = crypto.publicEncrypt(
-        {
-            key: clientPublicKey,
-            padding: crypto.constants.RSA_PKCS1_OAEP_PADDING,
-            oaepHash: "sha256",
-        },
-        Buffer.from(encKey)
-    );
-
+    const publicKey = forge.pki.publicKeyFromPem(clientPublicKey);
+    // Encrypt the encKey using RSA-OAEP
+    const encryptedEncKey = publicKey.encrypt(encKey, "RSA-OAEP", {
+        md: forge.md.sha256.create(),
+    });
     return res.status(200).json({
         status: true,
         message: "Encrypted key fetched successfully",
-        encryptedEncKey: encryptedKey,
+        encryptedEncKey: forge.util.encode64(encryptedEncKey),
     });
 });
 
