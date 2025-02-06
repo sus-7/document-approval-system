@@ -10,7 +10,7 @@ const {
     verifySpOTP,
     signOut,
     updateProfile,
-    toggleUserStatus,
+    changeUserStatus,
     getAssistants,
 } = require("../controllers/user.controllers");
 const {
@@ -45,10 +45,10 @@ router.post("/update-profile", verifyToken, updateProfile);
 
 //route for toggling user status
 router.post(
-    "/toggle-status",
+    "/change-user-status",
     verifyToken,
     authorizeRoles([Role.SENIOR_ASSISTANT, Role.ADMIN]),
-    toggleUserStatus
+    changeUserStatus
 );
 
 router.get(

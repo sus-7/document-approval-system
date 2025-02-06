@@ -10,3 +10,18 @@
 -   add timestamps to all the models
 -   promoting assistant to senior assistant
 -   delete notifications from database or not
+
+-   Admin can create new senior assistant, only if any approver dont have senior assistant, or if
+    previous sr. assitant is disabled
+-   solution for frequent database calls, use redis for storing user active not active,
+    only call the db when the entry is not found in redis
+-   on login, store the user active (possibly whole userdata) in redis along with the jwt token
+
+💡 Optimized Approach
+Instead of checking the database every time, consider caching isActive in Redis.
+
+🚀 Steps for Optimization
+When user logs in → Cache isActive in Redis.
+On each request → Check Redis instead of DB.
+When admin updates isActive → Update Redis.
+If Redis entry expires → Fetch from DB again.

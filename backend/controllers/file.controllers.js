@@ -19,6 +19,13 @@ const uploadPdf = asyncHandler(async (req, res, next) => {
         error.statusCode = 403;
         return next(error);
     }
+    await req.user.populate("assignedApprover");
+    console.log("req.user.assignedApprover", req.user.assignedApprover);
+    if (!req.user.assignedApprover.isActive) {
+        const error = new Error("Approver is not active");
+        error.statusCode = 403;
+        return next(error);
+    }
     const { department, title, description = null } = req.body;
     const file = req.file;
     const fileUniqueName = file.filename;

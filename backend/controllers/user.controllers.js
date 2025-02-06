@@ -97,7 +97,7 @@ const signIn = asyncHandler(async (req, res, next) => {
             email: user.email,
             role: user.role,
             fullName: user.fullName,
-            assignedApprover: user.assignedApprover.fullName,
+            assignedApprover: user?.assignedApprover?.fullName,
         },
     });
 });
@@ -393,38 +393,47 @@ const updateProfile = asyncHandler(async (req, res, next) => {
     });
 });
 
-const toggleUserStatus = asyncHandler(async (req, res, next) => {
+const changeUserStatus = asyncHandler(async (req, res, next) => {
     let { username, isActive } = req.body;
-    username = username.trim().toLowerCase();
-    isActive = isActive.trim().toLowerCase();
-    if (!username || !isActive) {
-        const error = new Error("username and isActive are required");
+
+    if (!username || typeof isActive !== "boolean") {
+        const error = new Error("username and isActive (boolean) are required");
         error.statusCode = 400;
         return next(error);
     }
+
+    username = username.trim().toLowerCase();
+
     const user = await User.findOne({ username });
+
     if (!user) {
         const error = new Error("User not found");
         error.statusCode = 404;
         return next(error);
     }
-    if (user._id === req.user._id || user.role !== Role.ASSISTANT) {
+    if (user._id === req.user._id) {
         const error = new Error("Access Denied!");
         error.statusCode = 400;
         return next(error);
     }
+    //todo:revoke access, use redis
     if (req.user.role === Role.SENIOR_ASSISTANT) {
         //check if assistant is created by senior assistant
-        if(!req.user.createdAssistants.includes(user._id)){
+        if (!req.user.createdAssistants.includes(user._id)) {
             const error = new Error("Access Denied!");
             error.statusCode = 400;
             return next(error);
         }
+        await User.updateOne({ username }, { isActive });
+        return res.status(200).json({
+            status: true,
+            message: `${username} is now ${
+                isActive ? "activated" : "deactivated"
+            }`,
+        });
     }
-    await User.updateOne(
-        { username },
-        { isActive: isActive === "true" ? true : false }
-    );
+    await User.findOneAndUpdate({ username }, { isActive }, { new: true });
+
     return res.status(200).json({
         status: "SUCCESS",
         message: `${username} is now ${isActive ? "activated" : "deactivated"}`,
@@ -455,6 +464,6 @@ module.exports = {
     resetPassword,
     verifySpOTP,
     updateProfile,
-    toggleUserStatus,
+    changeUserStatus,
     getAssistants,
 };
