@@ -80,7 +80,14 @@ const signIn = asyncHandler(async (req, res, next) => {
     //     "Login Successful",
     //     `Logged in at: ${new Date().toLocaleString()}`
     // );
-
+    await user.populate({
+        path: "assignedApprover createdAssistants",
+        select: "-password -encKey -deviceTokens",
+        populate: {
+            path: "assignedApprover",
+            select: "fullName",
+        },
+    });
     return res.status(200).json({
         success: true,
         message: "Login success!",
@@ -90,6 +97,7 @@ const signIn = asyncHandler(async (req, res, next) => {
             email: user.email,
             role: user.role,
             fullName: user.fullName,
+            assignedApprover: user.assignedApprover.fullName,
         },
     });
 });
@@ -400,10 +408,18 @@ const toggleUserStatus = asyncHandler(async (req, res, next) => {
         error.statusCode = 404;
         return next(error);
     }
-    if (user._id === req.user._id || user.role === Role.ADMIN) {
+    if (user._id === req.user._id || user.role !== Role.ASSISTANT) {
         const error = new Error("Access Denied!");
         error.statusCode = 400;
         return next(error);
+    }
+    if (req.user.role === Role.SENIOR_ASSISTANT) {
+        //check if assistant is created by senior assistant
+        if(!req.user.createdAssistants.includes(user._id)){
+            const error = new Error("Access Denied!");
+            error.statusCode = 400;
+            return next(error);
+        }
     }
     await User.updateOne(
         { username },
