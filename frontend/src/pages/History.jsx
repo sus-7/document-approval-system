@@ -24,8 +24,10 @@ const History = () => {
       setIsLoading(true);
       setError(null);
 
+      const queryParams = new URLSearchParams();
+      queryParams.append('status', 'approved');
       const response = await axios.get(
-        `${import.meta.env.VITE_API_URL}/file/get-documents`,
+        `${import.meta.env.VITE_API_URL}/file/get-documents?${queryParams}`, // Correct API endpoint for admin
         { withCredentials: true }
       );
 

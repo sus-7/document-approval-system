@@ -22,7 +22,7 @@ const AdminDashboard = () => {
       setError(null);
 
       const queryParams = new URLSearchParams();
-      queryParams.append('status', 'approved');
+      queryParams.append('status', 'approved-rejected-correction');
       const response = await axios.get(
         `${import.meta.env.VITE_API_URL}/file/get-documents?${queryParams}`, // Correct API endpoint for admin
         { withCredentials: true }
