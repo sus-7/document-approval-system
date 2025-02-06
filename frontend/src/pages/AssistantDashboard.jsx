@@ -15,7 +15,7 @@ import { FaCalendarAlt } from "react-icons/fa";
 import AddIcon from "@mui/icons-material/Add";
 import { toast, Toaster } from "react-hot-toast";
 import axios from "axios";
-import CryptoJS from "crypto-js";
+import CryptoJS, { enc } from "crypto-js";
 import forge from "node-forge";
 import DocumentsList from "../components/DocumentsList";
 import { IoMdRefresh } from "react-icons/io";
@@ -339,6 +339,7 @@ const AssistantDashboard = () => {
               setCurrentPdfUrl(url);
               setViewPdfDialogOpen(true);
             }}
+            encKey={encKey}
           />
         )}
       </main>
