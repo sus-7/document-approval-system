@@ -13,7 +13,12 @@ import { IoMdRefresh } from "react-icons/io";
 import "../index.css";
 import CryptoJS from "crypto-js";
 
-const NewCm = ({ handleTitleClick }) => {
+const NewCm = ({
+  handleTitleClick,
+  setfileUnName,
+  setRemark,
+  setDescription,
+}) => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
   const [filteredData, setFilteredData] = useState([]);
@@ -23,7 +28,7 @@ const NewCm = ({ handleTitleClick }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRemarkModalOpen, setIsRemarkModalOpen] = useState(false);
   const [selectedDocument, setSelectedDocument] = useState(null);
-  const [remark, setRemark] = useState("");
+  // const [remark, setRemark] = useState("");
 
   const convertWordArrayToUint8Array = (wordArray) => {
     const len = wordArray.sigBytes;
@@ -257,7 +262,14 @@ const NewCm = ({ handleTitleClick }) => {
                       className="text-xl font-bold tracking-tight font-open-sans text-gray-800 cursor-pointer"
                       onClick={async () => {
                         const url = await handlePreview(item.fileUniqueName);
-                        handleTitleClick(url);
+                        setfileUnName(item.fileUniqueName || "");
+                        setDescription(
+                          item.description || "No description available"
+                        );
+                        setRemark(item.remark || "No remarks available"); // Ensure default value
+                        console.log("remark", item.remark);
+                        console.log("description", item.description);
+                        handleTitleClick(url, item); // Pass item for safety
                       }}
                     >
                       {item.title}
@@ -280,26 +292,6 @@ const NewCm = ({ handleTitleClick }) => {
                   </div>
                   <p className="text-xs text-gray-500">{item.date}</p>
                 </div>
-              </div>
-              <div className="flex items-center space-x-2 mt-2 sm:mt-0">
-                <button
-                  onClick={() => handleApprove(item.fileUniqueName)}
-                  className="flex items-center justify-center w-8 h-8 bg-green-500 text-white rounded-full shadow-md hover:bg-green-600 transition"
-                >
-                  <AiOutlineCheck className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => handleReject(item.fileUniqueName)}
-                  className="flex items-center justify-center w-8 h-8 bg-red-500 text-white rounded-full shadow-md hover:bg-red-600 transition"
-                >
-                  <AiOutlineCloseCircle className="h-5 w-5" />
-                </button>
-                <button
-                  onClick={() => openRemarkModal(item)}
-                  className="flex items-center justify-center w-8 h-8 bg-yellow-500 text-white rounded-full shadow-md hover:bg-yellow-600 transition"
-                >
-                  <FaCommentDots className="h-5 w-5" />
-                </button>
               </div>
             </div>
           ))
