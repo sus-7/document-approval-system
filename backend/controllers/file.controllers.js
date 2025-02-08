@@ -19,6 +19,13 @@ const uploadPdf = asyncHandler(async (req, res, next) => {
         error.statusCode = 403;
         return next(error);
     }
+    await req.user.populate("assignedApprover");
+    console.log("req.user.assignedApprover", req.user.assignedApprover);
+    if (!req.user.assignedApprover.isActive) {
+        const error = new Error("Approver is not active");
+        error.statusCode = 403;
+        return next(error);
+    }
     const { department, title, description = null } = req.body;
     const file = req.file;
     const fileUniqueName = file.filename;
@@ -132,13 +139,28 @@ const getDocumentsByQuery = asyncHandler(async (req, res, next) => {
         error.status = 400;
         return next(error);
     }
+    const requestedStatuses = status.toLowerCase().split("-");
+    const invalidStatuses = requestedStatuses.filter(
+        (status) => !fileStatuses.includes(status)
+    );
 
-    if (!fileStatuses.includes(status.toLowerCase())) {
-        const error = new Error("Invalid status");
+    if (invalidStatuses.length > 0) {
+        const error = new Error(
+            `Invalid status values: ${invalidStatuses.join(", ")}`
+        );
         error.status = 400;
         return next(error);
     }
-    query.status = status.toLowerCase();
+
+    // $in operator to match any of the provided statuses
+    query.status = { $in: requestedStatuses };
+
+    // if (!fileStatuses.includes(status.toLowerCase())) {
+    //     const error = new Error("Invalid status");
+    //     error.status = 400;
+    //     return next(error);
+    // }
+    // query.status = status.toLowerCase();
 
     switch (req.user.role) {
         case Role.SENIOR_ASSISTANT:
