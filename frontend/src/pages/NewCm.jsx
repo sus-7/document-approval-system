@@ -192,7 +192,7 @@ const NewCm = ({
     <div className="flex flex-col font-sans space-y-6 p-4">
       {/* Search Section */}
       <Toaster />
-      <div className="relative -mt-2">
+      <div className="relative">
         <FaSearch className="absolute top-3 left-3 text-gray-400" />
         <input
           type="text"
@@ -202,9 +202,9 @@ const NewCm = ({
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col space-y-2 tracking-tight scale-90 sm:flex-row sm:space-y-0 sm:space-x-4 items-center justify-center">
+      <div className="flex flex-col space-y-2 tracking-tight scale-90 sm:flex-row sm:space-y-0 sm:space-x-4">
         <select
-          className="flex-1 px-4 py-2 rounded-md bg-gray-200 text-gray-700 border border-gray-300 "
+          className="flex-1 px-4 py-2 rounded-md bg-gray-200 text-gray-700 border border-gray-300"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
         >
