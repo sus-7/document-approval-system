@@ -104,7 +104,7 @@ const Login = () => {
       {tokenLoading && (
         <div className="fixed inset-0 bg-white flex items-center justify-center z-50">
           <span className="loading loading-bars loading-lg"></span>
-          <p className="ml-4">Generating token. Please wait...</p>
+          <p className="ml-4">System Loading. Please wait...</p>
         </div>
       )}
          <div>{fcmToken}</div>

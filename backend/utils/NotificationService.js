@@ -7,15 +7,14 @@ class NotificationService {
             notification: {
                 title: title,
                 body: body,
-            },
+            },  
         };
 
         try {
             const response = await admin.messaging().send(message);
             return response;
         } catch (error) {
-            console.log(error); 
-            throw new Error("Error sending notification");
+            console.log(error.stack); 
         }
     }
 }
