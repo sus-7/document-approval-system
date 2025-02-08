@@ -19,6 +19,7 @@ import { IoIosAdd, IoMdRefresh } from "react-icons/io";
 import Loader from "react-loaders";
 import "loaders.css/loaders.min.css";
 import { FaPlus } from "react-icons/fa";
+import { IoMdEye } from "react-icons/io";
 
 const AssistantDashboard = () => {
   // State Management
@@ -195,13 +196,7 @@ const AssistantDashboard = () => {
     <div className="flex flex-col min-h-screen bg-gray-100 text-gray-800">
       {/*    role="Personal Assistant - Approval Dashboard" /> */}
       <Toaster />
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="md:hidden p-2 text-gray-600 rounded-md"
-        disabled={loading}
-      >
-        <FaBars />
-      </button>
+      
 
       <main className="p-6 flex-grow">
         {/* Status Tabs */}
@@ -223,7 +218,8 @@ const AssistantDashboard = () => {
         </div>
 
         {/* Search Bar */}
-        <div className="relative w-full max-w-xs mx-auto mb-6">
+       <div className="flex  justify-start items-start md:flex-row gap-4">
+       <div className="relative w-full left-10 max-w-xs mx-auto mb-6">
           <FaSearch className="absolute top-3 left-3 text-gray-400" />
           <input
             type="text"
@@ -234,6 +230,7 @@ const AssistantDashboard = () => {
             disabled={loading}
           />
         </div>
+       </div>
 
         {/* Filters */}
         <div className="mb-4 flex flex-col md:flex-row gap-4">
@@ -332,9 +329,11 @@ const AssistantDashboard = () => {
           </div>
         ) : (
           <DocumentsList
-            documents={filteredData}
             status={selectedTab.toLowerCase()}
             department={selectedCategory}
+            startDate={startDate}
+            endDate={endDate}
+            searchQuery={searchQuery} // 🔹 Added search query prop
             handleTitleClick={(url) => {
               setCurrentPdfUrl(url);
               setViewPdfDialogOpen(true);
