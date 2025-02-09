@@ -341,6 +341,7 @@ const AssistantDashboard = () => {
           />
         )}
       </main>
+                  
 
       {/* New Document Dialog */}
       <Dialog
